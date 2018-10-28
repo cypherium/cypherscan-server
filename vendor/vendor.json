@@ -3,6 +3,48 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "kto0asmOE+Nuhj7T8cvrvIwq2ak=",
+			"path": "github.com/aristanetworks/goarista/monotime",
+			"revision": "33151c4543a79b013e8e6799ef45b2ba88c3cd1c",
+			"revisionTime": "2018-10-02T21:47:46Z"
+		},
+		{
+			"checksumSHA1": "vwNjR8772Pqs8z9ZdPFoatNI9Kg=",
+			"path": "github.com/deckarep/golang-set",
+			"revision": "699df6a3acf6867538e50931511e9dc403da108a",
+			"revisionTime": "2018-09-27T02:58:44Z"
+		},
+		{
+			"checksumSHA1": "2EkKilu0Q1uuX7XoHks8qnW/LXo=",
+			"path": "github.com/ethereum/go-ethereum/common/hexutil",
+			"revision": "54f650a3be2ccf7cd44e9929e3e132ef93f101ad",
+			"revisionTime": "2018-10-27T14:18:42Z"
+		},
+		{
+			"checksumSHA1": "TUAAxnHql8XSYnC157Y5iqyL6FQ=",
+			"path": "github.com/ethereum/go-ethereum/common/mclock",
+			"revision": "54f650a3be2ccf7cd44e9929e3e132ef93f101ad",
+			"revisionTime": "2018-10-27T14:18:42Z"
+		},
+		{
+			"checksumSHA1": "KSRJC/V4LkGTakqzakXY/Ces0sw=",
+			"path": "github.com/ethereum/go-ethereum/log",
+			"revision": "54f650a3be2ccf7cd44e9929e3e132ef93f101ad",
+			"revisionTime": "2018-10-27T14:18:42Z"
+		},
+		{
+			"checksumSHA1": "/TixkH5j7wvV11dYSkAb3BR416c=",
+			"path": "github.com/ethereum/go-ethereum/p2p/netutil",
+			"revision": "54f650a3be2ccf7cd44e9929e3e132ef93f101ad",
+			"revisionTime": "2018-10-27T14:18:42Z"
+		},
+		{
+			"checksumSHA1": "JrqevkIeZhRDl6Qw1yh8niXo97s=",
+			"path": "github.com/ethereum/go-ethereum/rpc",
+			"revision": "54f650a3be2ccf7cd44e9929e3e132ef93f101ad",
+			"revisionTime": "2018-10-27T14:18:42Z"
+		},
+		{
 			"checksumSHA1": "QeKwBtN2df+j+4stw3bQJ6yO4EY=",
 			"path": "github.com/gin-contrib/sse",
 			"revision": "22d885f9ecc78bf4ee5d72b937e4bbcdc58e8cae",
@@ -41,10 +83,34 @@
 			"versionExact": "v1.3.0"
 		},
 		{
+			"checksumSHA1": "H8wo+NR5z+VRl0wqPYpVQfC06ks=",
+			"path": "github.com/go-stack/stack",
+			"revision": "2fee6af1a9795aafbe0253a0cfbdf668e1fb8a9a",
+			"revisionTime": "2018-08-26T13:48:48Z"
+		},
+		{
 			"checksumSHA1": "GaJLoEuMGnP5ofXvuweAI4wx06U=",
 			"path": "github.com/golang/protobuf/proto",
 			"revision": "5e0eda4b6dc0f7e3c4ed8b94d87f7f7186b20c9c",
 			"revisionTime": "2018-10-24T21:30:55Z"
+		},
+		{
+			"checksumSHA1": "SVzanxaLYK43jeNWQqNs5P+uhow=",
+			"path": "github.com/jmoiron/sqlx",
+			"revision": "82935fac6c1a317907c8f43ed3f7f85ea844a78b",
+			"revisionTime": "2018-10-24T16:34:19Z"
+		},
+		{
+			"checksumSHA1": "i2O6Ji8ZL6q+EL+4cu/ftBytqZg=",
+			"path": "github.com/jmoiron/sqlx/reflectx",
+			"revision": "82935fac6c1a317907c8f43ed3f7f85ea844a78b",
+			"revisionTime": "2018-10-24T16:34:19Z"
+		},
+		{
+			"checksumSHA1": "I+g5iffd0bNDiI8swxzsHiJxBz0=",
+			"path": "github.com/joho/godotenv",
+			"revision": "c0b86d615e06d6fa5f869364d68f774ba49a86e3",
+			"revisionTime": "2018-09-27T05:32:03Z"
 		},
 		{
 			"checksumSHA1": "W4cByvvu+jwClgwuAKbJn8vlDwI=",
@@ -71,10 +137,22 @@
 			"revisionTime": "2018-07-18T01:23:57Z"
 		},
 		{
+			"checksumSHA1": "HiK8dVEr2ZRCb49HK1seH3u6ojM=",
+			"path": "github.com/rs/cors",
+			"revision": "a3460e445dd310dbefee993fe449f2ff9c08ae71",
+			"revisionTime": "2018-10-11T18:27:59Z"
+		},
+		{
 			"checksumSHA1": "uLN9Ecm/pL2MRyu+/5tJqZNDjWM=",
 			"path": "github.com/ugorji/go/codec",
 			"revision": "e5e69e061d4f7ee3a69b793cf9c1b41afe21918e",
 			"revisionTime": "2018-10-22T19:04:02Z"
+		},
+		{
+			"checksumSHA1": "F+tqxPGFt5x7DKZakbbMmENX1oQ=",
+			"path": "golang.org/x/net/websocket",
+			"revision": "9b4f9f5ad5197c79fd623a3638e70d8b26cef344",
+			"revisionTime": "2018-10-23T11:20:58Z"
 		},
 		{
 			"checksumSHA1": "DW/qhXYGUUFCGxc5c+gSiPVCm6o=",
@@ -87,6 +165,12 @@
 			"path": "gopkg.in/go-playground/validator.v8",
 			"revision": "5f1438d3fca68893a817e4a66806cea46a9e4ebf",
 			"revisionTime": "2017-07-30T05:02:35Z"
+		},
+		{
+			"checksumSHA1": "0xgs8lwcWLUffemlj+SsgKlxvDU=",
+			"path": "gopkg.in/natefinch/npipe.v2",
+			"revision": "c1b8fa8bdccecb0b8db834ee0b92fdbcfa606dd6",
+			"revisionTime": "2016-06-21T03:49:01Z"
 		},
 		{
 			"checksumSHA1": "ZSWoOPUNRr5+3dhkLK3C4cZAQPk=",
