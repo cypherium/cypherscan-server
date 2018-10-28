@@ -1,4 +1,4 @@
-package main
+package configLib
 
 import (
 	"github.com/joho/godotenv"
@@ -7,8 +7,8 @@ import (
 )
 
 type ConfigStruct struct {
-	dbDrive string
-	dbSource string
+	DbDrive string
+	DbSource string
 }
 var Config ConfigStruct 
 
