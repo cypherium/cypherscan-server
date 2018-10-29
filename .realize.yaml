@@ -1,0 +1,33 @@
+settings:
+  legacy:
+    force: false
+    interval: 0s
+schema:
+- name: main
+  path: cmd/main
+  commands:
+    clean:
+      args:
+      - none
+      status: false
+    vet:
+      args:
+      - none
+      status: false
+    test:
+      args:
+      - none
+      status: false
+    run:
+      status: true
+  watcher:
+    extensions:
+    - go
+    paths:
+    - /
+    - ../../
+    ignored_paths:
+    - .git
+    - .realize
+    - vendor
+  pattern: none
