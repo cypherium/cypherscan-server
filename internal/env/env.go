@@ -13,6 +13,7 @@ type _EnvStruct struct {
 }
 
 // Env is a structure holding env
+
 var Env _EnvStruct
 
 func init() {
