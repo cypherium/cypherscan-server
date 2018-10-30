@@ -1,23 +1,26 @@
-package configLib
+package env
 
 import (
-	"github.com/joho/godotenv"
-	"os"
 	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 )
 
-type ConfigStruct struct {
-	DbDrive string
+type _EnvStruct struct {
+	DbDrive  string
 	DbSource string
 }
-var Config ConfigStruct 
 
-func init () {
+// Env is a structure holding env
+var Env _EnvStruct
+
+func init() {
 	var err = godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	Config = ConfigStruct {
+	Env = _EnvStruct{
 		os.Getenv("DB_DRIVE"),
 		os.Getenv("DB_SOURCE"),
 	}
