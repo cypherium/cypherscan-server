@@ -1,6 +1,7 @@
 package util
 
 import (
+  "encoding/hex"
   "fmt"
   "log"
   "math/big"
@@ -34,11 +35,70 @@ func HxStrToBigInt(s string) (n *big.Int, err error) {
   return
 }
 
+// HxStrToHash convert hx string to Hash
+func HxStrToHash(s string) (*Hash, error) {
+  var ret Hash
+  r := strings.NewReader(Stripe0x(s))
+  reader := hex.NewDecoder(r)
+  _, err := reader.Read(ret[:])
+  return &ret, err
+}
+
+// HxStrToAddress convert hx string to Address
+func HxStrToAddress(s string) (*Address, error) {
+  var ret Address
+  r := strings.NewReader(Stripe0x(s))
+  reader := hex.NewDecoder(r)
+  _, err := reader.Read(ret[:])
+  return &ret, err
+}
+
+// HxStrToBloom convert hx string to Address
+func HxStrToBloom(s string) (*Bloom, error) {
+  var ret Bloom
+  r := strings.NewReader(Stripe0x(s))
+  reader := hex.NewDecoder(r)
+  _, err := reader.Read(ret[:])
+  return &ret, err
+}
+
+// ConvertedType is a enum
+type ConvertedType int
+
+const (
+  // BigIntType is *big.Int
+  BigIntType ConvertedType = 1 + iota
+  // HashType is Hash
+  HashType
+  // AddressType is Address
+  AddressType
+  // BloomType is Bloom
+  BloomType
+)
+
 // Parse is a generic convert function will take care of error
-func Parse(in string, sample interface{}) interface{} {
-  switch sample.(type) {
-  case *big.Int:
+func Parse(in string, t ConvertedType) interface{} {
+  switch t {
+  case BigIntType:
     out, err := HxStrToBigInt(in)
+    if err != nil {
+      log.Println("convert error from Parse")
+    }
+    return out
+  case HashType:
+    out, err := HxStrToHash(in)
+    if err != nil {
+      log.Println("convert error from Parse")
+    }
+    return out
+  case AddressType:
+    out, err := HxStrToAddress(in)
+    if err != nil {
+      log.Println("convert error from Parse")
+    }
+    return out
+  case BloomType:
+    out, err := HxStrToBloom(in)
     if err != nil {
       log.Println("convert error from Parse")
     }

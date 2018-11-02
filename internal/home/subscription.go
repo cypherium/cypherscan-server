@@ -6,6 +6,8 @@ import (
   "github.com/ethereum/go-ethereum/rpc"
   "gitlab.com/ron-liu/cypherscan-server/internal/env"
   "gitlab.com/ron-liu/cypherscan-server/internal/txblock"
+  "gitlab.com/ron-liu/cypherscan-server/internal/util"
+  "math/big"
   "time"
 )
 
@@ -37,7 +39,9 @@ func subscribeNewBlock() {
 }
 
 func transformToTxBlock(b blockInfo) *txblock.TxBlock {
-  return &txblock.TxBlock{}
+  return &txblock.TxBlock{
+    Number: util.Parse(b.Number, new(big.Int)).(*big.Int),
+  }
 }
 
 func subscribeBlocks(client *rpc.Client, subch chan blockInfo) {

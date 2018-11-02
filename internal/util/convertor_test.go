@@ -43,21 +43,23 @@ func TestHxStrToBigInt(t *testing.T) {
 func TestParse(t *testing.T) {
   tables := []struct {
     in      string
-    sample  interface{}
-    out     *big.Int
+    t       ConvertedType
+    out     interface{}
     isError bool
   }{
-    {"345", new(big.Int), big.NewInt(0x345), false},
-    {"0xabc", new(big.Int), big.NewInt(0xabc), false},
-    {"0Xbc", new(big.Int), big.NewInt(0xbc), false},
-    {"0xzzd", new(big.Int), big.NewInt(0), true},
+    {"345", BigIntType, big.NewInt(0x345), false},
+    {"0xabc", BigIntType, big.NewInt(0xabc), false},
+    {"0Xbc", BigIntType, big.NewInt(0xbc), false},
+    {"0xzzd", BigIntType, big.NewInt(0), true},
+    {"0x1122", HashType, &Hash{0x11, 0x22}, false},
+    {"0x3344", AddressType, &Address{0x33, 0x44}, false},
+    {"0x4455", BloomType, &Bloom{0x44, 0x55}, false},
   }
 
   for _, table := range tables {
     if !table.isError {
-      out := Parse(table.in, table.sample).(*big.Int)
-      assert.True(t, out.Cmp(table.out) == 0, "Parse (%s) was incorrect, got: %s, expect: %s.", table.in, out, table.out)
+      out := Parse(table.in, table.t)
+      assert.Equal(t, table.out, out)
     }
-
   }
 }
