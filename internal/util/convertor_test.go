@@ -47,13 +47,14 @@ func TestParse(t *testing.T) {
     out     interface{}
     isError bool
   }{
-    {"345", BigIntType, big.NewInt(0x345), false},
-    {"0xabc", BigIntType, big.NewInt(0xabc), false},
-    {"0Xbc", BigIntType, big.NewInt(0xbc), false},
-    {"0xzzd", BigIntType, big.NewInt(0), true},
+    {"345", BigIntType, *big.NewInt(0x345), false},
+    {"0xabc", BigIntType, *big.NewInt(0xabc), false},
+    {"0Xbc", BigIntType, *big.NewInt(0xbc), false},
+    {"0xzzd", BigIntType, *big.NewInt(0), true},
     {"0x1122", HashType, &Hash{0x11, 0x22}, false},
     {"0x3344", AddressType, &Address{0x33, 0x44}, false},
     {"0x4455", BloomType, &Bloom{0x44, 0x55}, false},
+    {"0x5566", BlockNonceType, &BlockNonce{0x55, 0x66}, false},
   }
 
   for _, table := range tables {
