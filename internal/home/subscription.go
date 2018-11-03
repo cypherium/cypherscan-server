@@ -4,10 +4,11 @@ import (
   "context"
   "fmt"
   "github.com/ethereum/go-ethereum/rpc"
+  "github.com/jinzhu/gorm"
   "gitlab.com/ron-liu/cypherscan-server/internal/env"
   "gitlab.com/ron-liu/cypherscan-server/internal/txblock"
   "gitlab.com/ron-liu/cypherscan-server/internal/util"
-  "math/big"
+  // "math/big"
   "time"
 )
 
@@ -66,9 +67,14 @@ func SubscribeNewBlock() {
 
   // Print events from the subscription as they arrive.
   for block := range subch {
-    fmt.Printf("block: %+v\n", block)
+    fmt.Printf("pre block: %+v\n", block)
     txBlock := transformToTxBlock(block)
-    fmt.Printf("block: %+v\n", txBlock)
+    fmt.Printf("post block: %#v", txBlock)
+    util.Run(func(db *gorm.DB) error {
+      db.NewRecord(txBlock)
+      db.Create(&txBlock)
+      return nil
+    })
     // fmt.Println("latest block:", block.Number, "diff", block.Difficulty, "txHash", block.TxHash, "gas limit", block.GasLimit, "gs used", block.GasUsed, block.Nonce)
   }
 }
@@ -76,38 +82,38 @@ func SubscribeNewBlock() {
 func transformToTxBlock(b blockInfo) *txblock.TxBlock {
   return &txblock.TxBlock{
     Number:      util.Parse(b.Number, util.UInt64Type).(uint64),
-    ParentHash:  *util.Parse(b.ParentHash, util.HashType).(*util.Hash),
-    UncleHash:   *util.Parse(b.UncleHash, util.HashType).(*util.Hash),
-    Coinbase:    *util.Parse(b.Coinbase, util.AddressType).(*util.Address),
-    Root:        *util.Parse(b.Root, util.HashType).(*util.Hash),
-    TxHash:      *util.Parse(b.TxHash, util.HashType).(*util.Hash),
-    ReceiptHash: *util.Parse(b.ReceiptHash, util.HashType).(*util.Hash),
-    Bloom:       *util.Parse(b.Bloom, util.BloomType).(*util.Bloom),
-    Difficulty:  util.Parse(b.Difficulty, util.BigIntType).(big.Int),
-    GasLimit:    util.Parse(b.GasLimit, util.UInt64Type).(uint64),
-    GasUsed:     util.Parse(b.GasUsed, util.UInt64Type).(uint64),
-    // Time:        util.Parse(b.Time, util.TimeType).(time.Time),
-    // Extra       string
-    MixDigest: *util.Parse(b.MixDigest, util.HashType).(*util.Hash),
-    // Nonce       string
+    ParentHash:  util.Parse(b.ParentHash, util.BytesType).([]byte),
+    UncleHash:   util.Parse(b.UncleHash, util.BytesType).([]byte),
+    Coinbase:    util.Parse(b.Coinbase, util.BytesType).([]byte),
+    Root:        util.Parse(b.Root, util.BytesType).([]byte),
+    TxHash:      util.Parse(b.TxHash, util.BytesType).([]byte),
+    ReceiptHash: util.Parse(b.ReceiptHash, util.BytesType).([]byte),
+    Bloom:       util.Parse(b.Bloom, util.BytesType).([]byte),
+    Difficulty:  util.Parse(b.Difficulty, util.BytesType).([]byte),
+    GasLimit:    util.Parse(b.GasLimit, util.BytesType).([]byte),
+    GasUsed:     util.Parse(b.GasUsed, util.BytesType).([]byte),
+    // // Time:        util.Parse(b.Time, util.TimeType).(time.Time),
+    // // Extra       string
+    MixDigest: util.Parse(b.MixDigest, util.BytesType).([]byte),
+    Nonce:     util.Parse(b.Nonce, util.BytesType).([]byte),
     Transactions: func(ts []transactionInfo) []txblock.Transaction {
       transactions := make([]txblock.Transaction, len(ts))
       for i, t := range b.Transactions {
         transactions[i] = txblock.Transaction{
-          // AccountNonce     uint64       `json:"nonce"    gencodec:"required"`
-          Price:     util.Parse(t.Price, util.BigIntType).(big.Int),
-          GasLimit:  util.Parse(b.GasLimit, util.UInt64Type).(uint64),
-          Recipient: *util.Parse(t.Recipient, util.AddressType).(*util.Address),
-          Amount:    util.Parse(t.Amount, util.BigIntType).(big.Int),
-          // Payload          []byte       `json:"input"    gencodec:"required"`
-          V:    util.Parse(t.V, util.BigIntType).(big.Int),
-          R:    util.Parse(t.R, util.BigIntType).(big.Int),
-          S:    util.Parse(t.S, util.BigIntType).(big.Int),
-          Hash: *util.Parse(t.Hash, util.HashType).(*util.Hash),
-          // BlockNumber: util.Parse(t.BlockNumber, util.UInt64Type).(uint64),
-          BlockHash: *util.Parse(t.BlockHash, util.HashType).(*util.Hash),
-          From:      *util.Parse(t.From, util.AddressType).(*util.Address),
-          // TransactionIndex uint         `json:"transactionIndex"`
+          AccountNonce:     util.Parse(t.AccountNonce, util.UInt64Type).(uint64),
+          Price:            util.Parse(t.Price, util.BytesType).([]byte),
+          GasLimit:         util.Parse(t.GasLimit, util.UInt64Type).(uint64),
+          Recipient:        util.Parse(t.Recipient, util.BytesType).([]byte),
+          Amount:           util.Parse(t.Amount, util.BytesType).([]byte),
+          Payload:          util.Parse(t.Payload, util.BytesType).([]byte),
+          V:                util.Parse(t.V, util.BytesType).([]byte),
+          R:                util.Parse(t.R, util.BytesType).([]byte),
+          S:                util.Parse(t.S, util.BytesType).([]byte),
+          Hash:             util.Parse(t.Hash, util.BytesType).([]byte),
+          BlockNumber:      util.Parse(t.BlockNumber, util.UInt64Type).(uint64),
+          BlockHash:        util.Parse(t.BlockHash, util.BytesType).([]byte),
+          From:             util.Parse(t.From, util.BytesType).([]byte),
+          TransactionIndex: util.Parse(t.TransactionIndex, util.UInt32Type).(uint32),
         }
       }
       return transactions

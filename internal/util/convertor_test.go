@@ -2,7 +2,6 @@ package util
 
 import (
   "github.com/stretchr/testify/assert"
-  "math/big"
   "testing"
 )
 
@@ -22,24 +21,6 @@ func TestStrip0x(t *testing.T) {
   }
 }
 
-func TestHxStrToBigInt(t *testing.T) {
-  tables := []struct {
-    in      string
-    out     *big.Int
-    isError bool
-  }{
-    {"345", big.NewInt(0x345), false},
-    {"0xabc", big.NewInt(0xabc), false},
-    {"0Xbc", big.NewInt(0xbc), false},
-    {"0xzzd", big.NewInt(0), true},
-  }
-
-  for _, table := range tables {
-    out, err := HxStrToBigInt(table.in)
-    assert.True(t, out.Cmp(table.out) == 0 || (table.isError && err != nil), "HxStrToBigInt (%s) was incorrect, got: %s, expect: %s.", table.in, out, table.out)
-  }
-}
-
 func TestParse(t *testing.T) {
   tables := []struct {
     in      string
@@ -47,20 +28,21 @@ func TestParse(t *testing.T) {
     out     interface{}
     isError bool
   }{
-    {"345", BigIntType, *big.NewInt(0x345), false},
-    {"0xabc", BigIntType, *big.NewInt(0xabc), false},
-    {"0Xbc", BigIntType, *big.NewInt(0xbc), false},
-    {"0xzzd", BigIntType, *big.NewInt(0), true},
-    {"0x1122", HashType, &Hash{0x11, 0x22}, false},
-    {"0x3344", AddressType, &Address{0x33, 0x44}, false},
-    {"0x4455", BloomType, &Bloom{0x44, 0x55}, false},
-    {"0x5566", BlockNonceType, &BlockNonce{0x55, 0x66}, false},
+    {"0x1122", BytesType, []byte{0x11, 0x22}, false},
+    {"0x3344", BytesType, []byte{0x33, 0x44}, false},
+    {"0x4455", BytesType, []byte{0x44, 0x55}, false},
+    {"0x5566", BytesType, []byte{0x55, 0x66}, false},
+    {"0x556", BytesType, []byte{0x05, 0x56}, false},
+    {"0x556", UInt64Type, uint64(0x556), false},
+    {"", UInt64Type, uint64(0), false},
+    {"0x516", UInt32Type, uint32(0x516), false},
+    {"", UInt32Type, uint32(0), false},
   }
 
   for _, table := range tables {
     if !table.isError {
       out := Parse(table.in, table.t)
-      assert.Equal(t, table.out, out)
+      assert.Equal(t, table.out, out, table.in)
     }
   }
 }

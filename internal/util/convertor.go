@@ -4,7 +4,7 @@ import (
   "encoding/hex"
   "fmt"
   "log"
-  "math/big"
+  // "math/big"
   "strconv"
   "strings"
   "time"
@@ -25,63 +25,36 @@ func Stripe0x(s string) string {
   return strings.TrimPrefix(s, "0X")
 }
 
-// HxStrToBigInt convert hx string like "0xff" to big.Int
-func HxStrToBigInt(s string) (n big.Int, err error) {
+// HxStrToBytes convert hx string to []byte
+func HxStrToBytes(s string) ([]byte, error) {
+  if s == "" {
+    return make([]byte, 0), nil
+  }
   striped := Stripe0x(s)
-  n = *new(big.Int)
+
+  return hex.DecodeString(
+    func(x string) string {
+      if len(x)%2 > 0 {
+        return "0" + x
+      }
+      return x
+    }(striped))
+}
+
+// HxStrToUInt32 convert hx string to uint32
+func HxStrToUInt32(s string) (uint32, error) {
   if s == "" {
-    return n, nil
+    return 0, nil
   }
-
-  _, ok := n.SetString(striped, 16)
-  if !ok {
-    err = &MyError{fmt.Sprintf("failed when convert (%s) to big.Int", s)}
-  }
-  return
-}
-
-func hxStrToBytes(s string, bytes []byte) ([]byte, error) {
-  if s == "" {
-    return bytes, nil
-  }
-  r := strings.NewReader(Stripe0x(s))
-  reader := hex.NewDecoder(r)
-  _, err := reader.Read(bytes)
-  return bytes, err
-}
-
-// HxStrToHash convert hx string to Hash
-func HxStrToHash(s string) (*Hash, error) {
-  var ret Hash
-  _, err := hxStrToBytes(s, ret[:])
-  return &ret, err
-}
-
-// HxStrToAddress convert hx string to Address
-func HxStrToAddress(s string) (*Address, error) {
-  var ret Address
-  _, err := hxStrToBytes(s, ret[:])
-  return &ret, err
-}
-
-// HxStrToBloom convert hx string to Address
-func HxStrToBloom(s string) (*Bloom, error) {
-  var ret Bloom
-  _, err := hxStrToBytes(s, ret[:])
-  return &ret, err
-}
-
-// HxStrToBlockNonce convert hx string to BlockNonce
-func HxStrToBlockNonce(s string) (*BlockNonce, error) {
-  var ret BlockNonce
-  r := strings.NewReader(Stripe0x(s))
-  reader := hex.NewDecoder(r)
-  _, err := reader.Read(ret[:])
-  return &ret, err
+  n, err := strconv.ParseUint(Stripe0x(s), 16, 32)
+  return uint32(n), err
 }
 
 // HxStrToUInt64 convert hx string to uint64
 func HxStrToUInt64(s string) (uint64, error) {
+  if s == "" {
+    return 0, nil
+  }
   return strconv.ParseUint(Stripe0x(s), 16, 64)
 }
 
@@ -99,65 +72,41 @@ func HxStrToTime(s string) (time.Time, error) {
 type ConvertedType int
 
 const (
-  // BigIntType is *big.Int
-  BigIntType ConvertedType = 1 + iota
-  // HashType is Hash
-  HashType
-  // AddressType is Address
-  AddressType
-  // BloomType is Bloom
-  BloomType
-  // BlockNonceType is BlockNonce
-  BlockNonceType
   // UInt64Type is unit64
-  UInt64Type
+  UInt64Type = 1 + iota
   // TimeType is Time
   TimeType
+  // BytesType is []byte
+  BytesType
+  // UInt32Type is unit
+  UInt32Type
 )
 
 // Parse is a generic convert function will take care of error
 func Parse(in string, t ConvertedType) interface{} {
   switch t {
-  case BigIntType:
-    out, err := HxStrToBigInt(in)
+  case BytesType:
+    out, err := HxStrToBytes(in)
     if err != nil {
-      log.Println("convert error from Parse:", err)
-    }
-    return out
-  case HashType:
-    out, err := HxStrToHash(in)
-    if err != nil {
-      log.Println("convert error from Parse:", err)
-    }
-    return out
-  case AddressType:
-    out, err := HxStrToAddress(in)
-    if err != nil {
-      log.Println("convert error from Parse:", err)
-    }
-    return out
-  case BloomType:
-    out, err := HxStrToBloom(in)
-    if err != nil {
-      log.Println("convert error from Parse:", err)
-    }
-    return out
-  case BlockNonceType:
-    out, err := HxStrToBlockNonce(in)
-    if err != nil {
-      log.Println("convert error from Parse:", t)
+      log.Printf("convert error from Parse: %v %v %v", in, t, err)
     }
     return out
   case UInt64Type:
     out, err := HxStrToUInt64(in)
     if err != nil {
-      log.Println("convert error from Parse:", t)
+      log.Println("convert error from Parse:", t, err)
+    }
+    return out
+  case UInt32Type:
+    out, err := HxStrToUInt32(in)
+    if err != nil {
+      log.Println("convert error from Parse:", t, err)
     }
     return out
   case TimeType:
     out, err := HxStrToTime(in)
     if err != nil {
-      log.Println("convert error from Parse:", t)
+      log.Println("convert error from Parse:", t, err)
     }
     return out
   default:

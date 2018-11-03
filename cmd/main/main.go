@@ -3,6 +3,7 @@ package main
 import (
   "fmt"
   // "github.com/gin-gonic/gin"
+  "github.com/jinzhu/gorm"
   _ "github.com/jinzhu/gorm/dialects/sqlite"
   "gitlab.com/ron-liu/cypherscan-server/internal/env"
   "gitlab.com/ron-liu/cypherscan-server/internal/home"
@@ -11,8 +12,11 @@ import (
 )
 
 func initDb() {
-  db := util.GetDb()
-  db.AutoMigrate(&txblock.TxBlock{})
+  util.Run(func(db *gorm.DB) error {
+    db.AutoMigrate(&txblock.TxBlock{}, &txblock.Transaction{})
+    return nil
+  })
+
 }
 
 func main() {
