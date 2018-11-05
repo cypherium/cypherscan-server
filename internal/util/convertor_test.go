@@ -14,7 +14,6 @@ func TestStrip0x(t *testing.T) {
     {"0xabc", "abc"},
     {"0Xbc", "bc"},
   }
-
   for _, table := range tables {
     out := Stripe0x(table.in)
     assert.Equal(t, out, table.out, "Strip0x (%s) was incorrect, got: %s, expect: %s.", table.in, out, table.out)

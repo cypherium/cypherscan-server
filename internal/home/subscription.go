@@ -8,7 +8,6 @@ import (
   "gitlab.com/ron-liu/cypherscan-server/internal/env"
   "gitlab.com/ron-liu/cypherscan-server/internal/txblock"
   "gitlab.com/ron-liu/cypherscan-server/internal/util"
-  // "math/big"
   "time"
 )
 
@@ -67,7 +66,8 @@ func SubscribeNewBlock() {
 
   // Print events from the subscription as they arrive.
   for block := range subch {
-    fmt.Printf("pre block: %+v\n", block)
+    fmt.Printf("pre block came")
+    // fmt.Printf("pre block: %+v\n", block)
     txBlock := transformToTxBlock(block)
     fmt.Printf("post block: %#v", txBlock)
     util.Run(func(db *gorm.DB) error {
