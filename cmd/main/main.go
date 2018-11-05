@@ -2,7 +2,6 @@ package main
 
 import (
   "fmt"
-  // "github.com/gin-gonic/gin"
   "github.com/jinzhu/gorm"
   _ "github.com/jinzhu/gorm/dialects/sqlite"
   "gitlab.com/ron-liu/cypherscan-server/internal/env"
@@ -25,7 +24,4 @@ func main() {
   initDb()
   defer util.CloseDb()
   home.SubscribeNewBlock()
-  // routers := gin.Default()
-  // routers.GET("/home", home.GetHome)
-  // routers.Run()
 }
