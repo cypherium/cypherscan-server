@@ -15,7 +15,6 @@ func initDb() {
     db.AutoMigrate(&txblock.TxBlock{}, &txblock.Transaction{})
     return nil
   })
-
 }
 
 func main() {

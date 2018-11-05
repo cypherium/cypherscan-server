@@ -1,4 +1,4 @@
 # ignore vendor packages
-vendor/*/
+vendor
 .env
 *.db
