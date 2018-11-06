@@ -1,7 +1,10 @@
 package home
 
 import (
+  "fmt"
+  "gitlab.com/ron-liu/cypherscan-server/internal/publisher"
   "math/big"
+  "net/http"
   "time"
 )
 
@@ -39,4 +42,14 @@ type home struct {
   TxBlocks  []_TxBlock
   KeyBlocks []_KeyBlock
   Txs       []_Tx
+}
+
+// HanderForBrowser is Websocket handler for browser
+func HanderForBrowser(w http.ResponseWriter, r *http.Request) {
+  publisher.ServeWebsocket(w, r)
+}
+
+// GetHome is to get the initial home contents
+func GetHome(w http.ResponseWriter, r *http.Request) {
+  fmt.Fprintf(w, "home")
 }

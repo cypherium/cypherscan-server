@@ -17,7 +17,7 @@
   revision = "504e848d77ea4752b3057b8fb46da0e7f746ccf3"
 
 [[projects]]
-  digest = "1:a1b2fa86745ea2695118b70a588eaab8a835349a17e299c6f181901b716b00f4"
+  digest = "1:08af77c41dc6a9ab5dd123ce76356fa4068d57287c060cdc934e1131973dd037"
   name = "github.com/ethereum/go-ethereum"
   packages = [
     "common/hexutil",
@@ -25,7 +25,7 @@
     "p2p/netutil",
     "rpc",
   ]
-  pruneopts = "UT"
+  pruneopts = "T"
   revision = "8bbe72075e4e16442c4e28d999edee12e294329e"
   version = "v1.8.17"
 
@@ -36,6 +36,30 @@
   pruneopts = "UT"
   revision = "54be5f394ed2c3e19dac9134a40a95ba5a017f7b"
   version = "v1.5.4"
+
+[[projects]]
+  digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:e73f5b0152105f18bc131fba127d9949305c8693f8a762588a82a48f61756f5f"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
+  version = "v1.6.2"
+
+[[projects]]
+  digest = "1:7b5c6e2eeaa9ae5907c391a91c132abfd5c9e8a784a341b5625e750c67e6825d"
+  name = "github.com/gorilla/websocket"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d"
+  version = "v1.4.0"
 
 [[projects]]
   digest = "1:2a21d36a5ab33e6e4ce82b3c7ba45c2330ca6e9af247382475e056b06395b8a9"
@@ -127,6 +151,8 @@
   analyzer-version = 1
   input-imports = [
     "github.com/ethereum/go-ethereum/rpc",
+    "github.com/gorilla/mux",
+    "github.com/gorilla/websocket",
     "github.com/jinzhu/gorm",
     "github.com/jinzhu/gorm/dialects/sqlite",
     "github.com/joho/godotenv",

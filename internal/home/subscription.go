@@ -49,12 +49,14 @@ type transactionInfo struct {
 
 // SubscribeNewBlock is to subscribe new block
 func SubscribeNewBlock() {
+  fmt.Println("about to connect")
   client, err := rpc.Dial(env.Env.TsBlockChainWsURL)
   if err != nil {
     fmt.Println(err)
     return
   }
-  subch := make(chan blockInfo)
+  fmt.Println("connected", client)
+  subch := make(chan blockInfo, 5)
 
   // Ensure that subch receives the latest block.
   go func() {
@@ -63,6 +65,7 @@ func SubscribeNewBlock() {
       time.Sleep(2 * time.Second)
     }
   }()
+  fmt.Println("about to listen")
 
   // Print events from the subscription as they arrive.
   for block := range subch {
@@ -77,6 +80,35 @@ func SubscribeNewBlock() {
     })
     // fmt.Println("latest block:", block.Number, "diff", block.Difficulty, "txHash", block.TxHash, "gas limit", block.GasLimit, "gs used", block.GasUsed, block.Nonce)
   }
+}
+
+func subscribeBlocks(client *rpc.Client, subch chan blockInfo) {
+  ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+  defer cancel()
+
+  fmt.Println("about to subscribe", client)
+  // Subscribe to new blocks.
+  sub, err := client.EthSubscribe(ctx, subch, "newHeads")
+  if err != nil {
+    fmt.Println("subscribe error:", err)
+    return
+  }
+  fmt.Println("new Head subscribed", client)
+
+  // The connection is established now.
+  // Update the channel with the current block.
+  var lastBlock blockInfo
+  if err := client.CallContext(ctx, &lastBlock, "eth_getBlockByNumber", "latest", true); err != nil {
+    fmt.Println("can't get latest block:", err)
+    return
+  }
+  fmt.Println("got", lastBlock)
+  subch <- lastBlock
+  fmt.Println("put into ch")
+  // The subscription will deliver events to the channel. Wait for the
+  // subscription to end for any reason, then loop around to re-establish
+  // the connection.
+  fmt.Println("connection lost: ", <-sub.Err())
 }
 
 func transformToTxBlock(b blockInfo) *txblock.TxBlock {
@@ -119,32 +151,6 @@ func transformToTxBlock(b blockInfo) *txblock.TxBlock {
       return transactions
     }(b.Transactions),
   }
-}
-
-func subscribeBlocks(client *rpc.Client, subch chan blockInfo) {
-  ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-  defer cancel()
-
-  // Subscribe to new blocks.
-  sub, err := client.EthSubscribe(ctx, subch, "newHeads")
-  if err != nil {
-    fmt.Println("subscribe error:", err)
-    return
-  }
-
-  // The connection is established now.
-  // Update the channel with the current block.
-  var lastBlock blockInfo
-  if err := client.CallContext(ctx, &lastBlock, "eth_getBlockByNumber", "latest", true); err != nil {
-    fmt.Println("can't get latest block:", err)
-    return
-  }
-  subch <- lastBlock
-
-  // The subscription will deliver events to the channel. Wait for the
-  // subscription to end for any reason, then loop around to re-establish
-  // the connection.
-  fmt.Println("connection lost: ", <-sub.Err())
 }
 
 /* data recieved from rpc

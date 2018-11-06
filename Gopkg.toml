@@ -44,3 +44,15 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+  [[prune.project]]
+    name = "github.com/ethereum/go-ethereum"
+    unused-packages = false
+
+[[constraint]]
+  name = "github.com/gorilla/mux"
+  version = "1.6.2"
+
+[[constraint]]
+  name = "github.com/gorilla/websocket"
+  version = "1.4.0"
