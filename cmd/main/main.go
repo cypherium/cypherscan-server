@@ -5,12 +5,13 @@ import (
   "github.com/gorilla/mux"
   "github.com/jinzhu/gorm"
   _ "github.com/jinzhu/gorm/dialects/sqlite"
+  log "github.com/sirupsen/logrus"
+  "gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
   "gitlab.com/ron-liu/cypherscan-server/internal/env"
   "gitlab.com/ron-liu/cypherscan-server/internal/home"
   "gitlab.com/ron-liu/cypherscan-server/internal/publisher"
   "gitlab.com/ron-liu/cypherscan-server/internal/txblock"
   "gitlab.com/ron-liu/cypherscan-server/internal/util"
-  "log"
   "net/http"
 )
 
@@ -22,11 +23,12 @@ func initDb() {
 }
 
 func main() {
+  log.SetFormatter(&log.JSONFormatter{})
   fmt.Println("Evironments:", env.Env)
   util.OpenDb()
   initDb()
   defer util.CloseDb()
-  home.SubscribeNewBlock()
+  blockchain.SubscribeNewBlock()
   publisher.StartHub()
   router := mux.NewRouter()
   router.HandleFunc("/home", home.GetHome).Methods("GET")
