@@ -35,3 +35,10 @@ func (role *UInt64) Scan(value interface{}) error {
   *role = UInt64(binary.LittleEndian.Uint64(value.([]byte)))
   return nil
 }
+
+// VRS is V R S
+type VRS struct {
+  V BigInt
+  R BigInt
+  S BigInt
+}
