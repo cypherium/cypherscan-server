@@ -18,6 +18,7 @@ type Transaction struct {
   Payload          []byte         `json:"input"    gencodec:"required"`
   Hash             common.Hash    `json:"hash"                               gorm:"primary_key"`
   BlockHash        common.Hash    `json:"blockHash"`
+  Block            TxBlock        `json:"-"                                  gorm:"foreignkey:BlockHash"`
   From             common.Address `json:"from"`
   TransactionIndex uint32         `json:"transactionIndex"`
 }
