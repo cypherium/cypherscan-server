@@ -3,6 +3,7 @@ package txblock
 import (
   "database/sql/driver"
   "encoding/binary"
+  "fmt"
   "math/big"
 )
 
@@ -10,14 +11,20 @@ import (
 type BigInt big.Int
 
 // Value is the Sacn interface
-func (role BigInt) Value() (driver.Value, error) {
-  return (*big.Int)(&role).Bytes(), nil
+func (i BigInt) Value() (driver.Value, error) {
+  return (*big.Int)(&i).Bytes(), nil
 }
 
 // Scan is the Scan interface
-func (role *BigInt) Scan(value interface{}) error {
-  (*big.Int)(role).SetBytes(value.([]byte))
+func (i *BigInt) Scan(value interface{}) error {
+  (*big.Int)(i).SetBytes(value.([]byte))
   return nil
+}
+
+// MarshalJSON is to support json
+func (i BigInt) MarshalJSON() ([]byte, error) {
+  i2 := big.Int(i)
+  return []byte(fmt.Sprintf(`"%s"`, i2.String())), nil
 }
 
 // UInt64 is uint64
@@ -34,11 +41,4 @@ func (role UInt64) Value() (driver.Value, error) {
 func (role *UInt64) Scan(value interface{}) error {
   *role = UInt64(binary.LittleEndian.Uint64(value.([]byte)))
   return nil
-}
-
-// VRS is V R S
-type VRS struct {
-  V BigInt
-  R BigInt
-  S BigInt
 }

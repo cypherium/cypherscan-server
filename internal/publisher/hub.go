@@ -36,6 +36,7 @@ func ServeWebsocket(w http.ResponseWriter, r *http.Request) {
   }
   client := &_Client{hub, conn, make(chan _Message, 2)}
   hub.register <- client
+  go client.writePump()
 }
 
 // Broadcast message to all connected clients

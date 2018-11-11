@@ -15,24 +15,24 @@ type TxBlock struct {
   Time         time.Time      `json:"timestamp"        gencodec:"required"`
   Txn          int            `json:"txn"              gencodec:"required"`
   ParentHash   common.Hash    `json:"parentHash"       gencodec:"required"`
-  UncleHash    common.Hash    `json:"sha3Uncles"       gencodec:"required"`
   Coinbase     common.Address `json:"miner"            gencodec:"required"`
   Root         common.Hash    `json:"stateRoot"        gencodec:"required"`
   TxHash       common.Hash    `json:"transactionsRoot" gencodec:"required"`
   ReceiptHash  common.Hash    `json:"receiptsRoot"     gencodec:"required"`
   Bloom        []byte         `json:"logsBloom"        gencodec:"required"`
-  Difficulty   BigInt         `json:"difficulty"       gencodec:"required"       gorm:"type:blob"`
   GasLimit     UInt64         `json:"gasLimit"         gencodec:"required"`
   GasUsed      UInt64         `json:"gasUsed"          gencodec:"required"`
   Extra        []byte         `json:"extraData"        gencodec:"required"`
-  MixDigest    common.Hash    `json:"mixHash"          gencodec:"required"`
-  Nonce        UInt64         `json:"nonce"            gencodec:"required"`
   Transactions []Transaction  `json:"transactions"     gencodec:"required"     gorm:"foreignkey:BlockHash"`
+  Difficulty   BigInt         `json:"difficulty"       gencodec:"required"       gorm:"type:blob"`
+  // MixDigest    common.Hash    `json:"mixHash"          gencodec:"required"`
+  // Nonce        UInt64         `json:"nonce"            gencodec:"required"`
+  // UncleHash    common.Hash    `json:"sha3Uncles"       gencodec:"required"`
 }
 
 // SaveBlock to the database
 func SaveBlock(block *types.Block) error {
-  record := transformToTxBlock(block)
+  record := transformBlockToDbRecord(block)
   util.Run(func(db *gorm.DB) error {
     db.NewRecord(record)
     db.Create(record)
@@ -41,14 +41,13 @@ func SaveBlock(block *types.Block) error {
   return nil
 }
 
-func transformToTxBlock(b *types.Block) *TxBlock {
+func transformBlockToDbRecord(b *types.Block) *TxBlock {
   return &TxBlock{
     Number:      UInt64(b.Number().Uint64()),
     Hash:        b.Hash(),
     Time:        time.Unix(b.Time().Int64(), 0),
     Txn:         len(b.Transactions()),
     ParentHash:  b.ParentHash(),
-    UncleHash:   b.UncleHash(),
     Coinbase:    b.Coinbase(),
     Root:        b.Root(),
     TxHash:      b.TxHash(),
@@ -58,8 +57,9 @@ func transformToTxBlock(b *types.Block) *TxBlock {
     GasLimit:    UInt64(b.GasLimit()),
     GasUsed:     UInt64(b.GasUsed()),
     Extra:       b.Extra(),
-    MixDigest:   b.MixDigest(),
-    Nonce:       UInt64(b.Nonce()),
+    // UncleHash:   b.UncleHash(),
+    // MixDigest:   b.MixDigest(),
+    // Nonce:       UInt64(b.Nonce()),
     Transactions: func(ts []*types.Transaction) []Transaction {
       transactions := make([]Transaction, len(ts))
       for i, t := range ts {
@@ -76,22 +76,22 @@ func transformToTxBlock(b *types.Block) *TxBlock {
           Value:            BigInt(*t.Value()),
           Cost:             BigInt(*t.Cost()),
           BlockHash:        b.Hash(),
-          AccountNonce:     UInt64(t.Nonce()),
           TransactionIndex: uint32(i),
           Payload:          t.Data(),
-          V: func() BigInt {
-            v, _, _ := t.RawSignatureValues()
-            return BigInt(*v)
-          }(),
-          R: func() BigInt {
-            _, r, _ := t.RawSignatureValues()
-            return BigInt(*r)
-          }(),
-          S: func() BigInt {
-            _, _, s := t.RawSignatureValues()
-            return BigInt(*s)
-          }(),
           // Recipient:        util.Parse(t.Recipient, util.BytesType).([]byte),
+          // AccountNonce:     UInt64(t.Nonce()),
+          // V: func() BigInt {
+          //   v, _, _ := t.RawSignatureValues()
+          //   return BigInt(*v)
+          // }(),
+          // R: func() BigInt {
+          //   _, r, _ := t.RawSignatureValues()
+          //   return BigInt(*r)
+          // }(),
+          // S: func() BigInt {
+          //   _, _, s := t.RawSignatureValues()
+          //   return BigInt(*s)
+          // }(),
         }
       }
       return transactions
