@@ -69,7 +69,9 @@ func GetHome(w http.ResponseWriter, r *http.Request) {
   var transactions []txblock.Transaction
   util.Run(func(db *gorm.DB) error {
     db.Select([]string{"number", "txn", "time"}).Order("time desc").Limit(TxBlockCount).Find(&txBlocks)
-    db.Debug().Joins("JOIN tx_blocks ON tx_blocks.hash = transactions.block_hash").Select([]string{"tx_blocks.time", "value", "transactions.hash", "\"from\"", "\"to\""}).Order("transaction_index desc").Limit(TransactionCount).Find(&transactions)
+    db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
+      return db.Select([]string{"time", "hash"})
+    }).Select([]string{"block_hash", "value", "hash", "\"from\"", "\"to\""}).Order("transaction_index desc").Limit(TransactionCount).Find(&transactions)
     return nil
   })
 
