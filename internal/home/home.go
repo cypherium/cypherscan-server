@@ -51,10 +51,10 @@ type _Metric struct {
 }
 
 type home struct {
-  Metrics   []_Metric
-  TxBlocks  []_TxBlock
-  KeyBlocks []_KeyBlock
-  Txs       []_Tx
+  Metrics   []_Metric   `json:"metrics"`
+  TxBlocks  []_TxBlock  `json:"txBlocks"`
+  KeyBlocks []_KeyBlock `json:"keyBlocks"`
+  Txs       []_Tx       `json:"txs"`
 }
 
 // HanderForBrowser is Websocket handler for browser
@@ -79,6 +79,7 @@ func GetHome(w http.ResponseWriter, r *http.Request) {
   log.Infof("transactins: %+v\n", transactions)
 
   payload := home{
+    Metrics: []_Metric{},
     TxBlocks: func() []_TxBlock {
       ret := make([]_TxBlock, 0, len(txBlocks))
       for _, b := range txBlocks {
@@ -86,6 +87,7 @@ func GetHome(w http.ResponseWriter, r *http.Request) {
       }
       return ret
     }(),
+    KeyBlocks: []_KeyBlock{},
     Txs: func() []_Tx {
       ret := make([]_Tx, 0, len(transactions))
       for _, t := range transactions {

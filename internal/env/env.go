@@ -11,6 +11,7 @@ type envStruct struct {
   DbDrive           string
   DbSource          string
   TsBlockChainWsURL string
+  OriginAllowed     string
 }
 
 // Env is a structure holding env
@@ -25,5 +26,6 @@ func init() {
     os.Getenv("DB_DRIVE"),
     os.Getenv("DB_SOURCE"),
     os.Getenv("TX_BLOCKCHAIN_WS_URL"),
+    os.Getenv("ORIGIN_ALLOWED"),
   }
 }
