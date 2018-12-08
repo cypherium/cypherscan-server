@@ -1,4 +1,4 @@
-package home
+package api
 
 import (
   "encoding/json"
@@ -6,10 +6,10 @@ import (
   "github.com/ethereum/go-ethereum/core/types"
   "github.com/jinzhu/gorm"
   // log "github.com/sirupsen/logrus"
-  "gitlab.com/ron-liu/cypherscan-server/internal/publisher"
   "gitlab.com/ron-liu/cypherscan-server/internal/txblock"
   "gitlab.com/ron-liu/cypherscan-server/internal/util"
   "net/http"
+
   "time"
 )
 
@@ -67,11 +67,6 @@ type Payload struct {
   Txs       []Tx       `json:"txs"`
 }
 
-// HanderForBrowser is Websocket handler for browser
-func HanderForBrowser(w http.ResponseWriter, r *http.Request) {
-  publisher.ServeWebsocket(w, r)
-}
-
 // GetHome is to get the initial home contents
 func GetHome(w http.ResponseWriter, r *http.Request) {
   fmt.Println("starting getting home")
@@ -117,8 +112,23 @@ func GetHome(w http.ResponseWriter, r *http.Request) {
   fmt.Fprintf(w, string(response))
 }
 
-// TransformTxBlockToFrontend is to transform Block to frontend json
-func TransformTxBlockToFrontend(block *types.Block) *TxBlock {
+// TransformTxBlockToFrontendMessage is to transform eth block type to message will broadcast to browsers
+func TransformTxBlockToFrontendMessage(block *types.Block) *Payload {
+  return &Payload{
+    TxBlocks: []TxBlock{*transformTxBlockToFrontend(block)},
+    Txs: func() []Tx {
+      ret := make([]Tx, 0, TransactionCount)
+      for _, transaction := range block.Transactions()[max(0, len(block.Transactions())-TransactionCount):] {
+        ret = append(ret, *transformTxToFrontend(transaction, block))
+      }
+      return ret
+    }(),
+    KeyBlocks: []KeyBlock{},
+    Metrics:   []Metric{},
+  }
+}
+
+func transformTxBlockToFrontend(block *types.Block) *TxBlock {
   return &TxBlock{
     Number:    txblock.UInt64(block.Number().Uint64()),
     Txn:       len(block.Transactions()),
@@ -126,8 +136,7 @@ func TransformTxBlockToFrontend(block *types.Block) *TxBlock {
   }
 }
 
-// TransformTxToFrontend is to transform Tx to frontend json
-func TransformTxToFrontend(tx *types.Transaction, block *types.Block) *Tx {
+func transformTxToFrontend(tx *types.Transaction, block *types.Block) *Tx {
   return &Tx{
     CreatedAt: time.Unix(block.Time().Int64(), 0),
     Value:     txblock.BigInt(*tx.Value()),
@@ -143,4 +152,11 @@ func TransformTxToFrontend(tx *types.Transaction, block *types.Block) *Tx {
     //   return to.Hex()
     // }(),
   }
+}
+
+func max(a, b int) int {
+  if a > b {
+    return a
+  }
+  return b
 }

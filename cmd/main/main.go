@@ -6,9 +6,9 @@ import (
   "github.com/jinzhu/gorm"
   _ "github.com/jinzhu/gorm/dialects/sqlite"
   log "github.com/sirupsen/logrus"
+  "gitlab.com/ron-liu/cypherscan-server/internal/api"
   "gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
   "gitlab.com/ron-liu/cypherscan-server/internal/env"
-  "gitlab.com/ron-liu/cypherscan-server/internal/home"
   "gitlab.com/ron-liu/cypherscan-server/internal/publisher"
   "gitlab.com/ron-liu/cypherscan-server/internal/txblock"
   "gitlab.com/ron-liu/cypherscan-server/internal/util"
@@ -22,12 +22,13 @@ func main() {
   initDb()
   defer util.CloseDb()
 
+  blockchain.Connect()
   go blockchain.SubscribeNewBlock([]blockchain.BlockHandlers{txblock.SaveBlock, boardcastNewBlock})
   go publisher.StartHub()
 
   util.CreateRouter(func(r *mux.Router) {
-    r.HandleFunc("/home", home.GetHome).Methods("GET")
-    r.HandleFunc("/ws", home.HanderForBrowser)
+    r.HandleFunc("/home", api.GetHome).Methods("GET")
+    r.HandleFunc("/ws", api.HanderForBrowser)
   })
 }
 
@@ -39,24 +40,6 @@ func initDb() {
 }
 
 func boardcastNewBlock(block *types.Block) error {
-  publisher.Broadcast(home.Payload{
-    TxBlocks: []home.TxBlock{*home.TransformTxBlockToFrontend(block)},
-    Txs: func() []home.Tx {
-      ret := make([]home.Tx, 0, home.TransactionCount)
-      for _, transaction := range block.Transactions()[max(0, len(block.Transactions())-home.TransactionCount):] {
-        ret = append(ret, *home.TransformTxToFrontend(transaction, block))
-      }
-      return ret
-    }(),
-    KeyBlocks: []home.KeyBlock{},
-    Metrics:   []home.Metric{},
-  })
+  publisher.Broadcast(api.TransformTxBlockToFrontendMessage(block))
   return nil
-}
-
-func max(a, b int) int {
-  if a > b {
-    return a
-  }
-  return b
 }

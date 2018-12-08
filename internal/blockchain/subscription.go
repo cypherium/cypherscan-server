@@ -2,11 +2,8 @@ package blockchain
 
 import (
   "context"
-  "fmt"
   "github.com/ethereum/go-ethereum/core/types"
-  "github.com/ethereum/go-ethereum/ethclient"
   log "github.com/sirupsen/logrus"
-  "gitlab.com/ron-liu/cypherscan-server/internal/env"
 )
 
 // BlockHandlers is the function type to handle the recieved block
@@ -14,13 +11,6 @@ type BlockHandlers func(*types.Block) error
 
 // SubscribeNewBlock is to subscribe new block
 func SubscribeNewBlock(handlers []BlockHandlers) {
-  fmt.Println("about to connect")
-  client, err := ethclient.Dial(env.Env.TsBlockChainWsURL)
-  if err != nil {
-    log.Fatal("Cannot connect blockchain nodes", err)
-    return
-  }
-  log.Info("Connected to blockchain nodes")
   headers := make(chan *types.Header)
 
   sub, err := client.SubscribeNewHead(context.Background(), headers)
