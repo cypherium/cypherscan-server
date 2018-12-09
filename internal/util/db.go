@@ -30,8 +30,8 @@ func CloseDb() {
   db.Close()
 }
 
-// Run a function take the db as the argument
-func Run(fn RunFunc) error {
+// RunDb a function take the db as the argument
+func RunDb(fn RunFunc) error {
   db := getDb()
   return fn(db)
 }

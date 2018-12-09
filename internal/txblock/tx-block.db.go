@@ -33,7 +33,7 @@ type TxBlock struct {
 // SaveBlock to the database
 func SaveBlock(block *types.Block) error {
   record := transformBlockToDbRecord(block)
-  util.Run(func(db *gorm.DB) error {
+  util.RunDb(func(db *gorm.DB) error {
     db.NewRecord(record)
     db.Create(record)
     return nil

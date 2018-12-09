@@ -29,11 +29,12 @@ func main() {
   util.CreateRouter(func(r *mux.Router) {
     r.HandleFunc("/home", api.GetHome).Methods("GET")
     r.HandleFunc("/ws", api.HanderForBrowser)
+    r.Path("/tx-blocks/{number:[0-9]+}").Queries("pagesize", "{pagesize}").HandlerFunc(api.GetBlocks)
   })
 }
 
 func initDb() {
-  util.Run(func(db *gorm.DB) error {
+  util.RunDb(func(db *gorm.DB) error {
     db.AutoMigrate(&txblock.TxBlock{}, &txblock.Transaction{})
     return nil
   })

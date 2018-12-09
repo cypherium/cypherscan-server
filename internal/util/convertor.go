@@ -3,8 +3,9 @@ package util
 import (
   "encoding/hex"
   "fmt"
-  "log"
+  log "github.com/sirupsen/logrus"
   // "math/big"
+  "math/big"
   "strconv"
   "strings"
   "time"
@@ -112,4 +113,15 @@ func Parse(in string, t ConvertedType) interface{} {
   default:
     return in
   }
+}
+
+// StringToBigInt is to change string to big.Int
+func StringToBigInt(s string, base int) (*big.Int, error) {
+  n := new(big.Int)
+  n, ok := n.SetString(s, base)
+  if !ok {
+    log.Error("StringToBigInt error")
+    return n, &MyError{"StringToBigInt error"}
+  }
+  return n, nil
 }
