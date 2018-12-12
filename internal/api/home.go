@@ -80,14 +80,14 @@ const (
 
 // TxBlock is the type transfor to frontend in home page
 type TxBlock struct {
-  Number    txblock.UInt64 `json:"number"`
+  Number    int64 `json:"number"`
   Txn       int            `json:"txn"`
   CreatedAt time.Time      `json:"createdAt"`
 }
 
 // KeyBlock is the key block type transfore to frontend in home page
 type KeyBlock struct {
-  Number    txblock.UInt64
+  Number    int64
   CreatedAt time.Time
 }
 
@@ -125,7 +125,7 @@ type Payload struct {
 
 func transformTxBlockToFrontend(block *types.Block) *TxBlock {
   return &TxBlock{
-    Number:    txblock.UInt64(block.Number().Uint64()),
+    Number:    block.Number().Int64(),
     Txn:       len(block.Transactions()),
     CreatedAt: time.Unix(block.Time().Int64(), 0),
   }

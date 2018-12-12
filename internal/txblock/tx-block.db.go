@@ -11,7 +11,7 @@ import (
 // TxBlock is the Database Table class
 type TxBlock struct {
   Hash         common.Hash    `json:"hash"             gencodec:"required"       gorm:"primary_key"`
-  Number       UInt64         `json:"number"           gencodec:"required"`
+  Number       int64         `json:"number"           gencodec:"required"`
   Time         time.Time      `json:"timestamp"        gencodec:"required"`
   Txn          int            `json:"txn"              gencodec:"required"`
   ParentHash   common.Hash    `json:"parentHash"       gencodec:"required"`
@@ -43,7 +43,7 @@ func SaveBlock(block *types.Block) error {
 
 func transformBlockToDbRecord(b *types.Block) *TxBlock {
   return &TxBlock{
-    Number:      UInt64(b.Number().Uint64()),
+    Number:      b.Number().Int64(),
     Hash:        b.Hash(),
     Time:        time.Unix(b.Time().Int64(), 0),
     Txn:         len(b.Transactions()),
