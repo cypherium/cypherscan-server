@@ -79,13 +79,10 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 		return "number block_number = ?", []interface{}{condition.BlockNumber}
 	}()
 	return txs, repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Set("gorm:auto_preload", true).Select(whereStatment, whereArgs...).Select(columns).Order("block_number desc, transaction_index desc").Offset(skip).Limit(pageSize).Find(&txs).Error
+		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
+			return db.Select([]string{"time", "hash"})
+		}).Select(whereStatment, whereArgs...).Select(columns).Order("block_number desc, transaction_index desc").Offset(skip).Limit(pageSize).Find(&txs).Error
 	})
-	// return txs, repo.dbRunner.Run(func(db *gorm.DB) error {
-	// 	return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
-	// 		return db.Select([]string{"time", "hash"})
-	// 	}).Select(whereStatment, whereArgs...).Select(columns).Order("block_number desc, transaction_index desc").Offset(skip).Limit(pageSize).Find(&txs).Error
-	// })
 }
 
 var blockColumnsConfig = map[Scenario][]string{
