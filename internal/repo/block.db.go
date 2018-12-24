@@ -3,23 +3,21 @@ package repo
 import (
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/jinzhu/gorm"
-	"gitlab.com/ron-liu/cypherscan-server/internal/util"
+	"github.com/cypherium/CypherTestNet/go-cypherium/common"
+	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 )
 
 // TxBlock is the Database Table class
 type TxBlock struct {
-	Hash         common.Hash    `json:"hash"             gencodec:"required"       gorm:"primary_key"`
+	Hash         Hash           `json:"hash"             gencodec:"required"       gorm:"primary_key"`
 	Number       int64          `json:"number"           gencodec:"required"`
 	Time         time.Time      `json:"timestamp"        gencodec:"required"`
 	Txn          int            `json:"txn"              gencodec:"required"`
-	ParentHash   common.Hash    `json:"parentHash"       gencodec:"required"`
+	ParentHash   Hash           `json:"parentHash"       gencodec:"required"`
 	Coinbase     common.Address `json:"miner"            gencodec:"required"`
-	Root         common.Hash    `json:"stateRoot"        gencodec:"required"`
-	TxHash       common.Hash    `json:"transactionsRoot" gencodec:"required"`
-	ReceiptHash  common.Hash    `json:"receiptsRoot"     gencodec:"required"`
+	Root         Hash           `json:"stateRoot"        gencodec:"required"`
+	TxHash       Hash           `json:"transactionsRoot" gencodec:"required"`
+	ReceiptHash  Hash           `json:"receiptsRoot"     gencodec:"required"`
 	Bloom        []byte         `json:"logsBloom"        gencodec:"required"`
 	GasLimit     UInt64         `json:"gasLimit"         gencodec:"required"`
 	GasUsed      UInt64         `json:"gasUsed"          gencodec:"required"`
@@ -31,33 +29,22 @@ type TxBlock struct {
 	// UncleHash    common.Hash    `json:"sha3Uncles"       gencodec:"required"`
 }
 
-// SaveBlock to the database
-func SaveBlock(block *types.Block) error {
-	record := transformBlockToDbRecord(block)
-	util.RunDb(func(db *gorm.DB) error {
-		db.NewRecord(record)
-		db.Create(record)
-		return nil
-	})
-	return nil
-}
-
 func transformBlockToDbRecord(b *types.Block) *TxBlock {
 	return &TxBlock{
 		Number:      b.Number().Int64(),
-		Hash:        b.Hash(),
+		Hash:        Hash(b.Hash()),
 		Time:        time.Unix(b.Time().Int64(), 0),
 		Txn:         len(b.Transactions()),
-		ParentHash:  b.ParentHash(),
+		ParentHash:  Hash(b.ParentHash()),
 		Coinbase:    b.Coinbase(),
-		Root:        b.Root(),
-		TxHash:      b.TxHash(),
-		ReceiptHash: b.ReceiptHash(),
+		Root:        Hash(b.Root()),
+		TxHash:      Hash(b.TxHash()),
+		ReceiptHash: Hash(b.ReceiptHash()),
 		Bloom:       b.Bloom().Bytes(),
-		Difficulty:  BigInt(*b.Difficulty()),
-		GasLimit:    UInt64(b.GasLimit()),
-		GasUsed:     UInt64(b.GasUsed()),
-		Extra:       b.Extra(),
+		// Difficulty:  BigInt(*b.Difficulty()),
+		GasLimit: UInt64(b.GasLimit()),
+		GasUsed:  UInt64(b.GasUsed()),
+		Extra:    b.Extra(),
 		// UncleHash:   b.UncleHash(),
 		// MixDigest:   b.MixDigest(),
 		// Nonce:       UInt64(b.Nonce()),
@@ -65,18 +52,18 @@ func transformBlockToDbRecord(b *types.Block) *TxBlock {
 			transactions := make([]Transaction, len(ts))
 			for i, t := range ts {
 				transactions[i] = Transaction{
-					Hash:     t.Hash(),
+					Hash:     Hash(t.Hash()),
 					Gas:      UInt64(t.Gas()),
 					GasPrice: BigInt(*t.GasPrice()),
-					To: func() common.Address {
+					To: func() Address {
 						if t.To() != nil {
-							return *(t.To())
+							return Address(*t.To())
 						}
-						return common.Address{}
+						return Address{}
 					}(),
 					Value:            BigInt(*t.Value()),
 					Cost:             BigInt(*t.Cost()),
-					BlockHash:        b.Hash(),
+					BlockHash:        Hash(b.Hash()),
 					TransactionIndex: uint32(i),
 					Payload:          t.Data(),
 					// Recipient:        util.Parse(t.Recipient, util.BytesType).([]byte),

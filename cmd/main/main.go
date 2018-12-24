@@ -1,13 +1,11 @@
 package main
 
 import (
-	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/gorilla/mux"
-	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ron-liu/cypherscan-server/internal/api"
-	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
 	"gitlab.com/ron-liu/cypherscan-server/internal/env"
 	"gitlab.com/ron-liu/cypherscan-server/internal/publisher"
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
@@ -17,26 +15,30 @@ import (
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.Info("Evironments:", env.Env)
+	// context := context.Background()
 
-	util.OpenDb()
-	initDb()
-	defer util.CloseDb()
+	dbClient, err := util.Connect()
+	if err != nil {
+		log.Fatal("Can NOT connect to database")
+	}
+	defer dbClient.Close()
 
-	blockchain.Connect()
-	go blockchain.SubscribeNewBlock([]blockchain.BlockHandlers{repo.SaveBlock, boardcastNewBlock})
-	go publisher.StartHub()
+	repo := repo.NewRepo(dbClient)
+	repo.InitDb()
 
+	// blockChainClient, err := blockchain.Dial(context)
+	// if err != nil {
+	// 	log.Fatal("Can NOT connect to blockchain")
+	// }
+
+	// go blockchain.SubscribeNewBlock([]blockchain.BlockHandlers{repo.SaveBlock, boardcastNewBlock})
+	// go publisher.StartHub()
+
+	controller := api.NewController(repo)
 	util.CreateRouter(func(r *mux.Router) {
-		r.HandleFunc("/home", api.GetHome).Methods("GET")
+		r.HandleFunc("/home", controller.GetHome).Methods("GET")
 		r.HandleFunc("/ws", api.HanderForBrowser)
-		r.Path("/tx-blocks/{number:[0-9]+}").Queries("pagesize", "{pagesize}").HandlerFunc(api.GetBlocks)
-	})
-}
-
-func initDb() {
-	util.RunDb(func(db *gorm.DB) error {
-		db.AutoMigrate(&repo.TxBlock{}, &repo.Transaction{})
-		return nil
+		r.Path("/tx-blocks/{number:[0-9]+}").Queries("pagesize", "{pagesize}").HandlerFunc(controller.GetBlocks)
 	})
 }
 

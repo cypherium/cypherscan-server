@@ -2,59 +2,15 @@ package api
 
 import (
 	// "encoding/json"
-	"fmt"
 
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/jinzhu/gorm"
+	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 
 	// log "github.com/sirupsen/logrus"
-	"net/http"
 
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
-	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 
 	"time"
 )
-
-// GetHome is to get the initial home contents
-func GetHome(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("starting getting home")
-	var txBlocks []repo.TxBlock
-	var transactions []repo.Transaction
-	util.RunDb(func(db *gorm.DB) error {
-		db.Select([]string{"number", "txn", "time"}).Order("time desc").Limit(TxBlockCount).Find(&txBlocks)
-		db.Preload("Block", func(db *gorm.DB) *gorm.DB {
-			return db.Select([]string{"time", "hash"})
-		}).Select([]string{"block_hash", "value", "hash", "\"from\"", "\"to\""}).Order("transaction_index desc").Limit(TransactionCount).Find(&transactions)
-		return nil
-	})
-
-	payload := Payload{
-		Metrics: []Metric{},
-		TxBlocks: func() []TxBlock {
-			ret := make([]TxBlock, 0, len(txBlocks))
-			for _, b := range txBlocks {
-				ret = append(ret, TxBlock{b.Number, b.Txn, b.Time})
-			}
-			return ret
-		}(),
-		KeyBlocks: []KeyBlock{},
-		Txs: func() []Tx {
-			ret := make([]Tx, 0, len(transactions))
-			for _, t := range transactions {
-				ret = append(ret, Tx{
-					t.Block.Time,
-					t.Value,
-					t.Hash.Hex(),
-					t.From.Hex(),
-					t.To.Hex(),
-				})
-			}
-			return ret
-		}(),
-	}
-	respondWithJSON(w, http.StatusOK, payload)
-}
 
 // TransformTxBlockToFrontendMessage is to transform eth block type to message will broadcast to browsers
 func TransformTxBlockToFrontendMessage(block *types.Block) *Payload {
