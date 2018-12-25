@@ -28,6 +28,15 @@ type TxBlock struct {
 	// UncleHash    common.Hash    `json:"sha3Uncles"       gencodec:"required"`
 }
 
+func transferKeyBlockHeaderToDbRecord(b *types.KeyBlockHeader) *KeyBlock {
+	return &KeyBlock{
+		Hash:       Hash(b.Hash()),
+		Number:     b.Number.Int64(),
+		Difficulty: BigInt(*b.Difficulty),
+		Time:       time.Unix(b.Time.Int64(), 0),
+	}
+}
+
 func transformBlockToDbRecord(b *types.Block) *TxBlock {
 	return &TxBlock{
 		Number:      b.Number().Int64(),

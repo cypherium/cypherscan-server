@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
@@ -24,15 +23,12 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		case newHead := <-newHeader:
 			fmt.Printf("Got new block head hash = %s, number = %d \n\r", newHead.Hash().Hex(), newHead.Number.Int64())
 			block, _, _ := listerner.BlockFetcher.BlockByHash(newHead.Hash(), true)
-			fmt.Printf("Got new block %v \n\r", block)
 			listerner.Repo.SaveBlock(block)
 			listerner.Broadcastable.Broadcast(TransformTxBlockToFrontendMessage(block))
 
 		case newKeyHead := <-keyHeadChan:
 			fmt.Printf("Got new key block head: hash = %s, number = %d\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64())
-			json, _ := json.Marshal(newKeyHead)
-			fmt.Printf("%s", json)
-
+			listerner.Repo.SaveKeyBlock(newKeyHead)
 		}
 	}
 }
