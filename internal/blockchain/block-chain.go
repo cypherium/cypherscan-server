@@ -3,6 +3,8 @@ package blockchain
 import (
 	"context"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/cypherium/CypherTestNet/go-cypherium/common"
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/cypherium/CypherTestNet/go-cypherium/ethclient"
@@ -37,13 +39,14 @@ func (blockChain *BlockChain) KeyBlocksByNumbers(numbers []int64) ([]*types.KeyB
 
 // Subscribe is to subscirbe new block and new key block
 func (blockChain *BlockChain) Subscribe(chBlock chan<- *types.Header, chKeyBlock chan<- *types.KeyBlockHeader) (Subscribed, error) {
-	ctx := context.Background()
-	blockSub, blockErr := blockChain.client.SubscribeNewHead(ctx, chBlock)
-	if blockErr != nil {
+	blockSub, err := blockChain.client.SubscribeNewHead(blockChain.context, chBlock)
+	if err != nil {
+		log.Error(err.Error())
 		return nil, &util.MyError{Message: "Cannot subscirbe to Block"}
 	}
-	keyBlockSub, keyBlockErr := blockChain.client.SubscribeNewKeyHead(ctx, chKeyBlock)
-	if keyBlockErr != nil {
+	keyBlockSub, err := blockChain.client.SubscribeNewKeyHead(blockChain.context, chKeyBlock)
+	if err != nil {
+		log.Error(err.Error())
 		blockSub.Unsubscribe()
 		return nil, &util.MyError{Message: "Cannot subscirbe to Key Block"}
 	}

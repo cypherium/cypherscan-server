@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
@@ -13,6 +14,11 @@ type Get interface {
 	GetBlocks(condition *BlockSearchContdition) ([]TxBlock, error)
 	GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error)
 	GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error)
+}
+
+// BlockSaver is the interface contains SaveBlock
+type BlockSaver interface {
+	SaveBlocks(block *types.Block) error
 }
 
 // Repo is the database access layer
@@ -35,6 +41,7 @@ func (repo *Repo) InitDb() {
 
 // SaveBlocks is to save blocks into db
 func (repo *Repo) SaveBlocks(block *types.Block) error {
+	fmt.Println(block)
 	record := transformBlockToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
 		db.NewRecord(record)
