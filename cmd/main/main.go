@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/gorilla/mux"
@@ -9,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ron-liu/cypherscan-server/internal/api"
 	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
-	"gitlab.com/ron-liu/cypherscan-server/internal/env"
+	"gitlab.com/ron-liu/cypherscan-server/internal/config"
 	"gitlab.com/ron-liu/cypherscan-server/internal/publisher"
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
 	"gitlab.com/ron-liu/cypherscan-server/internal/util"
@@ -17,10 +18,11 @@ import (
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
-	log.Info("Evironments:", env.Env)
 	context := context.Background()
+	config := config.GetFromEnv()
+	log.Info("Config:", fmt.Sprintf("%v", config))
 
-	dbClient, err := util.Connect()
+	dbClient, err := util.ConnectDb(config.DbDrive, config.DbSource)
 	if err != nil {
 		log.Fatal("Can NOT connect to database")
 	}
@@ -29,7 +31,7 @@ func main() {
 	repoInstance := repo.NewRepo(dbClient)
 	repoInstance.InitDb()
 
-	blockChainClient, err := blockchain.Dial(context)
+	blockChainClient, err := blockchain.Dial(context, config.BlockChainWsURL)
 	if err != nil {
 		log.Fatal("Can NOT connect to blockchain")
 	}
@@ -51,5 +53,5 @@ func main() {
 		r.HandleFunc("/home", controller.GetHome).Methods("GET")
 		r.HandleFunc("/ws", hub.ServeWebsocket)
 		r.Path("/tx-blocks/{number:[0-9]+}").Queries("pagesize", "{pagesize}").HandlerFunc(controller.GetBlocks)
-	})
+	}, config.OriginAllowed)
 }

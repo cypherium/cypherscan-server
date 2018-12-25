@@ -2,8 +2,6 @@ package util
 
 import (
 	"github.com/jinzhu/gorm"
-
-	"gitlab.com/ron-liu/cypherscan-server/internal/env"
 )
 
 // DbRunner is a interface mainly for a tests
@@ -26,9 +24,9 @@ func (dbClient *DbClient) Run(f RunFunc) error {
 	return f(dbClient.db)
 }
 
-// Connect will return a open db connection
-func Connect() (*DbClient, error) {
-	_db, err := gorm.Open(env.Env.DbDrive, env.Env.DbSource)
+// ConnectDb will return a open db connection
+func ConnectDb(drive string, args ...interface{}) (*DbClient, error) {
+	_db, err := gorm.Open(drive, args...)
 	if err != nil {
 		return nil, err
 	}

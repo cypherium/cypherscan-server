@@ -6,12 +6,11 @@ import (
 	"github.com/cypherium/CypherTestNet/go-cypherium/ethclient"
 
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ron-liu/cypherscan-server/internal/env"
 )
 
 // Dial is to connect the block chain
-func Dial(context context.Context) (*BlockChain, error) {
-	c, err := ethclient.Dial(env.Env.TsBlockChainWsURL)
+func Dial(context context.Context, url string) (*BlockChain, error) {
+	c, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, err
 	}
