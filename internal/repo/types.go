@@ -56,7 +56,7 @@ func (role Hash) Value() (driver.Value, error) {
 
 // Scan is the Scan interface
 func (role *Hash) Scan(value interface{}) error {
-	r := common.Hash(*role)
+	r := (*common.Hash)(role)
 	copy(r[:], value.([]byte))
 	return nil
 }
@@ -78,7 +78,7 @@ func (role Address) Value() (driver.Value, error) {
 
 // Scan is the Scan interface
 func (role *Address) Scan(value interface{}) error {
-	r := common.Address(*role)
+	r := (*common.Address)(role)
 	copy(r[:], value.([]byte))
 	return nil
 }

@@ -81,7 +81,7 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 	skip := condition.Skip
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		if condition.BlockNumber == 0 {
-			return "block_number > 0", []interface{}{}
+			return "block_number >= 0", []interface{}{}
 		}
 		return "number block_number = ?", []interface{}{condition.BlockNumber}
 	}()

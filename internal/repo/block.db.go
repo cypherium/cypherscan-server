@@ -63,6 +63,7 @@ func transformBlockToDbRecord(b *types.Block) *TxBlock {
 					Value:            BigInt(*t.Value()),
 					Cost:             BigInt(*t.Cost()),
 					BlockHash:        Hash(b.Hash()),
+					BlockNumber:      b.Number().Int64(),
 					TransactionIndex: uint32(i),
 					Payload:          t.Data(),
 					// Recipient:        util.Parse(t.Recipient, util.BytesType).([]byte),
