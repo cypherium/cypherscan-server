@@ -22,7 +22,7 @@ type TxBlock struct {
 	GasUsed      UInt64        `json:"gasUsed"          gencodec:"required"`
 	Extra        []byte        `json:"extraData"        gencodec:"required"`
 	Transactions []Transaction `json:"transactions"     gencodec:"required"     gorm:"foreignkey:BlockHash"`
-	Difficulty   BigInt        `json:"difficulty"       gencodec:"required"       gorm:"type:blob"`
+	// Difficulty   BigInt        `json:"difficulty"       gencodec:"required"       gorm:"type:blob"`
 	// MixDigest    common.Hash    `json:"mixHash"          gencodec:"required"`
 	// Nonce        UInt64         `json:"nonce"            gencodec:"required"`
 	// UncleHash    common.Hash    `json:"sha3Uncles"       gencodec:"required"`

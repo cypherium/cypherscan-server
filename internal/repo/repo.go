@@ -18,7 +18,7 @@ type Get interface {
 
 // BlockSaver is the interface contains SaveBlock
 type BlockSaver interface {
-	SaveBlocks(block *types.Block) error
+	SaveBlock(block *types.Block) error
 }
 
 // Repo is the database access layer
@@ -39,8 +39,8 @@ func (repo *Repo) InitDb() {
 	})
 }
 
-// SaveBlocks is to save blocks into db
-func (repo *Repo) SaveBlocks(block *types.Block) error {
+// SaveBlock is to save blocks into db
+func (repo *Repo) SaveBlock(block *types.Block) error {
 	fmt.Println(block)
 	record := transformBlockToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
