@@ -12,8 +12,7 @@ import (
 	"time"
 )
 
-// TransformTxBlockToFrontendMessage is to transform eth block type to message will broadcast to browsers
-func TransformTxBlockToFrontendMessage(block *types.Block) *Payload {
+func transformTxBlockToFrontendMessage(block *types.Block) *Payload {
 	return &Payload{
 		TxBlocks: []TxBlock{*transformTxBlockToFrontend(block)},
 		Txs: func() []Tx {
@@ -25,6 +24,15 @@ func TransformTxBlockToFrontendMessage(block *types.Block) *Payload {
 		}(),
 		KeyBlocks: []KeyBlock{},
 		Metrics:   []Metric{},
+	}
+}
+
+func transformKeyBlockToFrontendMessage(block *types.KeyBlockHeader) *Payload {
+	return &Payload{
+		TxBlocks:  []TxBlock{},
+		Txs:       []Tx{},
+		Metrics:   []Metric{},
+		KeyBlocks: []KeyBlock{*transformKeyBlockToFrontend(block)},
 	}
 }
 
@@ -46,8 +54,8 @@ type TxBlock struct {
 
 // KeyBlock is the key block type transfore to frontend in home page
 type KeyBlock struct {
-	Number    int64
-	CreatedAt time.Time
+	Number    int64     `json:"number"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // MetricValue is the MetricValue type transfore to frontend in home page
@@ -87,6 +95,13 @@ func transformTxBlockToFrontend(block *types.Block) *TxBlock {
 		Number:    block.Number().Int64(),
 		Txn:       len(block.Transactions()),
 		CreatedAt: time.Unix(block.Time().Int64(), 0),
+	}
+}
+
+func transformKeyBlockToFrontend(block *types.KeyBlockHeader) *KeyBlock {
+	return &KeyBlock{
+		Number:    block.Number.Int64(),
+		CreatedAt: time.Unix(block.Time.Int64(), 0),
 	}
 }
 

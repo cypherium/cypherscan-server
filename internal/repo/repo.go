@@ -103,7 +103,7 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 }
 
 var blockColumnsConfig = map[Scenario][]string{
-	HomePage: []string{"hash", "number", "txn", "time"},
+	HomePage: []string{"number", "txn", "time"},
 	ListPage: []string{"number", "txn", "time"},
 }
 var keyBlockColumnsConfig = map[Scenario][]string{

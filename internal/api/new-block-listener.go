@@ -24,11 +24,12 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 			fmt.Printf("Got new block head hash = %s, number = %d \n\r", newHead.Hash().Hex(), newHead.Number.Int64())
 			block, _, _ := listerner.BlockFetcher.BlockByHash(newHead.Hash(), true)
 			listerner.Repo.SaveBlock(block)
-			listerner.Broadcastable.Broadcast(TransformTxBlockToFrontendMessage(block))
+			listerner.Broadcastable.Broadcast(transformTxBlockToFrontendMessage(block))
 
 		case newKeyHead := <-keyHeadChan:
 			fmt.Printf("Got new key block head: hash = %s, number = %d\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64())
 			listerner.Repo.SaveKeyBlock(newKeyHead)
+			listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(newKeyHead))
 		}
 	}
 }

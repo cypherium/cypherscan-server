@@ -13,19 +13,14 @@ type TxBlock struct {
 	Time         time.Time     `json:"timestamp"        gencodec:"required"`
 	Txn          int           `json:"txn"              gencodec:"required"`
 	ParentHash   Hash          `json:"parentHash"       gencodec:"required"`
-	Coinbase     Address       `json:"miner"            gencodec:"required"`
 	Root         Hash          `json:"stateRoot"        gencodec:"required"`
 	TxHash       Hash          `json:"transactionsRoot" gencodec:"required"`
 	ReceiptHash  Hash          `json:"receiptsRoot"     gencodec:"required"`
 	Bloom        []byte        `json:"logsBloom"        gencodec:"required"`
 	GasLimit     UInt64        `json:"gasLimit"         gencodec:"required"`
 	GasUsed      UInt64        `json:"gasUsed"          gencodec:"required"`
-	Extra        []byte        `json:"extraData"        gencodec:"required"`
 	Transactions []Transaction `json:"transactions"     gencodec:"required"     gorm:"foreignkey:BlockHash"`
-	// Difficulty   BigInt        `json:"difficulty"       gencodec:"required"       gorm:"type:blob"`
-	// MixDigest    common.Hash    `json:"mixHash"          gencodec:"required"`
-	// Nonce        UInt64         `json:"nonce"            gencodec:"required"`
-	// UncleHash    common.Hash    `json:"sha3Uncles"       gencodec:"required"`
+	// Extra        []byte        `json:"extraData"        gencodec:"required"`
 }
 
 func transferKeyBlockHeaderToDbRecord(b *types.KeyBlockHeader) *KeyBlock {
@@ -44,7 +39,6 @@ func transformBlockToDbRecord(b *types.Block) *TxBlock {
 		Time:        time.Unix(b.Time().Int64(), 0),
 		Txn:         len(b.Transactions()),
 		ParentHash:  Hash(b.ParentHash()),
-		Coinbase:    Address(b.Coinbase()),
 		Root:        Hash(b.Root()),
 		TxHash:      Hash(b.TxHash()),
 		ReceiptHash: Hash(b.ReceiptHash()),
@@ -52,7 +46,6 @@ func transformBlockToDbRecord(b *types.Block) *TxBlock {
 		// Difficulty:  BigInt(*b.Difficulty()),
 		GasLimit: UInt64(b.GasLimit()),
 		GasUsed:  UInt64(b.GasUsed()),
-		Extra:    b.Extra(),
 		// UncleHash:   b.UncleHash(),
 		// MixDigest:   b.MixDigest(),
 		// Nonce:       UInt64(b.Nonce()),
