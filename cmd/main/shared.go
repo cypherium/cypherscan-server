@@ -21,3 +21,21 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.WriteHeader(code)
 	w.Write(response)
 }
+
+// assuming items in numbersAlreadyGot is order by the number desc
+func getMissedNumbers(startedNumber int64, pageSize int, numbersAlreadyGot []int64) []int64 {
+	missedLen := pageSize - len(numbersAlreadyGot)
+	if missedLen == pageSize {
+		return []int64{}
+	}
+	notChecked := numbersAlreadyGot[:]
+	missed := make([]int64, 0, missedLen)
+	for number := startedNumber; number > startedNumber-int64(pageSize); number-- {
+		if len(notChecked) > 0 && number == notChecked[0] {
+			notChecked = notChecked[1:]
+			continue
+		}
+		missed = append(missed, number)
+	}
+	return missed
+}
