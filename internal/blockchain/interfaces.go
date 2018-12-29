@@ -11,6 +11,12 @@ type BlockFetcher interface {
 	KeyBlockByHash(hash common.Hash) (*types.KeyBlock, error)
 }
 
+//BlocksFetcher is the interface to get multiple blocks
+type BlocksFetcher interface {
+	BlockHeadersByNumbers(numbers []int64) ([]*types.Header, error)
+	KeyBlocksByNumbers(numbers []int64) ([]*types.KeyBlock, error)
+}
+
 // Subscription is an interface of subscribe to new block and new key block
 type Subscription interface {
 	Subscribe(chBlock chan<- *types.Header, chKeyBlock chan<- *types.KeyBlockHeader) (Subscribed, error)

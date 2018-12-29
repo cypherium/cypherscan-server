@@ -46,7 +46,6 @@ func main() {
 	}
 	go newBlockListener.Listen(chBlock, chKeyBlock)
 
-	app := NewApp(repoInstance, hub, config.OriginAllowed)
+	app := NewApp(repoInstance, hub, blockChainClient, config.OriginAllowed)
 	app.Run()
-
 }

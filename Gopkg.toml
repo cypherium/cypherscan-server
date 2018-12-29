@@ -25,9 +25,7 @@
 #   unused-packages = true
 
 
-[[constraint]]
-  name = "github.com/ethereum/go-ethereum"
-  version = "1.8.17"
+ignored = ["github.com/cypherium/CypherTestNet/*"]
 
 [[constraint]]
   name = "github.com/jinzhu/gorm"
@@ -44,10 +42,6 @@
 [prune]
   go-tests = true
   unused-packages = true
-
-  [[prune.project]]
-    name = "github.com/ethereum/go-ethereum"
-    unused-packages = false
 
 [[constraint]]
   name = "github.com/gorilla/mux"

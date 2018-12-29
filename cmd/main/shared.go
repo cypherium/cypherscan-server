@@ -25,7 +25,7 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 // assuming items in numbersAlreadyGot is order by the number desc
 func getMissedNumbers(startedNumber int64, pageSize int, numbersAlreadyGot []int64) []int64 {
 	missedLen := pageSize - len(numbersAlreadyGot)
-	if missedLen == pageSize {
+	if len(numbersAlreadyGot) == pageSize {
 		return []int64{}
 	}
 	notChecked := numbersAlreadyGot[:]

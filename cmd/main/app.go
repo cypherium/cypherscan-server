@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
 	"gitlab.com/ron-liu/cypherscan-server/internal/publisher"
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
 )
@@ -16,13 +17,14 @@ import (
 type App struct {
 	repo          repo.Get
 	wsServer      publisher.WebSocketServer
+	blocksFetcher blockchain.BlocksFetcher
 	Router        *mux.Router
 	originAllowed string
 }
 
 // NewApp is the constructor for App
-func NewApp(rep repo.Get, wsServer publisher.WebSocketServer, originAllowed string) *App {
-	a := App{rep, wsServer, mux.NewRouter(), originAllowed}
+func NewApp(rep repo.Get, wsServer publisher.WebSocketServer, blocksFetcher blockchain.BlocksFetcher, originAllowed string) *App {
+	a := App{rep, wsServer, blocksFetcher, mux.NewRouter(), originAllowed}
 	a.setupCors()
 	a.initializeRoutes()
 	return &a
@@ -98,6 +100,16 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 	}
 
 	txBlocks, _ := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.ListPage, StartWith: number, PageSize: pageSize})
+	numbersAlreadyGot := func() []int64 {
+		ret := make([]int64, 0, len(txBlocks))
+		for _, b := range txBlocks {
+			ret = append(ret, b.Number)
+		}
+		return ret
+	}()
+	missedNumber := getMissedNumbers(number, pageSize, numbersAlreadyGot)
+	missedBlocks, err := a.blocksFetcher.BlockHeadersByNumbers(missedNumber)
+	fmt.Printf("ffffff: %v, %v, %v", missedBlocks, err, numbersAlreadyGot)
 	respondWithJSON(w, http.StatusOK, txBlocks)
 }
 

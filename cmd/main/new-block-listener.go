@@ -6,6 +6,7 @@ import (
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
 	"gitlab.com/ron-liu/cypherscan-server/internal/publisher"
+
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
 )
 
