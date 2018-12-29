@@ -14,25 +14,25 @@ import (
 
 func transformTxBlockToFrontendMessage(block *types.Block) *Payload {
 	return &Payload{
-		TxBlocks: []TxBlock{*transformTxBlockToFrontend(block)},
-		Txs: func() []Tx {
-			ret := make([]Tx, 0, TransactionCount)
+		TxBlocks: []HomeTxBlock{*transformTxBlockToFrontend(block)},
+		Txs: func() []HomeTx {
+			ret := make([]HomeTx, 0, TransactionCount)
 			for _, transaction := range block.Transactions()[max(0, len(block.Transactions())-TransactionCount):] {
 				ret = append(ret, *transformTxToFrontend(transaction, block))
 			}
 			return ret
 		}(),
-		KeyBlocks: []KeyBlock{},
-		Metrics:   []Metric{},
+		KeyBlocks: []HomeKeyBlock{},
+		Metrics:   []HomeMetric{},
 	}
 }
 
 func transformKeyBlockToFrontendMessage(block *types.KeyBlockHeader) *Payload {
 	return &Payload{
-		TxBlocks:  []TxBlock{},
-		Txs:       []Tx{},
-		Metrics:   []Metric{},
-		KeyBlocks: []KeyBlock{*transformKeyBlockToFrontend(block)},
+		TxBlocks:  []HomeTxBlock{},
+		Txs:       []HomeTx{},
+		Metrics:   []HomeMetric{},
+		KeyBlocks: []HomeKeyBlock{*transformKeyBlockToFrontend(block)},
 	}
 }
 
@@ -45,15 +45,15 @@ const (
 	TransactionCount = 5
 )
 
-// TxBlock is the type transfor to frontend in home page
-type TxBlock struct {
+// HomeTxBlock is the type transfor to frontend in home page
+type HomeTxBlock struct {
 	Number    int64     `json:"number"`
 	Txn       int       `json:"txn"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-// KeyBlock is the key block type transfore to frontend in home page
-type KeyBlock struct {
+// HomeKeyBlock is the key block type transfore to frontend in home page
+type HomeKeyBlock struct {
 	Number    int64     `json:"number"`
 	CreatedAt time.Time `json:"createdAt"`
 }
@@ -65,8 +65,8 @@ type MetricValue struct {
 	digits int
 }
 
-// Tx is the Tx type trransfore to frontend in home page
-type Tx struct {
+// HomeTx is the HomeTx type trransfore to frontend in home page
+type HomeTx struct {
 	CreatedAt time.Time   `json:"createdAt"`
 	Value     repo.BigInt `json:"value"`
 	Hash      string      `json:"hash"`
@@ -74,8 +74,8 @@ type Tx struct {
 	To        string      `json:"to"`
 }
 
-// Metric is the Metric type transfore to frontend in home page
-type Metric struct {
+// HomeMetric is the HomeMetric type transfore to frontend in home page
+type HomeMetric struct {
 	key       string
 	name      string
 	value     MetricValue
@@ -84,29 +84,29 @@ type Metric struct {
 
 // Payload is the Payload type transfore to fronent in home page
 type Payload struct {
-	Metrics   []Metric   `json:"metrics"`
-	TxBlocks  []TxBlock  `json:"txBlocks"`
-	KeyBlocks []KeyBlock `json:"keyBlocks"`
-	Txs       []Tx       `json:"txs"`
+	Metrics   []HomeMetric   `json:"metrics"`
+	TxBlocks  []HomeTxBlock  `json:"txBlocks"`
+	KeyBlocks []HomeKeyBlock `json:"keyBlocks"`
+	Txs       []HomeTx       `json:"txs"`
 }
 
-func transformTxBlockToFrontend(block *types.Block) *TxBlock {
-	return &TxBlock{
+func transformTxBlockToFrontend(block *types.Block) *HomeTxBlock {
+	return &HomeTxBlock{
 		Number:    block.Number().Int64(),
 		Txn:       len(block.Transactions()),
 		CreatedAt: time.Unix(block.Time().Int64(), 0),
 	}
 }
 
-func transformKeyBlockToFrontend(block *types.KeyBlockHeader) *KeyBlock {
-	return &KeyBlock{
+func transformKeyBlockToFrontend(block *types.KeyBlockHeader) *HomeKeyBlock {
+	return &HomeKeyBlock{
 		Number:    block.Number.Int64(),
 		CreatedAt: time.Unix(block.Time.Int64(), 0),
 	}
 }
 
-func transformTxToFrontend(tx *types.Transaction, block *types.Block) *Tx {
-	return &Tx{
+func transformTxToFrontend(tx *types.Transaction, block *types.Block) *HomeTx {
+	return &HomeTx{
 		CreatedAt: time.Unix(block.Time().Int64(), 0),
 		Value:     repo.BigInt(*tx.Value()),
 		Hash:      tx.Hash().Hex(),

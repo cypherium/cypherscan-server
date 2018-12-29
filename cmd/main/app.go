@@ -55,25 +55,25 @@ func (a *App) GetHome(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	payload := Payload{
-		Metrics: []Metric{},
-		TxBlocks: func() []TxBlock {
-			ret := make([]TxBlock, 0, len(txBlocks))
+		Metrics: []HomeMetric{},
+		TxBlocks: func() []HomeTxBlock {
+			ret := make([]HomeTxBlock, 0, len(txBlocks))
 			for _, b := range txBlocks {
-				ret = append(ret, TxBlock{b.Number, b.Txn, b.Time})
+				ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
 			}
 			return ret
 		}(),
-		KeyBlocks: func() []KeyBlock {
-			ret := make([]KeyBlock, 0, len(keyBlocks))
+		KeyBlocks: func() []HomeKeyBlock {
+			ret := make([]HomeKeyBlock, 0, len(keyBlocks))
 			for _, b := range keyBlocks {
-				ret = append(ret, KeyBlock{b.Number, b.Time})
+				ret = append(ret, HomeKeyBlock{b.Number, b.Time})
 			}
 			return ret
 		}(),
-		Txs: func() []Tx {
-			ret := make([]Tx, 0, len(transactions))
+		Txs: func() []HomeTx {
+			ret := make([]HomeTx, 0, len(transactions))
 			for _, t := range transactions {
-				ret = append(ret, Tx{
+				ret = append(ret, HomeTx{
 					t.Block.Time,
 					t.Value,
 					t.Hash.Hex(),
@@ -109,7 +109,6 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 	}()
 	missedNumber := getMissedNumbers(number, pageSize, numbersAlreadyGot)
 	missedBlocks, err := a.blocksFetcher.BlockHeadersByNumbers(missedNumber)
-	fmt.Printf("ffffff: %v, %v, %v", missedBlocks, err, numbersAlreadyGot)
 	respondWithJSON(w, http.StatusOK, txBlocks)
 }
 
