@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"sort"
 	"strconv"
 
+	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
@@ -54,7 +56,7 @@ func (a *App) GetHome(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-	payload := Payload{
+	payload := HomePayload{
 		Metrics: []HomeMetric{},
 		TxBlocks: func() []HomeTxBlock {
 			ret := make([]HomeTxBlock, 0, len(txBlocks))
@@ -98,8 +100,14 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, fmt.Sprint("The passed number or pageSize is not a valid number", strNumber))
 		return
 	}
-
 	txBlocks, _ := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.ListPage, StartWith: number, PageSize: pageSize})
+	dbListTxBlocks := func(bs []repo.TxBlock) []*listTxBlock {
+		ret := make([]*listTxBlock, 0, len(txBlocks))
+		for _, b := range bs {
+			ret = append(ret, &listTxBlock{Number: b.Number, Time: b.Time, GasUsed: uint64(b.GasUsed), GasLimit: uint64(b.GasLimit)})
+		}
+		return ret
+	}(txBlocks)
 	numbersAlreadyGot := func() []int64 {
 		ret := make([]int64, 0, len(txBlocks))
 		for _, b := range txBlocks {
@@ -107,9 +115,26 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 		}
 		return ret
 	}()
-	missedNumber := getMissedNumbers(number, pageSize, numbersAlreadyGot)
-	missedBlocks, err := a.blocksFetcher.BlockHeadersByNumbers(missedNumber)
-	respondWithJSON(w, http.StatusOK, txBlocks)
+
+	missedListTxBlocks := func() []*listTxBlock {
+		if pageSize == len(numbersAlreadyGot) {
+			return []*listTxBlock{}
+		}
+		missedNumber := getMissedNumbers(number, pageSize, numbersAlreadyGot)
+		missedBlocks, _ := a.blocksFetcher.BlockHeadersByNumbers(missedNumber)
+		return func(bs []*types.Header) []*listTxBlock {
+			ret := make([]*listTxBlock, 0, len(txBlocks))
+			for _, h := range bs {
+				ret = append(ret, transferBlockHeadToListTxBlock(h))
+			}
+			return ret
+
+		}(missedBlocks)
+	}()
+	retList := append(dbListTxBlocks, missedListTxBlocks...)
+	sort.Sort(numberDescSorterForListTxBlock(retList))
+
+	respondWithJSON(w, http.StatusOK, retList)
 }
 
 // Run starts the app and serves on the specified addr

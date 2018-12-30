@@ -1,10 +1,13 @@
 package main_test
 
 import (
+	"encoding/json"
 	"fmt"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/stretchr/testify/assert"
@@ -53,23 +56,87 @@ func (m *MockedBlocksFetcher) KeyBlocksByNumbers(numbers []int64) ([]*types.KeyB
 	return args.Get(0).([]*types.KeyBlock), args.Error(1)
 }
 
-func TestGetTxBlocks(t *testing.T) {
-	req, _ := http.NewRequest("GET", "/tx-blocks/11?pagesize=5", nil)
+func TestGetTxBlocksWithoutAnyInDb(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/tx-blocks/11?pagesize=3", nil)
 	mockedRepo := new(MockedRepo)
-	mockedRepo.On("GetBlocks", &repo.BlockSearchContdition{Scenario: 1, StartWith: 11, PageSize: 5}).Return([]repo.TxBlock{}, nil)
+	mockedRepo.On("GetBlocks", &repo.BlockSearchContdition{Scenario: 1, StartWith: 11, PageSize: 3}).Return([]repo.TxBlock{}, nil)
 
 	mockedWsServer := new(MockedWebSocketServer)
 
 	mockedBlocksFetcher := new(MockedBlocksFetcher)
-	mockedBlocksFetcher.On("BlockHeadersByNumbers", mock.Anything).Return([]*types.Header{}, nil)
+	mockedBlocksFetcher.On("BlockHeadersByNumbers", []int64{11, 10, 9}).Return([]*types.Header{
+		&types.Header{Number: big.NewInt(9), Time: big.NewInt(time.Now().Unix())},
+		&types.Header{Number: big.NewInt(11), Time: big.NewInt(time.Now().Unix())},
+		&types.Header{Number: big.NewInt(10), Time: big.NewInt(time.Now().Unix())},
+	}, nil)
 
 	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
-
 	rr := httptest.NewRecorder()
 	app.Router.ServeHTTP(rr, req)
 	assert.Equal(t, rr.Code, http.StatusOK)
-	mockedBlocksFetcher.AssertCalled(t, "BlockHeadersByNumbers", []int64{11, 10, 9, 8, 7})
 
+	var m []map[string]interface{}
+	json.Unmarshal(rr.Body.Bytes(), &m)
+	assert.Equal(t, 3, len(m))
+	assert.Equal(t, 11, int(m[0]["number"].(float64)))
+	assert.Equal(t, 10, int(m[1]["number"].(float64)))
+	assert.Equal(t, 9, int(m[2]["number"].(float64)))
+}
+func TestGetTxBlocksWithoutAllInDb(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/tx-blocks/11?pagesize=3", nil)
+	mockedRepo := new(MockedRepo)
+	mockedRepo.On("GetBlocks", &repo.BlockSearchContdition{Scenario: 1, StartWith: 11, PageSize: 3}).Return([]repo.TxBlock{
+		{Number: 11},
+		{Number: 10},
+		{Number: 9},
+	}, nil)
+
+	mockedWsServer := new(MockedWebSocketServer)
+
+	mockedBlocksFetcher := new(MockedBlocksFetcher)
+	mockedBlocksFetcher.On("BlockHeadersByNumbers").Return([]*types.Header{}, nil)
+
+	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
+	rr := httptest.NewRecorder()
+	app.Router.ServeHTTP(rr, req)
+	mockedBlocksFetcher.AssertNotCalled(t, "BlockHeadersByNumbers") // already got from db, no need to call blockchain
+
+	assert.Equal(t, rr.Code, http.StatusOK)
+
+	var m []map[string]interface{}
+	json.Unmarshal(rr.Body.Bytes(), &m)
+	assert.Equal(t, 3, len(m))
+	assert.Equal(t, 11, int(m[0]["number"].(float64)))
+	assert.Equal(t, 10, int(m[1]["number"].(float64)))
+	assert.Equal(t, 9, int(m[2]["number"].(float64)))
+}
+func TestGetTxBlocksWithSomeInDb(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/tx-blocks/11?pagesize=3", nil)
+	mockedRepo := new(MockedRepo)
+	mockedRepo.On("GetBlocks", &repo.BlockSearchContdition{Scenario: 1, StartWith: 11, PageSize: 3}).Return([]repo.TxBlock{
+		{Number: 11},
+		{Number: 9},
+	}, nil)
+
+	mockedWsServer := new(MockedWebSocketServer)
+
+	mockedBlocksFetcher := new(MockedBlocksFetcher)
+	mockedBlocksFetcher.On("BlockHeadersByNumbers", []int64{10}).Return([]*types.Header{
+		&types.Header{Number: big.NewInt(10), Time: big.NewInt(time.Now().Unix())},
+	}, nil)
+
+	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
+	rr := httptest.NewRecorder()
+	app.Router.ServeHTTP(rr, req)
+
+	assert.Equal(t, rr.Code, http.StatusOK)
+
+	var m []map[string]interface{}
+	json.Unmarshal(rr.Body.Bytes(), &m)
+	assert.Equal(t, 3, len(m))
+	assert.Equal(t, 11, int(m[0]["number"].(float64)))
+	assert.Equal(t, 10, int(m[1]["number"].(float64)))
+	assert.Equal(t, 9, int(m[2]["number"].(float64)))
 }
 
 func checkResponseCode(t *testing.T, expected, actual int) {

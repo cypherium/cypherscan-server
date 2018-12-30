@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-func transformTxBlockToFrontendMessage(block *types.Block) *Payload {
-	return &Payload{
+func transformTxBlockToFrontendMessage(block *types.Block) *HomePayload {
+	return &HomePayload{
 		TxBlocks: []HomeTxBlock{*transformTxBlockToFrontend(block)},
 		Txs: func() []HomeTx {
 			ret := make([]HomeTx, 0, TransactionCount)
@@ -27,8 +27,8 @@ func transformTxBlockToFrontendMessage(block *types.Block) *Payload {
 	}
 }
 
-func transformKeyBlockToFrontendMessage(block *types.KeyBlockHeader) *Payload {
-	return &Payload{
+func transformKeyBlockToFrontendMessage(block *types.KeyBlockHeader) *HomePayload {
+	return &HomePayload{
 		TxBlocks:  []HomeTxBlock{},
 		Txs:       []HomeTx{},
 		Metrics:   []HomeMetric{},
@@ -82,8 +82,8 @@ type HomeMetric struct {
 	needGraph bool
 }
 
-// Payload is the Payload type transfore to fronent in home page
-type Payload struct {
+// HomePayload is the HomePayload type transfore to fronent in home page
+type HomePayload struct {
 	Metrics   []HomeMetric   `json:"metrics"`
 	TxBlocks  []HomeTxBlock  `json:"txBlocks"`
 	KeyBlocks []HomeKeyBlock `json:"keyBlocks"`
