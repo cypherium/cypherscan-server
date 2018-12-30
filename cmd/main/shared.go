@@ -39,3 +39,11 @@ func getMissedNumbers(startedNumber int64, pageSize int, numbersAlreadyGot []int
 	}
 	return missed
 }
+
+func cors(handleFunc func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		handleFunc(w, r)
+	}
+}

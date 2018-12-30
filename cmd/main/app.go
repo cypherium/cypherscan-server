@@ -7,7 +7,6 @@ import (
 	"strconv"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
@@ -27,20 +26,19 @@ type App struct {
 // NewApp is the constructor for App
 func NewApp(rep repo.Get, wsServer publisher.WebSocketServer, blocksFetcher blockchain.BlocksFetcher, originAllowed string) *App {
 	a := App{rep, wsServer, blocksFetcher, mux.NewRouter(), originAllowed}
-	a.setupCors()
+	// a.setupCors()
 	a.initializeRoutes()
 	return &a
 }
 
 func (a *App) initializeRoutes() {
-	a.Router.HandleFunc("/home", a.GetHome).Methods("GET")
+	a.Router.HandleFunc("/home", cors(a.GetHome)).Methods("GET", "OPTIONS")
 	a.Router.HandleFunc("/ws", a.wsServer.ServeWebsocket)
-	a.Router.Path("/tx-blocks/{number:[0-9]+}").Queries("pagesize", "{pagesize}").HandlerFunc(a.GetBlocks)
+	a.Router.Path("/tx-blocks/{number:[0-9]+}").Queries("pagesize", "{pagesize}").HandlerFunc(cors(a.GetBlocks)).Methods("GET", "OPTIONS")
 }
 
 // GetHome is: GET /home
 func (a *App) GetHome(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("starting getting home")
 	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
@@ -140,19 +138,4 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 // Run starts the app and serves on the specified addr
 func (a *App) Run() {
 	log.Fatal(http.ListenAndServe(":8000", a.Router))
-}
-
-func (a *App) setupCors() {
-	// Handle all preflight request
-	a.Router.Methods("OPTIONS").HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Access-Control-Request-Headers, Access-Control-Request-Method, Connection, Host, Origin, User-Agent, Referer, Cache-Control, X-header")
-		w.WriteHeader(http.StatusNoContent)
-		return
-	})
-	a.Router.StrictSlash(true)
-	_ = handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type"})
-	_ = handlers.AllowedOrigins([]string{a.originAllowed})
-	_ = handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 }
