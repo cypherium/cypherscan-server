@@ -11,6 +11,7 @@ import (
 // Get is the interface to get saved information
 type Get interface {
 	GetBlocks(condition *BlockSearchContdition) ([]TxBlock, error)
+	GetBlock(number int64) (*TxBlock, error)
 	GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error)
 	GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error)
 }
@@ -70,6 +71,25 @@ func (repo *Repo) GetBlocks(condition *BlockSearchContdition) ([]TxBlock, error)
 	return txBlocks, repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Where(whereStatment, whereArgs...).Select(columns).Order("time desc").Limit(pageSize).Find(&txBlocks).Error
 	})
+}
+
+// GetBlock is to get single block by the number if number >=0, otherwise it will get the latest one
+func (repo *Repo) GetBlock(number int64) (*TxBlock, error) {
+	var txBlocks []TxBlock
+	whereStatment, whereArgs := func() (string, []interface{}) {
+		if number < 0 {
+			return "1=1", []interface{}{}
+		}
+		return "number = ?", []interface{}{number}
+	}()
+
+	err := repo.dbRunner.Run(func(db *gorm.DB) error {
+		return db.Where(whereStatment, whereArgs).Select(getColumnsByScenario(blockColumnsConfig, ListPage)).Order("time desc").Limit(1).Find(&txBlocks).Error
+	})
+	if err == nil && len(txBlocks) > 0 {
+		return &txBlocks[0], nil
+	}
+	return nil, err
 }
 
 // GetKeyBlocks is
@@ -154,7 +174,7 @@ func getPageSizeDefault(pageSize int) int64 {
 }
 
 func getWhere(startWith int64, pageSize int64) (string, []interface{}) {
-	if startWith == 0 {
+	if startWith < 0 {
 		return "number <= ?", []interface{}{math.MaxInt64}
 	}
 	return "number BETWEEN ? AND ?", []interface{}{startWith - pageSize + 1, startWith}
