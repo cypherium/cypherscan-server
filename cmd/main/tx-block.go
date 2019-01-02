@@ -6,6 +6,11 @@ import (
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 )
 
+type ResponseOfGetBlocks struct {
+	Total  int64          `json:"total"`
+	Blocks []*listTxBlock `json:"blocks"`
+}
+
 type listTxBlock struct {
 	Number   int64     `json:"number"`
 	Time     time.Time `json:"createdAt"`

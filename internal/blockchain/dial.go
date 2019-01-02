@@ -15,5 +15,5 @@ func Dial(context context.Context, url string) (*BlockChain, error) {
 		return nil, err
 	}
 	log.Info("Connected to blockchain nodes")
-	return &BlockChain{c, context}, nil
+	return &BlockChain{c, context, -1, -1}, nil
 }

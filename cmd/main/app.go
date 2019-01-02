@@ -12,6 +12,7 @@ import (
 	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
 	"gitlab.com/ron-liu/cypherscan-server/internal/publisher"
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
+	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
 
 // App is the application structuer
@@ -34,7 +35,7 @@ func NewApp(rep repo.Get, wsServer publisher.WebSocketServer, blocksFetcher bloc
 func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/home", cors(a.GetHome)).Methods("GET", "OPTIONS")
 	a.Router.HandleFunc("/ws", a.wsServer.ServeWebsocket)
-	a.Router.Path("/tx-blocks/{number:[0-9]+}").Queries("pagesize", "{pagesize}").HandlerFunc(cors(a.GetBlocks)).Methods("GET", "OPTIONS")
+	a.Router.Path("/tx-blocks").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetBlocks)).Methods("GET", "OPTIONS")
 }
 
 // GetHome is: GET /home
@@ -89,16 +90,31 @@ func (a *App) GetHome(w http.ResponseWriter, r *http.Request) {
 
 // GetBlocks is: GET /tx-blocks/:{number}?pagesize={pageszie}
 func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
-	strNumber := mux.Vars(r)["number"]
-	strPageSize := r.FormValue("pagesize")
+	// get request
+	pageNo, pageSize, err := func(r *http.Request) (int64, int, error) {
+		strPageNo := mux.Vars(r)["p"]
+		strPageSize := r.FormValue("pagesize")
 
-	number, numberErr := strconv.ParseInt(strNumber, 10, 64)
-	pageSize, pageSizeErr := strconv.Atoi(strPageSize)
-	if numberErr != nil || pageSizeErr != nil {
-		respondWithError(w, http.StatusInternalServerError, fmt.Sprint("The passed number or pageSize is not a valid number", strNumber))
+		pageNo, pageNoErr := strconv.ParseInt(strPageNo, 10, 64)
+		pageSize, pageSizeErr := strconv.Atoi(strPageSize)
+		if pageNoErr != nil || pageSizeErr != nil {
+			return 0, 0, &util.MyError{Message: fmt.Sprintf("The passed p(%s) or pageSize(%s) is not a valid number", strPageNo, strPageSize)}
+		}
+		return pageNo, pageSize, nil
+	}(r)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	txBlocks, _ := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.ListPage, StartWith: number, PageSize: pageSize})
+
+	total, err := a.blocksFetcher.GetLatestBlockNumber()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	var startWith = total - (pageNo-1)*int64(pageSize)
+	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.ListPage, StartWith: startWith, PageSize: pageSize})
 	dbListTxBlocks := func(bs []repo.TxBlock) []*listTxBlock {
 		ret := make([]*listTxBlock, 0, len(txBlocks))
 		for _, b := range bs {
@@ -118,7 +134,7 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 		if pageSize == len(numbersAlreadyGot) {
 			return []*listTxBlock{}
 		}
-		missedNumber := getMissedNumbers(number, pageSize, numbersAlreadyGot)
+		missedNumber := getMissedNumbers(total-int64(pageSize)*(pageNo-1), pageSize, numbersAlreadyGot)
 		missedBlocks, _ := a.blocksFetcher.BlockHeadersByNumbers(missedNumber)
 		return func(bs []*types.Header) []*listTxBlock {
 			ret := make([]*listTxBlock, 0, len(txBlocks))
@@ -132,7 +148,7 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 	retList := append(dbListTxBlocks, missedListTxBlocks...)
 	sort.Sort(numberDescSorterForListTxBlock(retList))
 
-	respondWithJSON(w, http.StatusOK, retList)
+	respondWithJSON(w, http.StatusOK, &ResponseOfGetBlocks{total, retList})
 }
 
 // Run starts the app and serves on the specified addr

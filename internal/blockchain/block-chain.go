@@ -2,10 +2,10 @@ package blockchain
 
 import (
 	"context"
+	"math/big"
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cypherium/CypherTestNet/go-cypherium/common"
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/cypherium/CypherTestNet/go-cypherium/ethclient"
 	"gitlab.com/ron-liu/cypherscan-server/internal/util"
@@ -13,8 +13,10 @@ import (
 
 // BlockChain is the struct of the Client
 type BlockChain struct {
-	client  *ethclient.Client
-	context context.Context
+	client               *ethclient.Client
+	context              context.Context
+	latestBlockNumber    int64
+	latestKeyBlockNumber int64
 }
 
 // BlockHeadersByNumbers is to get BlockHeaders by numbers
@@ -22,19 +24,53 @@ func (blockChain *BlockChain) BlockHeadersByNumbers(numbers []int64) ([]*types.H
 	return blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
 }
 
-// BlockByHash is to get Block by hash, and return number of transactions without retreive whole transation slice
-func (blockChain *BlockChain) BlockByHash(hash common.Hash, incTx bool) (*types.Block, int, error) {
-	return blockChain.client.BlockByHash(blockChain.context, hash, incTx)
+// BlockByNumber is to get Block by number, if number is nil , and return number of transactions without retreive whole transation slice
+func (blockChain *BlockChain) BlockByNumber(number *big.Int, incTx bool) (*types.Block, int, error) {
+	return blockChain.client.BlockByNumber(blockChain.context, number, incTx)
 }
 
-// KeyBlockByHash is to get Key Block by hash
-func (blockChain *BlockChain) KeyBlockByHash(hash common.Hash) (*types.KeyBlock, error) {
-	return blockChain.client.KeyBlockByHash(blockChain.context, hash)
+// KeyBlockByNumber is to get Key Block by number
+func (blockChain *BlockChain) KeyBlockByNumber(number *big.Int) (*types.KeyBlock, error) {
+	return blockChain.client.KeyBlockByNumber(blockChain.context, number)
 }
 
 // KeyBlocksByNumbers is to get BlockHeaders by numbers
 func (blockChain *BlockChain) KeyBlocksByNumbers(numbers []int64) ([]*types.KeyBlock, error) {
 	return blockChain.client.KeyBlocksByNumbers(blockChain.context, numbers)
+}
+
+// GetLatestBlockNumber is to get the latest Block number
+func (blockChain *BlockChain) GetLatestBlockNumber() (int64, error) {
+	if blockChain.latestBlockNumber <= 0 {
+		header, err := blockChain.client.HeaderByNumber(blockChain.context, nil)
+		if err != nil {
+			return 0, err
+		}
+		blockChain.latestBlockNumber = header.Number.Int64()
+	}
+	return blockChain.latestBlockNumber, nil
+}
+
+// GetLatestKeyBlockNumber is to get the latest KeyBlock Number
+func (blockChain *BlockChain) GetLatestKeyBlockNumber() (int64, error) {
+	if blockChain.latestKeyBlockNumber <= 0 {
+		b, err := blockChain.client.KeyBlockByNumber(blockChain.context, nil)
+		if err != nil {
+			return 0, err
+		}
+		blockChain.latestKeyBlockNumber = b.Number().Int64()
+	}
+	return blockChain.latestKeyBlockNumber, nil
+}
+
+// SetLatestNumbers is to set the latest block/key block number
+func (blockChain *BlockChain) SetLatestNumbers(blockNumber int64, keyBlockNumber int64) {
+	if blockNumber > 0 {
+		blockChain.latestBlockNumber = blockNumber
+	}
+	if keyBlockNumber > 0 {
+		blockChain.latestKeyBlockNumber = keyBlockNumber
+	}
 }
 
 // Subscribe is to subscirbe new block and new key block

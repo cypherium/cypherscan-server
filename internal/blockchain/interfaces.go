@@ -1,20 +1,24 @@
 package blockchain
 
 import (
-	"github.com/cypherium/CypherTestNet/go-cypherium/common"
+	"math/big"
+
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 )
 
 // BlockFetcher is the interface to fetch the Block and Keyblock
 type BlockFetcher interface {
-	BlockByHash(hash common.Hash, incTx bool) (*types.Block, int, error)
-	KeyBlockByHash(hash common.Hash) (*types.KeyBlock, error)
+	BlockByNumber(number *big.Int, incTx bool) (*types.Block, int, error)
+	KeyBlockByNumber(number *big.Int) (*types.KeyBlock, error)
+	SetLatestNumbers(blockNumber int64, keyBlockNumber int64)
 }
 
-//BlocksFetcher is the interface to get multiple blocks
+// BlocksFetcher is the interface to fetch the Blocks
 type BlocksFetcher interface {
 	BlockHeadersByNumbers(numbers []int64) ([]*types.Header, error)
 	KeyBlocksByNumbers(numbers []int64) ([]*types.KeyBlock, error)
+	GetLatestBlockNumber() (int64, error)
+	GetLatestKeyBlockNumber() (int64, error)
 }
 
 // Subscription is an interface of subscribe to new block and new key block

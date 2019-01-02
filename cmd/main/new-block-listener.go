@@ -23,7 +23,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		select {
 		case newHead := <-newHeader:
 			fmt.Printf("Got new block head hash = %s, number = %d \n\r", newHead.Hash().Hex(), newHead.Number.Int64())
-			block, _, _ := listerner.BlockFetcher.BlockByHash(newHead.Hash(), true)
+			block, _, _ := listerner.BlockFetcher.BlockByNumber(newHead.Number, true)
 			listerner.Repo.SaveBlock(block)
 			listerner.Broadcastable.Broadcast(transformTxBlockToFrontendMessage(block))
 
