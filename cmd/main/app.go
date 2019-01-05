@@ -36,6 +36,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/home", cors(a.GetHome)).Methods("GET", "OPTIONS")
 	a.Router.HandleFunc("/ws", a.wsServer.ServeWebsocket)
 	a.Router.Path("/tx-blocks").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetBlocks)).Methods("GET", "OPTIONS")
+	a.Router.Path("/tx-blocks").HandlerFunc(cors(a.GetBlocks)).Methods("GET", "OPTIONS")
 }
 
 // GetHome is: GET /home
@@ -92,8 +93,19 @@ func (a *App) GetHome(w http.ResponseWriter, r *http.Request) {
 func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 	// get request
 	pageNo, pageSize, err := func(r *http.Request) (int64, int, error) {
+		const (
+			DefaultPageNo       = "1"
+			DefaultListPageSize = "20"
+		)
 		strPageNo := mux.Vars(r)["p"]
 		strPageSize := r.FormValue("pagesize")
+		fmt.Printf("xv: %s %s\n", strPageNo, strPageSize)
+		if strPageNo == "" {
+			strPageNo = DefaultPageNo
+		}
+		if strPageSize == "" {
+			strPageSize = DefaultListPageSize
+		}
 
 		pageNo, pageNoErr := strconv.ParseInt(strPageNo, 10, 64)
 		pageSize, pageSizeErr := strconv.Atoi(strPageSize)

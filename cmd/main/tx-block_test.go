@@ -183,6 +183,30 @@ func TestGetTxBlocksSecondPageWithSomeInDb(t *testing.T) {
 	assert.Equal(t, int64(7), m.Blocks[2].Number)
 }
 
+func TestGetTxBlocksWithNoQueries(t *testing.T) {
+	mockedRepo := new(MockedRepo)
+	mockedRepo.On("GetBlocks", &repo.BlockSearchContdition{Scenario: 1, StartWith: 20, PageSize: 20}).Return(
+		func() []repo.TxBlock {
+			ret := make([]repo.TxBlock, 0, 20)
+			for i := 20; i > 0; i-- {
+				ret = append(ret, repo.TxBlock{Number: int64(i)})
+			}
+			return ret
+		}(),
+		nil)
+	mockedWsServer := new(MockedWebSocketServer)
+	mockedBlocksFetcher := new(MockedBlocksFetcher)
+	mockedBlocksFetcher.On("GetLatestBlockNumber").Return(int64(20), nil)
+	mockedBlocksFetcher.On("BlockHeadersByNumbers").Return([]*types.Header{}, nil)
+	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
+
+	rr := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/tx-blocks", nil)
+	app.Router.ServeHTTP(rr, req)
+
+	assert.Equal(t, rr.Code, http.StatusOK)
+}
+
 func checkResponseCode(t *testing.T, expected, actual int) {
 	if expected != actual {
 		t.Errorf("Expected response code %d. Got %d\n", expected, actual)
