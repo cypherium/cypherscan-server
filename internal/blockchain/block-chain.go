@@ -42,11 +42,11 @@ func (blockChain *BlockChain) KeyBlocksByNumbers(numbers []int64) ([]*types.KeyB
 // GetLatestBlockNumber is to get the latest Block number
 func (blockChain *BlockChain) GetLatestBlockNumber() (int64, error) {
 	if blockChain.latestBlockNumber <= 0 {
-		header, err := blockChain.client.HeaderByNumber(blockChain.context, nil)
+		b, _, err := blockChain.client.BlockByNumber(blockChain.context, nil, false)
 		if err != nil {
 			return 0, err
 		}
-		blockChain.latestBlockNumber = header.Number.Int64()
+		blockChain.latestBlockNumber = b.Number().Int64()
 	}
 	return blockChain.latestBlockNumber, nil
 }

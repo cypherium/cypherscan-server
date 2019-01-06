@@ -97,9 +97,9 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 			DefaultPageNo       = "1"
 			DefaultListPageSize = "20"
 		)
-		strPageNo := mux.Vars(r)["p"]
-		strPageSize := r.FormValue("pagesize")
-		fmt.Printf("xv: %s %s\n", strPageNo, strPageSize)
+		v := r.URL.Query()
+		strPageNo := v.Get("p")
+		strPageSize := v.Get("pagesize")
 		if strPageNo == "" {
 			strPageNo = DefaultPageNo
 		}

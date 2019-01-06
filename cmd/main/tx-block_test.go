@@ -205,6 +205,9 @@ func TestGetTxBlocksWithNoQueries(t *testing.T) {
 	app.Router.ServeHTTP(rr, req)
 
 	assert.Equal(t, rr.Code, http.StatusOK)
+	var m main.ResponseOfGetBlocks
+	json.Unmarshal(rr.Body.Bytes(), &m)
+	assert.Equal(t, 20, len(m.Blocks))
 }
 
 func checkResponseCode(t *testing.T, expected, actual int) {
