@@ -19,6 +19,7 @@ func TestGetMissedNumbers(t *testing.T) {
 		{10, 2, []int64{10}, []int64{9}},
 		{6, 3, []int64{4}, []int64{6, 5}},
 		{11, 5, []int64{}, []int64{11, 10, 9, 8, 7}},
+		{7, 10, []int64{7, 6, 5, 4, 3, 2, 1}, []int64{0}},
 	}
 
 	for i, c := range cases {

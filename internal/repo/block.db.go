@@ -8,8 +8,8 @@ import (
 
 // TxBlock is the Database Table class
 type TxBlock struct {
-	Hash         Hash          `json:"hash"             gencodec:"required"       gorm:"primary_key"`
-	Number       int64         `json:"number"           gencodec:"required"`
+	Number       int64         `json:"number"           gencodec:"required" 		gorm:"primary_key"`
+	Hash         Hash          `json:"hash"             gencodec:"required"`
 	Time         time.Time     `json:"timestamp"        gencodec:"required"`
 	Txn          int           `json:"txn"              gencodec:"required"`
 	ParentHash   Hash          `json:"parentHash"       gencodec:"required"`

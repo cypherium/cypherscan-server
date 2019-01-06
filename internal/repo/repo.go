@@ -69,7 +69,7 @@ func (repo *Repo) GetBlocks(condition *BlockSearchContdition) ([]TxBlock, error)
 	columns := getColumnsByScenario(blockColumnsConfig, condition.Scenario)
 	whereStatment, whereArgs := getWhere(condition.StartWith, pageSize)
 	return txBlocks, repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Where(whereStatment, whereArgs...).Select(columns).Order("time desc").Limit(pageSize).Find(&txBlocks).Error
+		return db.Debug().Where(whereStatment, whereArgs...).Select(columns).Order("time desc").Limit(pageSize).Find(&txBlocks).Error
 	})
 }
 

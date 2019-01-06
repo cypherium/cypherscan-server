@@ -30,7 +30,7 @@ func getMissedNumbers(startedNumber int64, pageSize int, numbersAlreadyGot []int
 	}
 	notChecked := numbersAlreadyGot[:]
 	missed := make([]int64, 0, missedLen)
-	for number := startedNumber; number > startedNumber-int64(pageSize); number-- {
+	for number := startedNumber; number > startedNumber-int64(pageSize) && number >= 0; number-- {
 		if len(notChecked) > 0 && number == notChecked[0] {
 			notChecked = notChecked[1:]
 			continue

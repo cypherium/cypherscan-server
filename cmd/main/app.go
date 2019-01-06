@@ -119,13 +119,13 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	total, err := a.blocksFetcher.GetLatestBlockNumber()
+	latestNumber, err := a.blocksFetcher.GetLatestBlockNumber()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	var startWith = total - (pageNo-1)*int64(pageSize)
+	var startWith = latestNumber - (pageNo-1)*int64(pageSize)
 	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.ListPage, StartWith: startWith, PageSize: pageSize})
 	dbListTxBlocks := func(bs []repo.TxBlock) []*listTxBlock {
 		ret := make([]*listTxBlock, 0, len(txBlocks))
@@ -141,12 +141,11 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 		}
 		return ret
 	}()
-
 	missedListTxBlocks := func() []*listTxBlock {
 		if pageSize == len(numbersAlreadyGot) {
 			return []*listTxBlock{}
 		}
-		missedNumber := getMissedNumbers(total-int64(pageSize)*(pageNo-1), pageSize, numbersAlreadyGot)
+		missedNumber := getMissedNumbers(latestNumber-int64(pageSize)*(pageNo-1), pageSize, numbersAlreadyGot)
 		missedBlocks, _ := a.blocksFetcher.BlockHeadersByNumbers(missedNumber)
 		return func(bs []*types.Header) []*listTxBlock {
 			ret := make([]*listTxBlock, 0, len(txBlocks))
@@ -160,7 +159,7 @@ func (a *App) GetBlocks(w http.ResponseWriter, r *http.Request) {
 	retList := append(dbListTxBlocks, missedListTxBlocks...)
 	sort.Sort(numberDescSorterForListTxBlock(retList))
 
-	respondWithJSON(w, http.StatusOK, &ResponseOfGetBlocks{total, retList})
+	respondWithJSON(w, http.StatusOK, &ResponseOfGetBlocks{Total: latestNumber + 1, Blocks: retList})
 }
 
 // Run starts the app and serves on the specified addr
