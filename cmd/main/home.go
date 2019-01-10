@@ -3,6 +3,8 @@ package main
 import (
 	// "encoding/json"
 
+	"net/http"
+
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 
 	// log "github.com/sirupsen/logrus"
@@ -11,6 +13,55 @@ import (
 
 	"time"
 )
+
+func getHome(a *App, w http.ResponseWriter, r *http.Request) {
+	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage})
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
+	keyBlocks, err := a.repo.GetKeyBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage})
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
+	transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage})
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
+	payload := HomePayload{
+		Metrics: []HomeMetric{},
+		TxBlocks: func() []HomeTxBlock {
+			ret := make([]HomeTxBlock, 0, len(txBlocks))
+			for _, b := range txBlocks {
+				ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
+			}
+			return ret
+		}(),
+		KeyBlocks: func() []HomeKeyBlock {
+			ret := make([]HomeKeyBlock, 0, len(keyBlocks))
+			for _, b := range keyBlocks {
+				ret = append(ret, HomeKeyBlock{b.Number, b.Time})
+			}
+			return ret
+		}(),
+		Txs: func() []HomeTx {
+			ret := make([]HomeTx, 0, len(transactions))
+			for _, t := range transactions {
+				ret = append(ret, HomeTx{
+					t.Block.Time,
+					t.Value,
+					t.Hash.Hex(),
+					t.From.Hex(),
+					t.To.Hex(),
+				})
+			}
+			return ret
+		}(),
+	}
+	respondWithJSON(w, http.StatusOK, payload)
+}
 
 func transformTxBlockToFrontendMessage(block *types.Block) *HomePayload {
 	return &HomePayload{

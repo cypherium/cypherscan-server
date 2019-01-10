@@ -1,6 +1,7 @@
 package repo
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
@@ -43,6 +44,7 @@ func (repo *Repo) InitDb() {
 // SaveBlock is to save blocks into db
 func (repo *Repo) SaveBlock(block *types.Block) error {
 	record := transformBlockToDbRecord(block)
+	// util.PrintStructInJSON(record)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
 		db.NewRecord(record)
 		db.Create(record)
@@ -84,12 +86,15 @@ func (repo *Repo) GetBlock(number int64) (*TxBlock, error) {
 	}()
 
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Where(whereStatment, whereArgs).Select(getColumnsByScenario(blockColumnsConfig, ListPage)).Order("time desc").Limit(1).Find(&txBlocks).Error
+		return db.Debug().Where(whereStatment, whereArgs).Select(getColumnsByScenario(blockColumnsConfig, ListPage)).Order("time desc").Limit(1).Find(&txBlocks).Error
 	})
-	if err == nil && len(txBlocks) > 0 {
-		return &txBlocks[0], nil
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	if len(txBlocks) <= 0 {
+		return nil, &util.MyError{Message: fmt.Sprintf("No Block(number=%d) found in Db", number)}
+	}
+	return &txBlocks[0], nil
 }
 
 // GetKeyBlocks is

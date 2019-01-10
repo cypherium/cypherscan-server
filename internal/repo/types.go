@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/common"
+	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
 
 // BigInt is big.Int
@@ -27,6 +28,17 @@ func (i *BigInt) Scan(value interface{}) error {
 func (i BigInt) MarshalJSON() ([]byte, error) {
 	i2 := big.Int(i)
 	return []byte(fmt.Sprintf(`"%s"`, i2.String())), nil
+}
+
+// UnmarshalJSON is to support json
+func (i *BigInt) UnmarshalJSON(b []byte) error {
+	z := (*big.Int)(i)
+	s := string(b[1 : len(b)-1])
+	_, ok := z.SetString(s, 10)
+	if !ok {
+		return &util.MyError{Message: fmt.Sprintf("Error to Unmarshal to big.Int: %s", s)}
+	}
+	return nil
 }
 
 // UInt64 is uint64
