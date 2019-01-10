@@ -3,6 +3,7 @@ package repo
 import (
 	"database/sql/driver"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 
@@ -77,6 +78,28 @@ func (role *Hash) Scan(value interface{}) error {
 func (role Hash) Hex() string {
 	r := common.Hash(role)
 	return r.Hex()
+}
+
+// MarshalJSON is to support json
+func (role Hash) MarshalJSON() ([]byte, error) {
+	dst := make([]byte, hex.EncodedLen(len(role)))
+	hex.Encode(dst, role[:])
+	return []byte(fmt.Sprintf(`"0x%s"`, dst)), nil
+}
+
+// UnmarshalJSON is to support json
+func (role *Hash) UnmarshalJSON(b []byte) error {
+	src := string(b[3 : len(b)-1])
+	fmt.Printf("434343, %s", src)
+	bytes, err := hex.DecodeString(src)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		return err
+	}
+	for i, b := range bytes {
+		role[i] = b
+	}
+	return nil
 }
 
 // Address is common.Hash

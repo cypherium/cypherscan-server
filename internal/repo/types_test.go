@@ -10,7 +10,7 @@ import (
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
 )
 
-func TestCustomizedTypeWithJson(t *testing.T) {
+func TestBigIntWithJson(t *testing.T) {
 	type A struct {
 		BigInt repo.BigInt `json:"bigInt"`
 	}
@@ -20,6 +20,23 @@ func TestCustomizedTypeWithJson(t *testing.T) {
 	b, err := json.Marshal(a)
 	assert.NoError(t, err)
 	assert.Equal(t, "{\"bigInt\":\"98765432101\"}", string(b))
+
+	a1 := A{}
+	err = json.Unmarshal(b, &a1)
+	assert.NoError(t, err)
+	assert.Equal(t, a, a1)
+}
+
+func TestHashWithJson(t *testing.T) {
+	type A struct {
+		Hash repo.Hash `json:"hash"`
+	}
+
+	a := A{repo.Hash{0x34, 0x33, 0x32, 0x31, 0x34, 0x33, 0x32, 0x31, 0x34, 0x33, 0x32, 0x31, 0x34, 0x33, 0x32, 0x31, 0x34, 0x33, 0x32, 0x31, 0x34, 0x33, 0x32, 0x31, 0x34, 0x33, 0x32, 0x31, 0x34, 0x33, 0x32, 0x31}}
+
+	b, err := json.Marshal(a)
+	assert.NoError(t, err)
+	assert.Equal(t, "{\"hash\":\"0x3433323134333231343332313433323134333231343332313433323134333231\"}", string(b))
 
 	a1 := A{}
 	err = json.Unmarshal(b, &a1)
