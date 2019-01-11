@@ -33,6 +33,10 @@ func (a *App) initializeRoutes() {
 	a.Router.Path("/tx-blocks").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetBlocks)).Methods("GET", "OPTIONS")
 	a.Router.Path("/tx-blocks").HandlerFunc(cors(a.GetBlocks)).Methods("GET", "OPTIONS")
 	a.Router.Path("/tx-block/{number:[0-9]+}").HandlerFunc(cors(a.GetBlock)).Methods("GET", "OPTIONS")
+
+	a.Router.Path("/key-blocks").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetKeyBlocks)).Methods("GET", "OPTIONS")
+	a.Router.Path("/tx-blocks").HandlerFunc(cors(a.GetKeyBlocks)).Methods("GET", "OPTIONS")
+	a.Router.Path("/tx-block/{number:[0-9]+}").HandlerFunc(cors(a.GetKeyBlock)).Methods("GET", "OPTIONS")
 }
 
 // GetHome is: GET /home
