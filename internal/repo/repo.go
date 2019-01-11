@@ -13,6 +13,7 @@ import (
 type Get interface {
 	GetBlocks(condition *BlockSearchContdition) ([]TxBlock, error)
 	GetBlock(number int64) (*TxBlock, error)
+	GetKeyBlock(number int64) (*KeyBlock, error)
 	GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error)
 	GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error)
 }
@@ -106,6 +107,28 @@ func (repo *Repo) GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, er
 	return keyBlocks, repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Where(whereStatment, whereArgs...).Select(columns).Order("time desc").Limit(pageSize).Find(&keyBlocks).Error
 	})
+}
+
+// GetKeyBlock is to get single key block by the number if number >=0, otherwise it will get the latest one
+func (repo *Repo) GetKeyBlock(number int64) (*KeyBlock, error) {
+	var keyBlocks []KeyBlock
+	whereStatment, whereArgs := func() (string, []interface{}) {
+		if number < 0 {
+			return "1=1", []interface{}{}
+		}
+		return "number = ?", []interface{}{number}
+	}()
+
+	err := repo.dbRunner.Run(func(db *gorm.DB) error {
+		return db.Debug().Where(whereStatment, whereArgs).Select(getColumnsByScenario(blockColumnsConfig, ListPage)).Order("time desc").Limit(1).Find(&keyBlocks).Error
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(keyBlocks) <= 0 {
+		return nil, &util.MyError{Message: fmt.Sprintf("No Block(number=%d) found in Db", number)}
+	}
+	return &keyBlocks[0], nil
 }
 
 // GetTransactions is

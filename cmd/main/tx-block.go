@@ -10,7 +10,6 @@ import (
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/gorilla/mux"
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
-	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
 
 func getBlock(a *App, w http.ResponseWriter, r *http.Request) {
@@ -32,28 +31,7 @@ func getBlock(a *App, w http.ResponseWriter, r *http.Request) {
 
 func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 	// get request
-	pageNo, pageSize, err := func(r *http.Request) (int64, int, error) {
-		const (
-			DefaultPageNo       = "1"
-			DefaultListPageSize = "20"
-		)
-		v := r.URL.Query()
-		strPageNo := v.Get("p")
-		strPageSize := v.Get("pagesize")
-		if strPageNo == "" {
-			strPageNo = DefaultPageNo
-		}
-		if strPageSize == "" {
-			strPageSize = DefaultListPageSize
-		}
-
-		pageNo, pageNoErr := strconv.ParseInt(strPageNo, 10, 64)
-		pageSize, pageSizeErr := strconv.Atoi(strPageSize)
-		if pageNoErr != nil || pageSizeErr != nil {
-			return 0, 0, &util.MyError{Message: fmt.Sprintf("The passed p(%s) or pageSize(%s) is not a valid number", strPageNo, strPageSize)}
-		}
-		return pageNo, pageSize, nil
-	}(r)
+	pageNo, pageSize, err := getPaginationRequest(r)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
@@ -99,11 +77,12 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 	retList := append(dbListTxBlocks, missedListTxBlocks...)
 	sort.Sort(numberDescSorterForListTxBlock(retList))
 
-	respondWithJSON(w, http.StatusOK, &ResponseOfGetBlocks{Total: latestNumber + 1, Blocks: retList})
+	respondWithJSON(w, http.StatusOK, &responseOfGetBlocks{Total: latestNumber + 1, Blocks: retList})
 
 }
 
-type ResponseOfGetBlocks struct {
+// responseOfGetBlocks is response of get blocks
+type responseOfGetBlocks struct {
 	Total  int64          `json:"total"`
 	Blocks []*listTxBlock `json:"blocks"`
 }

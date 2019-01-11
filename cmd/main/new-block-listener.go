@@ -26,11 +26,13 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 			block, _, _ := listerner.BlockFetcher.BlockByNumber(newHead.Number, true)
 			listerner.Repo.SaveBlock(block)
 			listerner.Broadcastable.Broadcast(transformTxBlockToFrontendMessage(block))
+			listerner.BlockFetcher.SetLatestNumbers(newHead.Number.Int64(), -1)
 
 		case newKeyHead := <-keyHeadChan:
 			fmt.Printf("Got new key block head: hash = %s, number = %d\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64())
 			listerner.Repo.SaveKeyBlock(newKeyHead)
 			listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(newKeyHead))
+			listerner.BlockFetcher.SetLatestNumbers(-1, newKeyHead.Number.Int64())
 		}
 	}
 }

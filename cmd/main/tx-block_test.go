@@ -1,4 +1,4 @@
-package main_test
+package main
 
 import (
 	"encoding/json"
@@ -12,7 +12,6 @@ import (
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gitlab.com/ron-liu/cypherscan-server/cmd/main"
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
 )
 
@@ -82,13 +81,13 @@ func TestGetTxBlocksWithoutAnyInDb(t *testing.T) {
 		&types.Header{Number: big.NewInt(11), Time: big.NewInt(time.Now().Unix())},
 		&types.Header{Number: big.NewInt(10), Time: big.NewInt(time.Now().Unix())},
 	}, nil)
-	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
+	app := NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
 	rr := httptest.NewRecorder()
 	app.Router.ServeHTTP(rr, req)
 	mockedBlocksFetcher.AssertNotCalled(t, "BlockHeadersByNumbers")
 	assert.Equal(t, rr.Code, http.StatusOK)
 
-	var m main.ResponseOfGetBlocks
+	var m responseOfGetBlocks
 	json.Unmarshal(rr.Body.Bytes(), &m)
 	assert.Equal(t, 3, len(m.Blocks))
 	assert.Equal(t, int64(11), m.Blocks[0].Number)
@@ -107,7 +106,7 @@ func TestGetTxBlocksWithFirtPageAllInDb(t *testing.T) {
 	mockedBlocksFetcher := new(MockedBlocksFetcher)
 	mockedBlocksFetcher.On("GetLatestBlockNumber").Return(int64(12), nil)
 	mockedBlocksFetcher.On("BlockHeadersByNumbers").Return([]*types.Header{}, nil)
-	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
+	app := NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
 
 	rr := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/tx-blocks?p=1&pagesize=3", nil)
@@ -116,7 +115,7 @@ func TestGetTxBlocksWithFirtPageAllInDb(t *testing.T) {
 
 	assert.Equal(t, rr.Code, http.StatusOK)
 
-	var m main.ResponseOfGetBlocks
+	var m responseOfGetBlocks
 	json.Unmarshal(rr.Body.Bytes(), &m)
 	assert.Equal(t, int64(13), m.Total)
 	assert.Equal(t, int64(12), m.Blocks[0].Number)
@@ -140,13 +139,13 @@ func TestGetTxBlocksFirstPageWithSomeInDb(t *testing.T) {
 		&types.Header{Number: big.NewInt(11), Time: big.NewInt(time.Now().Unix())},
 	}, nil)
 
-	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
+	app := NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
 	rr := httptest.NewRecorder()
 	app.Router.ServeHTTP(rr, req)
 
 	assert.Equal(t, rr.Code, http.StatusOK)
 
-	var m main.ResponseOfGetBlocks
+	var m responseOfGetBlocks
 	json.Unmarshal(rr.Body.Bytes(), &m)
 	assert.Equal(t, 3, len(m.Blocks))
 	assert.Equal(t, int64(12), m.Blocks[0].Number)
@@ -169,13 +168,13 @@ func TestGetTxBlocksSecondPageWithSomeInDb(t *testing.T) {
 		&types.Header{Number: big.NewInt(7), Time: big.NewInt(time.Now().Unix())},
 	}, nil)
 
-	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
+	app := NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
 	rr := httptest.NewRecorder()
 	app.Router.ServeHTTP(rr, req)
 
 	assert.Equal(t, rr.Code, http.StatusOK)
 
-	var m main.ResponseOfGetBlocks
+	var m responseOfGetBlocks
 	json.Unmarshal(rr.Body.Bytes(), &m)
 	assert.Equal(t, 3, len(m.Blocks))
 	assert.Equal(t, int64(9), m.Blocks[0].Number)
@@ -198,14 +197,14 @@ func TestGetTxBlocksWithNoQueries(t *testing.T) {
 	mockedBlocksFetcher := new(MockedBlocksFetcher)
 	mockedBlocksFetcher.On("GetLatestBlockNumber").Return(int64(20), nil)
 	mockedBlocksFetcher.On("BlockHeadersByNumbers").Return([]*types.Header{}, nil)
-	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
+	app := NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
 
 	rr := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/tx-blocks", nil)
 	app.Router.ServeHTTP(rr, req)
 
 	assert.Equal(t, rr.Code, http.StatusOK)
-	var m main.ResponseOfGetBlocks
+	var m responseOfGetBlocks
 	json.Unmarshal(rr.Body.Bytes(), &m)
 	assert.Equal(t, 20, len(m.Blocks))
 }
@@ -227,7 +226,7 @@ func TestGetTxBlocksWithLastPage(t *testing.T) {
 	mockedBlocksFetcher.On("BlockHeadersByNumbers", []int64{0}).Return([]*types.Header{
 		&types.Header{Number: big.NewInt(0), Time: big.NewInt(time.Now().Unix())},
 	}, nil)
-	app := main.NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
+	app := NewApp(mockedRepo, mockedWsServer, mockedBlocksFetcher, "")
 
 	rr := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/tx-blocks?p=3&pagesize=10", nil)
@@ -235,7 +234,7 @@ func TestGetTxBlocksWithLastPage(t *testing.T) {
 
 	assert.Equal(t, rr.Code, http.StatusOK)
 
-	var m main.ResponseOfGetBlocks
+	var m responseOfGetBlocks
 	json.Unmarshal(rr.Body.Bytes(), &m)
 	assert.Equal(t, 8, len(m.Blocks))
 	assert.Equal(t, int64(28), m.Total)

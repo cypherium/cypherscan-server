@@ -50,6 +50,16 @@ func (a *App) GetBlock(w http.ResponseWriter, r *http.Request) {
 	getBlock(a, w, r)
 }
 
+// GetKeyBlocks is: GET /tx-blocks/:{number}?pagesize={pageszie}
+func (a *App) GetKeyBlocks(w http.ResponseWriter, r *http.Request) {
+	getKeyBlocks(a, w, r)
+}
+
+// GetKeyBlock is : GET /key-block/{number}
+func (a *App) GetKeyBlock(w http.ResponseWriter, r *http.Request) {
+	getKeyBlock(a, w, r)
+}
+
 // Run starts the app and serves on the specified addr
 func (a *App) Run() {
 	log.Fatal(http.ListenAndServe(":8000", a.Router))

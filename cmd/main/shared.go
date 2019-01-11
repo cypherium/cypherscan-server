@@ -2,7 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
+
+	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
@@ -46,4 +50,27 @@ func cors(handleFunc func(http.ResponseWriter, *http.Request)) func(http.Respons
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		handleFunc(w, r)
 	}
+}
+
+func getPaginationRequest(r *http.Request) (int64, int, error) {
+	const (
+		DefaultPageNo       = "1"
+		DefaultListPageSize = "20"
+	)
+	v := r.URL.Query()
+	strPageNo := v.Get("p")
+	strPageSize := v.Get("pagesize")
+	if strPageNo == "" {
+		strPageNo = DefaultPageNo
+	}
+	if strPageSize == "" {
+		strPageSize = DefaultListPageSize
+	}
+
+	pageNo, pageNoErr := strconv.ParseInt(strPageNo, 10, 64)
+	pageSize, pageSizeErr := strconv.Atoi(strPageSize)
+	if pageNoErr != nil || pageSizeErr != nil {
+		return 0, 0, &util.MyError{Message: fmt.Sprintf("The passed p(%s) or pageSize(%s) is not a valid number", strPageNo, strPageSize)}
+	}
+	return pageNo, pageSize, nil
 }
