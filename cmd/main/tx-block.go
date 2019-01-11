@@ -84,7 +84,7 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 // responseOfGetBlocks is response of get blocks
 type responseOfGetBlocks struct {
 	Total  int64          `json:"total"`
-	Blocks []*listTxBlock `json:"blocks"`
+	Blocks []*listTxBlock `json:"records"`
 }
 
 type listTxBlock struct {

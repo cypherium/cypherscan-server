@@ -82,7 +82,7 @@ func getKeyBlock(a *App, w http.ResponseWriter, r *http.Request) {
 
 type responseOfGetKeyBlocks struct {
 	Total  int64           `json:"total"`
-	Blocks []*listKeyBlock `json:"blocks"`
+	Blocks []*listKeyBlock `json:"records"`
 }
 
 type listKeyBlock struct {

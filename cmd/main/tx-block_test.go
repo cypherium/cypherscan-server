@@ -28,6 +28,10 @@ func (m *MockedRepo) GetBlock(number int64) (*repo.TxBlock, error) {
 	args := m.Called(number)
 	return args.Get(0).(*repo.TxBlock), args.Error(1)
 }
+func (m *MockedRepo) GetKeyBlock(number int64) (*repo.KeyBlock, error) {
+	args := m.Called(number)
+	return args.Get(0).(*repo.KeyBlock), args.Error(1)
+}
 
 func (m *MockedRepo) GetKeyBlocks(condition *repo.BlockSearchContdition) ([]repo.KeyBlock, error) {
 	args := m.Called(condition)
