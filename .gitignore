@@ -1,4 +1,10 @@
 # ignore vendor packages
 vendor
+internal
+cmd
 .env
 *.db
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

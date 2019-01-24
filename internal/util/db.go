@@ -1,6 +1,8 @@
 package util
 
 import (
+	"fmt"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -26,7 +28,17 @@ func (dbClient *DbClient) Run(f RunFunc) error {
 
 // ConnectDb will return a open db connection
 func ConnectDb(drive string, args ...interface{}) (*DbClient, error) {
-	_db, err := gorm.Open(drive, args...)
+	if drive != "postgres" && drive != "sqlite3" {
+		return nil, &MyError{fmt.Sprintf("Unsupported db: %s, only supporting sqlite3 and postgres", drive)}
+	}
+	// name, port, dbName, userName, password := args
+	connectionStr := ""
+	if drive == "postgres" {
+		connectionStr = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s", args...)
+	} else {
+		connectionStr = args[2].(string)
+	}
+	_db, err := gorm.Open(drive, connectionStr)
 	if err != nil {
 		return nil, err
 	}

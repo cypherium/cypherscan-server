@@ -1,8 +1,6 @@
 package config
 
 import (
-	log "github.com/sirupsen/logrus"
-
 	"os"
 
 	"github.com/joho/godotenv"
@@ -11,20 +9,25 @@ import (
 // Config is the paramters
 type Config struct {
 	DbDrive         string
-	DbSource        string
+	RdsHostName     string
+	RdsPort         string
+	RdsDbName       string
+	RdsUserName     string
+	RdsPassword     string
 	BlockChainWsURL string
 	OriginAllowed   string
 }
 
 // GetFromEnv is to get env
 func GetFromEnv() *Config {
-	var err = godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	godotenv.Load()
 	return &Config{
 		os.Getenv("DB_DRIVE"),
-		os.Getenv("DB_SOURCE"),
+		os.Getenv("RDS_HOSTNAME"),
+		os.Getenv("RDS_PORT"),
+		os.Getenv("RDS_DB_NAME"),
+		os.Getenv("RDS_USERNAME"),
+		os.Getenv("RDS_PASSWORD"),
 		os.Getenv("TX_BLOCKCHAIN_WS_URL"),
 		os.Getenv("ORIGIN_ALLOWED"),
 	}

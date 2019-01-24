@@ -18,4 +18,6 @@ RUN mkdir /go/src/gitlab.com/ron-liu -p && \
     dep ensure && \
     go build -o app cmd/main/*
 
+EXPOSE 8000
+
 CMD ["/go/src/gitlab.com/ron-liu/cypherscan-server/app"]

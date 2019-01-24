@@ -20,9 +20,9 @@ func main() {
 	config := config.GetFromEnv()
 	log.Info("Config:", fmt.Sprintf("%v", config))
 
-	dbClient, err := util.ConnectDb(config.DbDrive, config.DbSource)
+	dbClient, err := util.ConnectDb(config.DbDrive, config.RdsHostName, config.RdsPort, config.RdsDbName, config.RdsUserName, config.RdsPassword)
 	if err != nil {
-		log.Fatal("Can NOT connect to database")
+		log.Fatal(fmt.Sprintf("Can NOT connect to database: %s", err.Error()))
 	}
 	defer dbClient.Close()
 
