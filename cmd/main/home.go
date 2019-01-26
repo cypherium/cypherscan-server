@@ -14,13 +14,31 @@ import (
 	"time"
 )
 
+const (
+	BlocksPageSize    = 3
+	KeyBlocksPageSize = 3
+	TxsPageSize       = 5
+)
+
 func getHome(a *App, w http.ResponseWriter, r *http.Request) {
-	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage})
+	blockLatestNumber, err := a.blocksFetcher.GetLatestBlockNumber()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: BlocksPageSize})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-	keyBlocks, err := a.repo.GetKeyBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage})
+	keyBlockLatestNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	keyBlocks, err := a.repo.GetKeyBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, PageSize: KeyBlocksPageSize, StartWith: keyBlockLatestNumber})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
 		return

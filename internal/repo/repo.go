@@ -48,7 +48,7 @@ func (repo *Repo) SaveBlock(block *types.Block) error {
 	// util.PrintStructInJSON(record)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
 		db.NewRecord(record)
-		db.Create(record)
+		db.Debug().Create(record)
 		return nil
 	})
 	return nil
@@ -59,7 +59,7 @@ func (repo *Repo) SaveKeyBlock(block *types.KeyBlockHeader) error {
 	record := transferKeyBlockHeaderToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
 		db.NewRecord(record)
-		db.Create(record)
+		db.Debug().Create(record)
 		return nil
 	})
 	return nil
@@ -105,7 +105,7 @@ func (repo *Repo) GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, er
 	columns := getColumnsByScenario(keyBlockColumnsConfig, condition.Scenario)
 	whereStatment, whereArgs := getWhere(condition.StartWith, pageSize)
 	return keyBlocks, repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Where(whereStatment, whereArgs...).Select(columns).Order("time desc").Limit(pageSize).Find(&keyBlocks).Error
+		return db.Debug().Where(whereStatment, whereArgs...).Select(columns).Order("time desc").Limit(pageSize).Find(&keyBlocks).Error
 	})
 }
 
