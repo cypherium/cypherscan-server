@@ -120,7 +120,7 @@ func (repo *Repo) GetKeyBlock(number int64) (*KeyBlock, error) {
 	}()
 
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Where(whereStatment, whereArgs).Select(getColumnsByScenario(blockColumnsConfig, ListPage)).Order("time desc").Limit(1).Find(&keyBlocks).Error
+		return db.Debug().Where(whereStatment, whereArgs).Select(getColumnsByScenario(keyBlockColumnsConfig, ListPage)).Order("time desc").Limit(1).Find(&keyBlocks).Error
 	})
 	if err != nil {
 		return nil, err
