@@ -33,7 +33,7 @@ ignored = ["github.com/cypherium/CypherTestNet/*"]
 
 [[constraint]]
   name = "github.com/jinzhu/gorm"
-  version = "1.9.1"
+  version = "1.9.2"
 
 [[constraint]]
   name = "github.com/joho/godotenv"

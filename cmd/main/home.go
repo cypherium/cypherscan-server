@@ -43,7 +43,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-	transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage})
+	transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: TxsPageSize})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
 		return
