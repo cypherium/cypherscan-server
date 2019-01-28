@@ -137,7 +137,7 @@ type MetricValue struct {
 // HomeTx is the HomeTx type trransfore to frontend in home page
 type HomeTx struct {
 	CreatedAt time.Time   `json:"createdAt"`
-	Value     repo.BigInt `json:"value"`
+	Value     repo.UInt64 `json:"value"`
 	Hash      string      `json:"hash"`
 	From      string      `json:"from"`
 	To        string      `json:"to"`
@@ -177,7 +177,7 @@ func transformKeyBlockToFrontend(block *types.KeyBlockHeader) *HomeKeyBlock {
 func transformTxToFrontend(tx *types.Transaction, block *types.Block) *HomeTx {
 	return &HomeTx{
 		CreatedAt: time.Unix(block.Time().Int64(), 0),
-		Value:     repo.BigInt(*tx.Value()),
+		Value:     repo.UInt64(tx.Value().Uint64()),
 		Hash:      tx.Hash().Hex(),
 		From:      "",
 		To:        "",

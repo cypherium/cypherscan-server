@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
@@ -20,7 +21,7 @@ func main() {
 	config := config.GetFromEnv()
 	log.Info("Config:", fmt.Sprintf("%v", config))
 
-	dbClient, err := util.ConnectDb(config.DbDrive, config.RdsHostName, config.RdsPort, config.RdsDbName, config.RdsUserName, config.RdsPassword)
+	dbClient, err := util.ConnectDb(config.DbDrive, config.RdsHostName, config.RdsPort, config.RdsDbName, config.RdsUserName, config.RdsPassword, config.RdsSslMode)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Can NOT connect to database: %s", err.Error()))
 	}

@@ -2,7 +2,6 @@ package repo
 
 import (
 	"database/sql/driver"
-	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"math/big"
@@ -16,12 +15,14 @@ type BigInt big.Int
 
 // Value is the Sacn interface
 func (i BigInt) Value() (driver.Value, error) {
-	return (*big.Int)(&i).Bytes(), nil
+	// return (*big.Int)(&i).Bytes(), nil
+	return (*big.Int)(&i).String(), nil
 }
 
 // Scan is the Scan interface
 func (i *BigInt) Scan(value interface{}) error {
-	(*big.Int)(i).SetBytes(value.([]byte))
+	// (*big.Int)(i).SetBytes(value.([]byte))
+	(*big.Int)(i).SetString(value.(string), 10)
 	return nil
 }
 
@@ -47,14 +48,15 @@ type UInt64 uint64
 
 // Value is the Sacn interface
 func (role UInt64) Value() (driver.Value, error) {
-	b := make([]byte, 8)
-	binary.LittleEndian.PutUint64(b, uint64(role))
-	return b, nil
+	x := int64(role)
+	return x, nil
 }
 
 // Scan is the Scan interface
 func (role *UInt64) Scan(value interface{}) error {
-	*role = UInt64(binary.LittleEndian.Uint64(value.([]byte)))
+	x := value.(int64)
+	*role = UInt64(x)
+
 	return nil
 }
 

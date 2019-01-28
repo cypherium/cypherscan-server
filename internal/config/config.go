@@ -14,6 +14,7 @@ type Config struct {
 	RdsDbName       string
 	RdsUserName     string
 	RdsPassword     string
+	RdsSslMode      string
 	BlockChainWsURL string
 	OriginAllowed   string
 }
@@ -28,6 +29,7 @@ func GetFromEnv() *Config {
 		os.Getenv("RDS_DB_NAME"),
 		os.Getenv("RDS_USERNAME"),
 		os.Getenv("RDS_PASSWORD"),
+		os.Getenv("RDS_SSLMODE"),
 		os.Getenv("TX_BLOCKCHAIN_WS_URL"),
 		os.Getenv("ORIGIN_ALLOWED"),
 	}

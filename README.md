@@ -1,9 +1,15 @@
 # cypherscan-server
-> This project uses `govendor`, please install govendor first `go get -u github.com/kardianos/govendor`.
 
-# Quick Start
+## Spin a local postgres docker container
+```bash
+docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres:10.6-alpine
 ```
-  govendor sync
-  go run main.go
-```
+After that, connect via:
+- host: localhost
+- port: 5432
+- database: postgres
+- user: postgres
+- password: postgres
+
+Finally, run `create database scan`
 

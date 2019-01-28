@@ -34,10 +34,11 @@
   version = "v1.4.0"
 
 [[projects]]
-  digest = "1:57072e5ce133ed6023e6ff49d9f19dcfb09f0fc8da693b1a8ac2eaa038ac858f"
+  digest = "1:af20574f4a85d55078bae1840d00e6c1af65d18e8ae0ad5e199b03bd18902cd5"
   name = "github.com/jinzhu/gorm"
   packages = [
     ".",
+    "dialects/postgres",
     "dialects/sqlite",
   ]
   pruneopts = "UT"
@@ -67,6 +68,18 @@
   pruneopts = "UT"
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
   version = "v1.0.1"
+
+[[projects]]
+  digest = "1:b18ffc558326ebaed3b4a175617f1e12ed4e3f53d6ebfe5ba372a3de16d22278"
+  name = "github.com/lib/pq"
+  packages = [
+    ".",
+    "hstore",
+    "oid",
+  ]
+  pruneopts = "UT"
+  revision = "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:4a49346ca45376a2bba679ca0e83bec949d780d4e927931317904bad482943ec"
@@ -137,6 +150,7 @@
     "github.com/gorilla/mux",
     "github.com/gorilla/websocket",
     "github.com/jinzhu/gorm",
+    "github.com/jinzhu/gorm/dialects/postgres",
     "github.com/jinzhu/gorm/dialects/sqlite",
     "github.com/joho/godotenv",
     "github.com/sirupsen/logrus",

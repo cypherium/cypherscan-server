@@ -34,7 +34,7 @@ func ConnectDb(drive string, args ...interface{}) (*DbClient, error) {
 	// name, port, dbName, userName, password := args
 	connectionStr := ""
 	if drive == "postgres" {
-		connectionStr = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s", args...)
+		connectionStr = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", args...)
 	} else {
 		connectionStr = args[2].(string)
 	}
