@@ -1,7 +1,6 @@
+.DS_Store
 # ignore vendor packages
 vendor
-internal
-cmd
 .env
 *.db
 # Elastic Beanstalk Files

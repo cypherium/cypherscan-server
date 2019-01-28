@@ -45,10 +45,8 @@ func (repo *Repo) InitDb() {
 // SaveBlock is to save blocks into db
 func (repo *Repo) SaveBlock(block *types.Block) error {
 	record := transformBlockToDbRecord(block)
-	fmt.Printf("xdf: %d, %d, %v", record.Number, record.Transactions[0].BlockNumber, record.Transactions[0].Hash)
-	// util.PrintStructInJSON(record)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
-		db.Debug().Create(record)
+		db.Create(record)
 		return nil
 	})
 	return nil

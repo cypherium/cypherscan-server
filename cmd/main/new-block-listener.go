@@ -2,12 +2,17 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
 	"gitlab.com/ron-liu/cypherscan-server/internal/publisher"
 
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
+)
+
+const (
+	BroadcastInterval = 5
 )
 
 // NewBlockListener is to listen the
@@ -19,15 +24,23 @@ type NewBlockListener struct {
 
 // Listen is to listen
 func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadChan chan *types.KeyBlockHeader) {
+	ticker := time.NewTicker(5 * time.Second)
+	blocks := make([]*types.Block, 0, 1000)
 	for {
 		select {
+
 		case newHead := <-newHeader:
 			fmt.Printf("Got new block head hash = %s, number = %d \n\r", newHead.Hash().Hex(), newHead.Number.Int64())
 			block, _, _ := listerner.BlockFetcher.BlockByNumber(newHead.Number, true)
+			blocks = append(blocks, block)
 			listerner.Repo.SaveBlock(block)
-			listerner.Broadcastable.Broadcast(transformTxBlockToFrontendMessage(block))
 			listerner.BlockFetcher.SetLatestNumbers(newHead.Number.Int64(), -1)
-
+		case <-ticker.C:
+			if blocks != nil || len(blocks) > 0 {
+				fmt.Printf("Broadcst %d blocks", len(blocks))
+				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks))
+				blocks = nil
+			}
 		case newKeyHead := <-keyHeadChan:
 			fmt.Printf("Got new key block head: hash = %s, number = %d\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64())
 			listerner.Repo.SaveKeyBlock(newKeyHead)

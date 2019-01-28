@@ -81,16 +81,31 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, payload)
 }
 
-func transformTxBlockToFrontendMessage(block *types.Block) *HomePayload {
+func getHomeTxsFromBlock(block *types.Block, count int) []HomeTx {
+	ret := make([]HomeTx, 0, count)
+	for _, transaction := range block.Transactions()[max(0, len(block.Transactions())-count):] {
+		ret = append(ret, *transformTxToFrontend(transaction, block))
+	}
+	return ret
+}
+
+func transformTxBlocksToFrontendMessage(blocks []*types.Block) *HomePayload {
+	txBlocks := make([]HomeTxBlock, 0, len(blocks))
+	for _, b := range blocks {
+		txBlocks = append(txBlocks, *transformTxBlockToFrontend(b))
+	}
+	txs := make([]HomeTx, 0, TransactionCount)
+	for i := len(blocks) - 1; i >= 0; i-- {
+		currentBlock := blocks[i]
+		currentTxs := getHomeTxsFromBlock(currentBlock, TransactionCount-len(txs))
+		txs = append(txs, currentTxs...)
+		if len(txs) >= TransactionCount {
+			break
+		}
+	}
 	return &HomePayload{
-		TxBlocks: []HomeTxBlock{*transformTxBlockToFrontend(block)},
-		Txs: func() []HomeTx {
-			ret := make([]HomeTx, 0, TransactionCount)
-			for _, transaction := range block.Transactions()[max(0, len(block.Transactions())-TransactionCount):] {
-				ret = append(ret, *transformTxToFrontend(transaction, block))
-			}
-			return ret
-		}(),
+		TxBlocks:  txBlocks,
+		Txs:       txs,
 		KeyBlocks: []HomeKeyBlock{},
 		Metrics:   []HomeMetric{},
 	}

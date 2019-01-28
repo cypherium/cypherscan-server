@@ -12,4 +12,3 @@ After that, connect via:
 - password: postgres
 
 Finally, run `create database scan`
-

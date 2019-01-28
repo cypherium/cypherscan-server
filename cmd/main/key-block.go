@@ -88,14 +88,14 @@ type responseOfGetKeyBlocks struct {
 type listKeyBlock struct {
 	Number     int64       `json:"number"`
 	Time       time.Time   `json:"createdAt"`
-	Difficulty repo.BigInt `json:"difficulty"`
+	Difficulty repo.UInt64 `json:"difficulty"`
 }
 
 func transferKeyBlockHeadToListKeyBlock(h *types.KeyBlock) *listKeyBlock {
 	return &listKeyBlock{
 		Number:     h.Number().Int64(),
 		Time:       time.Unix(h.Time().Int64(), 0),
-		Difficulty: repo.BigInt(*h.Difficulty()),
+		Difficulty: repo.UInt64(h.Difficulty().Uint64()),
 	}
 }
 
