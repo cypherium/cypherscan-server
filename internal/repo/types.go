@@ -92,7 +92,6 @@ func (role Hash) MarshalJSON() ([]byte, error) {
 // UnmarshalJSON is to support json
 func (role *Hash) UnmarshalJSON(b []byte) error {
 	src := string(b[3 : len(b)-1])
-	fmt.Printf("434343, %s", src)
 	bytes, err := hex.DecodeString(src)
 	if err != nil {
 		fmt.Printf("Error: %s", err.Error())
