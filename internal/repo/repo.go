@@ -16,6 +16,7 @@ type Get interface {
 	GetKeyBlock(number int64) (*KeyBlock, error)
 	GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error)
 	GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error)
+	GetTransaction(hash Hash) (*Transaction, error)
 }
 
 // BlockSaver is the interface contains SaveBlock
@@ -85,7 +86,7 @@ func (repo *Repo) GetBlock(number int64) (*TxBlock, error) {
 	}()
 
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Where(whereStatment, whereArgs).Select(getColumnsByScenario(blockColumnsConfig, ListPage)).Order("time desc").Limit(1).Find(&txBlocks).Error
+		return db.Debug().Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&txBlocks).Error
 	})
 	if err != nil {
 		return nil, err
@@ -139,7 +140,7 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 		if condition.BlockNumber == 0 {
 			return "block_number >= 0", []interface{}{}
 		}
-		return "number block_number = ?", []interface{}{condition.BlockNumber}
+		return "block_number = ?", []interface{}{condition.BlockNumber}
 	}()
 	return txs, repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
@@ -148,13 +149,32 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 	})
 }
 
+// GetTransaction is
+func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
+	var txs []Transaction
+	whereStatment, whereArgs := func() (string, []interface{}) {
+		return "hash = ?", []interface{}{hash}
+	}()
+
+	err := repo.dbRunner.Run(func(db *gorm.DB) error {
+		return db.Debug().Where(whereStatment, whereArgs).Select(getColumnsByScenario(keyBlockColumnsConfig, ListPage)).Order("time desc").Limit(1).Find(&txs).Error
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(txs) <= 0 {
+		return nil, &util.MyError{Message: fmt.Sprintf("No Tranasction(number=%v) found in Db", hash)}
+	}
+	return &txs[0], nil
+}
+
 var blockColumnsConfig = map[Scenario][]string{
 	HomePage: []string{"number", "txn", "time"},
-	ListPage: []string{"number", "txn", "time"},
+	ListPage: []string{"number", "txn", "time", "gas_used", "gas_limit"},
 }
 var keyBlockColumnsConfig = map[Scenario][]string{
 	HomePage: []string{"number", "time"},
-	ListPage: []string{"number", "time"},
+	ListPage: []string{"number", "time", "difficulty"},
 }
 var transactionColumnsConfig = map[Scenario][]string{
 	HomePage: []string{"block_hash", "value", "hash", "\"from\"", "\"to\""},

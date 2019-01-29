@@ -37,6 +37,12 @@ func (a *App) initializeRoutes() {
 	a.Router.Path("/key-blocks").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetKeyBlocks)).Methods("GET", "OPTIONS")
 	a.Router.Path("/key-blocks").HandlerFunc(cors(a.GetKeyBlocks)).Methods("GET", "OPTIONS")
 	a.Router.Path("/key-block/{number:[0-9]+}").HandlerFunc(cors(a.GetKeyBlock)).Methods("GET", "OPTIONS")
+
+	a.Router.Path("/txs").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
+	a.Router.Path("/txs").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
+	a.Router.Path("/block-txs/{number:[0-9]+}").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
+	a.Router.Path("/block-txs/{number:[0-9]+}}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
+	a.Router.Path("/tx/{hash}").HandlerFunc(cors(a.GetTx)).Methods("GET", "OPTIONS")
 }
 
 // GetHome is: GET /home
@@ -62,6 +68,21 @@ func (a *App) GetKeyBlocks(w http.ResponseWriter, r *http.Request) {
 // GetKeyBlock is : GET /key-block/{number}
 func (a *App) GetKeyBlock(w http.ResponseWriter, r *http.Request) {
 	getKeyBlock(a, w, r)
+}
+
+// GetTxs is: GET /txs/{number}
+func (a *App) GetTxs(w http.ResponseWriter, r *http.Request) {
+	getTxs(a, w, r)
+}
+
+// GetBlockTxs is: GET /block-txs/{number}
+func (a *App) GetBlockTxs(w http.ResponseWriter, r *http.Request) {
+	getTxs(a, w, r)
+}
+
+// GetTx is: GET /tx/{number}
+func (a *App) GetTx(w http.ResponseWriter, r *http.Request) {
+	getTxs(a, w, r)
 }
 
 // Run starts the app and serves on the specified addr

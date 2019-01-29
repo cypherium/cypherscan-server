@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/cypherium/CypherTestNet/go-cypherium/common/hexutil"
 	// "encoding/json"
 
 	"net/http"
@@ -194,16 +195,8 @@ func transformTxToFrontend(tx *types.Transaction, block *types.Block) *HomeTx {
 		CreatedAt: time.Unix(block.Time().Int64(), 0),
 		Value:     repo.UInt64(tx.Value().Uint64()),
 		Hash:      tx.Hash().Hex(),
-		From:      "",
-		To:        "",
-		// To: func() string {
-		//   to := tx.To()
-		//   if tx == nil {
-		//     return ""
-		//   }
-		//   log.Infoln("to.Hex()", to)
-		//   return to.Hex()
-		// }(),
+		From:      hexutil.Encode(tx.SenderKey()),
+		To:        hexutil.Encode(tx.To()[:]),
 	}
 }
 

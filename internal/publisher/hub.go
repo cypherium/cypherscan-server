@@ -1,8 +1,6 @@
 package publisher
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -58,8 +56,6 @@ func (hub *Hub) ServeWebsocket(w http.ResponseWriter, r *http.Request) {
 
 // Broadcast message to all connected clients
 func (hub *Hub) Broadcast(message _Message) {
-	s, _ := json.Marshal(message)
-	fmt.Printf("xxxxx: %s", s)
 	hub.broadcast <- message
 }
 

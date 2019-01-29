@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	"github.com/cypherium/CypherTestNet/go-cypherium/crypto"
 )
 
 // TxBlock is the Database Table class
@@ -63,6 +64,7 @@ func transformBlockToDbRecord(b *types.Block) *TxBlock {
 						}
 						return Address{}
 					}(),
+					From:             Address(crypto.PubKeyToAddressCypherium(t.SenderKey())),
 					Value:            UInt64(t.Value().Uint64()),
 					Cost:             UInt64(t.Cost().Uint64()),
 					BlockHash:        Hash(b.Hash()),

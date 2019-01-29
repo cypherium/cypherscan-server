@@ -48,7 +48,7 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 	dbListTxBlocks := func(bs []repo.TxBlock) []*listTxBlock {
 		ret := make([]*listTxBlock, 0, len(txBlocks))
 		for _, b := range bs {
-			ret = append(ret, &listTxBlock{Number: b.Number, Time: b.Time, GasUsed: uint64(b.GasUsed), GasLimit: uint64(b.GasLimit)})
+			ret = append(ret, &listTxBlock{Number: b.Number, Txn: b.Txn, Time: b.Time, GasUsed: uint64(b.GasUsed), GasLimit: uint64(b.GasLimit)})
 		}
 		return ret
 	}(txBlocks)
