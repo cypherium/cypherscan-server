@@ -21,7 +21,7 @@ type TxBlock struct {
 	Bloom        []byte        `json:"logsBloom"`
 	GasLimit     UInt64        `json:"gasLimit"`
 	GasUsed      UInt64        `json:"gasUsed"`
-	Transactions []Transaction `json:"transactions" gorm:"foreignkey:BlockNumber"`
+	Transactions []Transaction `json:"transactions" gorm:"foreignkey:BlockNumber;association_foreignkey:Number"`
 	// Extra        []byte        `json:"extraData"        gencodec:"required"`
 }
 

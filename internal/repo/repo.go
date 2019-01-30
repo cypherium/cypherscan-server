@@ -144,7 +144,7 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 	}()
 	return txs, repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
-			return db.Select([]string{"time", "hash"})
+			return db.Select([]string{"time", "number"})
 		}).Select(whereStatment, whereArgs...).Select(columns).Order("block_number desc, transaction_index desc").Offset(skip).Limit(pageSize).Find(&txs).Error
 	})
 }
@@ -177,8 +177,8 @@ var keyBlockColumnsConfig = map[Scenario][]string{
 	ListPage: []string{"number", "time", "difficulty"},
 }
 var transactionColumnsConfig = map[Scenario][]string{
-	HomePage: []string{"block_hash", "value", "hash", "\"from\"", "\"to\""},
-	ListPage: []string{"block_hash", "value", "hash", "\"from\"", "\"to\""},
+	HomePage: []string{"value", "hash", "\"from\"", "\"to\"", "block_number"},
+	ListPage: []string{"value", "hash", "\"from\"", "\"to\"", "block_number"},
 }
 
 func getColumnsByScenario(config map[Scenario][]string, scenario Scenario) []string {

@@ -19,7 +19,11 @@ func getTxs(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJSON(w, http.StatusOK, txs)
+	list := make([]*listTx, 0, len(txs))
+	for _, t := range txs {
+		list = append(list, transferTransactionToListTx(t))
+	}
+	respondWithJSON(w, http.StatusOK, list)
 }
 
 func getBlockTxs(a *App, w http.ResponseWriter, r *http.Request) {
@@ -63,15 +67,15 @@ type listTx struct {
 	Value     uint64       `json:"value"`
 	Hash      repo.Hash    `json:"hash"`
 	From      repo.Address `json:"from"`
-	To        repo.Address `json:"from"`
+	To        repo.Address `json:"to"`
 }
 
 func transferTransactionToListTx(tx repo.Transaction) *listTx {
 	return &listTx{
-		Hash:  tx.Hash,
-		Value: uint64(tx.Value),
-		From:  tx.From,
-		To:    tx.To,
-		// CreatedAt: tx, //todo:
+		Hash:      tx.Hash,
+		Value:     uint64(tx.Value),
+		From:      tx.From,
+		To:        tx.To,
+		CreatedAt: tx.Block.Time,
 	}
 }

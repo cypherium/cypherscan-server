@@ -106,6 +106,27 @@ func (role *Hash) UnmarshalJSON(b []byte) error {
 // Address is common.Hash
 type Address common.Address
 
+// MarshalJSON is to support json
+func (role Address) MarshalJSON() ([]byte, error) {
+	dst := make([]byte, hex.EncodedLen(len(role)))
+	hex.Encode(dst, role[:])
+	return []byte(fmt.Sprintf(`"0x%s"`, dst)), nil
+}
+
+// UnmarshalJSON is to support json
+func (role *Address) UnmarshalJSON(b []byte) error {
+	src := string(b[3 : len(b)-1])
+	bytes, err := hex.DecodeString(src)
+	if err != nil {
+		fmt.Printf("Error: %s", err.Error())
+		return err
+	}
+	for i, b := range bytes {
+		role[i] = b
+	}
+	return nil
+}
+
 // Value is the Sacn interface
 func (role Address) Value() (driver.Value, error) {
 	b := role[:]

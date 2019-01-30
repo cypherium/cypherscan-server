@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/cypherium/CypherTestNet/go-cypherium/common/hexutil"
+
 	// "encoding/json"
 
 	"net/http"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	"github.com/cypherium/CypherTestNet/go-cypherium/crypto"
 
 	// log "github.com/sirupsen/logrus"
 
@@ -72,8 +73,8 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 					t.Block.Time,
 					t.Value,
 					t.Hash.Hex(),
-					t.From.Hex(),
-					t.To.Hex(),
+					t.From,
+					t.To,
 				})
 			}
 			return ret
@@ -152,11 +153,11 @@ type MetricValue struct {
 
 // HomeTx is the HomeTx type trransfore to frontend in home page
 type HomeTx struct {
-	CreatedAt time.Time   `json:"createdAt"`
-	Value     repo.UInt64 `json:"value"`
-	Hash      string      `json:"hash"`
-	From      string      `json:"from"`
-	To        string      `json:"to"`
+	CreatedAt time.Time    `json:"createdAt"`
+	Value     repo.UInt64  `json:"value"`
+	Hash      string       `json:"hash"`
+	From      repo.Address `json:"from"`
+	To        repo.Address `json:"to"`
 }
 
 // HomeMetric is the HomeMetric type transfore to frontend in home page
@@ -195,8 +196,8 @@ func transformTxToFrontend(tx *types.Transaction, block *types.Block) *HomeTx {
 		CreatedAt: time.Unix(0, block.Time().Int64()),
 		Value:     repo.UInt64(tx.Value().Uint64()),
 		Hash:      tx.Hash().Hex(),
-		From:      hexutil.Encode(tx.SenderKey()),
-		To:        hexutil.Encode(tx.To()[:]),
+		From:      repo.Address(crypto.PubKeyToAddressCypherium(tx.SenderKey())),
+		To:        repo.Address(*tx.To()),
 	}
 }
 
