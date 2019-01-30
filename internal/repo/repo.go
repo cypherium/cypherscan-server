@@ -155,9 +155,10 @@ func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		return "hash = ?", []interface{}{hash}
 	}()
-
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Where(whereStatment, whereArgs).Select(getColumnsByScenario(keyBlockColumnsConfig, ListPage)).Order("time desc").Limit(1).Find(&txs).Error
+		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
+			return db.Select([]string{"time", "number"})
+		}).Where(whereStatment, whereArgs).Select(getColumnsByScenario(transactionColumnsConfig, ListPage)).Find(&txs).Error
 	})
 	if err != nil {
 		return nil, err

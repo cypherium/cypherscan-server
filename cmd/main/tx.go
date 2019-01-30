@@ -12,6 +12,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	TotalTxsNumber = 1000
+)
+
 func getTxs(a *App, w http.ResponseWriter, r *http.Request) {
 	pageNo, pageSize, err := getPaginationRequest(r)
 	txs, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: -1, PageSize: pageSize, Skip: (pageNo - 1) * int64(pageSize), Scenario: repo.ListPage})
@@ -23,7 +27,7 @@ func getTxs(a *App, w http.ResponseWriter, r *http.Request) {
 	for _, t := range txs {
 		list = append(list, transferTransactionToListTx(t))
 	}
-	respondWithJSON(w, http.StatusOK, list)
+	respondWithJSON(w, http.StatusOK, &responseOfGetTxs{Total: TotalTxsNumber, Txs: list})
 }
 
 func getBlockTxs(a *App, w http.ResponseWriter, r *http.Request) {
@@ -41,7 +45,11 @@ func getBlockTxs(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJSON(w, http.StatusOK, txs)
+	list := make([]*listTx, 0, len(txs))
+	for _, t := range txs {
+		list = append(list, transferTransactionToListTx(t))
+	}
+	respondWithJSON(w, http.StatusOK, &responseOfGetTxs{Total: TotalTxsNumber, Txs: list})
 }
 
 func getTx(a *App, w http.ResponseWriter, r *http.Request) {
@@ -78,4 +86,9 @@ func transferTransactionToListTx(tx repo.Transaction) *listTx {
 		To:        tx.To,
 		CreatedAt: tx.Block.Time,
 	}
+}
+
+type responseOfGetTxs struct {
+	Total int64     `json:"total"`
+	Txs   []*listTx `json:"records"`
 }

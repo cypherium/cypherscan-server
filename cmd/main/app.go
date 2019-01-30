@@ -82,7 +82,7 @@ func (a *App) GetBlockTxs(w http.ResponseWriter, r *http.Request) {
 
 // GetTx is: GET /tx/{number}
 func (a *App) GetTx(w http.ResponseWriter, r *http.Request) {
-	getTxs(a, w, r)
+	getTx(a, w, r)
 }
 
 // Run starts the app and serves on the specified addr
