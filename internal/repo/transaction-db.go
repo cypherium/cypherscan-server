@@ -3,7 +3,7 @@ package repo
 // Transaction is Transaction struct
 type Transaction struct {
 	ID               int64   `json:"-" gorm:"primary_key"`
-	Hash             Hash    `json:"hash"`
+	Hash             Hash    `json:"hash" gorm:"index:transactions_hash`
 	GasPrice         UInt64  `json:"gasPrice"`
 	Gas              UInt64  `json:"gas"`
 	From             Address `json:"from"`

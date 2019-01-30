@@ -9,8 +9,8 @@ import (
 
 // TxBlock is the Database Table class
 type TxBlock struct {
-	ID           int64         `json:"-" gorm:"primary_key"`
-	Number       int64         `json:"number"`
+	ID           int64         `json:"-" 				gorm:"primary_key"`
+	Number       int64         `json:"number" 	sql:"index"`
 	Hash         Hash          `json:"hash"`
 	Time         time.Time     `json:"timestamp"`
 	Txn          int           `json:"txn"`

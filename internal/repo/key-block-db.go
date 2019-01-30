@@ -7,7 +7,7 @@ import (
 // KeyBlock is the Database Table class
 type KeyBlock struct {
 	Hash       Hash      `json:"hash" gorm:"primary_key"`
-	Number     int64     `json:"number"`
+	Number     int64     `json:"number" gorm:"indßex:key_blocks_number`
 	Time       time.Time `json:"timestamp"`
 	ParentHash Hash      `json:"parentHash"`
 	Difficulty UInt64    `json:"difficulty"`

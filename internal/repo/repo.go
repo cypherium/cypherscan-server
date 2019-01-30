@@ -39,6 +39,10 @@ func NewRepo(dbRunner util.DbRunner) *Repo {
 func (repo *Repo) InitDb() {
 	repo.dbRunner.Run(func(db *gorm.DB) error {
 		db.AutoMigrate(&TxBlock{}, &Transaction{}, &KeyBlock{})
+		db.Model(&TxBlock{}).AddIndex("idx_block_number", "number")
+		db.Model(&Transaction{}).AddIndex("idx_tx_hash", "hash")
+		db.Model(&KeyBlock{}).AddIndex("idx_key_block_number", "number")
+
 		return nil
 	})
 }
