@@ -24,7 +24,7 @@ type NewBlockListener struct {
 
 // Listen is to listen
 func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadChan chan *types.KeyBlockHeader) {
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(2 * time.Second)
 	blocks := make([]*types.Block, 0, 1000)
 	for {
 		select {

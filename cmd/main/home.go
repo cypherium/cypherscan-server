@@ -179,7 +179,7 @@ func transformTxBlockToFrontend(block *types.Block) *HomeTxBlock {
 	return &HomeTxBlock{
 		Number:    block.Number().Int64(),
 		Txn:       len(block.Transactions()),
-		CreatedAt: time.Unix(block.Time().Int64(), 0),
+		CreatedAt: time.Unix(0, block.Time().Int64()),
 	}
 }
 
@@ -192,7 +192,7 @@ func transformKeyBlockToFrontend(block *types.KeyBlockHeader) *HomeKeyBlock {
 
 func transformTxToFrontend(tx *types.Transaction, block *types.Block) *HomeTx {
 	return &HomeTx{
-		CreatedAt: time.Unix(block.Time().Int64(), 0),
+		CreatedAt: time.Unix(0, block.Time().Int64()),
 		Value:     repo.UInt64(tx.Value().Uint64()),
 		Hash:      tx.Hash().Hex(),
 		From:      hexutil.Encode(tx.SenderKey()),
