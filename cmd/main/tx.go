@@ -40,6 +40,12 @@ func getBlockTxs(a *App, w http.ResponseWriter, r *http.Request) {
 	}
 	pageNo, pageSize, err := getPaginationRequest(r)
 
+	block, err := a.repo.GetBlock(number)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	txs, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: number, PageSize: pageSize, Skip: (pageNo - 1) * int64(pageSize), Scenario: repo.ListPage})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -49,7 +55,7 @@ func getBlockTxs(a *App, w http.ResponseWriter, r *http.Request) {
 	for _, t := range txs {
 		list = append(list, transferTransactionToListTx(t))
 	}
-	respondWithJSON(w, http.StatusOK, &responseOfGetTxs{Total: TotalTxsNumber, Txs: list})
+	respondWithJSON(w, http.StatusOK, &responseOfGetTxs{Total: int64(block.Txn), Txs: list})
 }
 
 func getTx(a *App, w http.ResponseWriter, r *http.Request) {

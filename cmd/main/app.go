@@ -41,7 +41,7 @@ func (a *App) initializeRoutes() {
 	a.Router.Path("/txs").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/txs").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/block-txs/{number:[0-9]+}").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
-	a.Router.Path("/block-txs/{number:[0-9]+}}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
+	a.Router.Path("/block-txs/{number:[0-9]+}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/tx/{hash}").HandlerFunc(cors(a.GetTx)).Methods("GET", "OPTIONS")
 }
 
@@ -75,9 +75,9 @@ func (a *App) GetTxs(w http.ResponseWriter, r *http.Request) {
 	getTxs(a, w, r)
 }
 
-// GetBlockTxs is: GET /block-txs/{number}
+// GetBlockTxs is: GET /block-txs
 func (a *App) GetBlockTxs(w http.ResponseWriter, r *http.Request) {
-	getTxs(a, w, r)
+	getBlockTxs(a, w, r)
 }
 
 // GetTx is: GET /tx/{number}

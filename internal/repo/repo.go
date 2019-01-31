@@ -141,7 +141,7 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 	columns := getColumnsByScenario(transactionColumnsConfig, condition.Scenario)
 	skip := condition.Skip
 	whereStatment, whereArgs := func() (string, []interface{}) {
-		if condition.BlockNumber == 0 {
+		if condition.BlockNumber <= 0 {
 			return "block_number >= 0", []interface{}{}
 		}
 		return "block_number = ?", []interface{}{condition.BlockNumber}
@@ -149,7 +149,7 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 	return txs, repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
 			return db.Select([]string{"time", "number"})
-		}).Select(whereStatment, whereArgs...).Select(columns).Order("block_number desc, transaction_index desc").Offset(skip).Limit(pageSize).Find(&txs).Error
+		}).Where(whereStatment, whereArgs...).Select(columns).Order("id desc").Offset(skip).Limit(pageSize).Find(&txs).Error
 	})
 }
 
