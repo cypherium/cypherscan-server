@@ -11,4 +11,8 @@ After that, connect via:
 - user: postgres
 - password: postgres
 
-Finally, run `create database scan`
+### Create a database for dev
+`create database scan`
+
+### Create a database for local test
+`create database scan_test`
