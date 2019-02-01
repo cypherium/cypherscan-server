@@ -15,7 +15,7 @@ import (
 
 func TestSaveBlockWithTransaction(t *testing.T) {
 	os.Remove("test.db")
-	dbClient, err := util.ConnectDb("sqlite3", nil, nil, "test.db")
+	dbClient, err := util.ConnectDb("sqlite3", nil, nil, "")
 	assert.Nil(t, err)
 	defer dbClient.Close()
 	dbClient.Run(func(db *gorm.DB) error {

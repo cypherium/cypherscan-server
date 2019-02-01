@@ -72,7 +72,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 				ret = append(ret, HomeTx{
 					t.Block.Time,
 					t.Value,
-					t.Hash.Hex(),
+					t.Hash,
 					t.From,
 					t.To,
 				})
@@ -155,7 +155,7 @@ type MetricValue struct {
 type HomeTx struct {
 	CreatedAt time.Time    `json:"createdAt"`
 	Value     repo.UInt64  `json:"value"`
-	Hash      string       `json:"hash"`
+	Hash      repo.Hash    `json:"hash"`
 	From      repo.Address `json:"from"`
 	To        repo.Address `json:"to"`
 }
@@ -195,7 +195,7 @@ func transformTxToFrontend(tx *types.Transaction, block *types.Block) *HomeTx {
 	return &HomeTx{
 		CreatedAt: time.Unix(0, block.Time().Int64()),
 		Value:     repo.UInt64(tx.Value().Uint64()),
-		Hash:      tx.Hash().Hex(),
+		Hash:      repo.Hash(tx.Hash()),
 		From:      repo.Address(crypto.PubKeyToAddressCypherium(tx.SenderKey())),
 		To:        repo.Address(*tx.To()),
 	}
