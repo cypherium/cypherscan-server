@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/labstack/gommon/log"
 	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
 
@@ -17,6 +18,7 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 
 	response, err := json.Marshal(payload)
 	if err != nil {
+		log.Error(err.Error())
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Error when marshal object to json string"))
 		return

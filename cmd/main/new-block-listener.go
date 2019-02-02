@@ -30,7 +30,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		select {
 
 		case newHead := <-newHeader:
-			fmt.Printf("Got new block head hash = %s, number = %d \n\r", newHead.Hash().Hex(), newHead.Number.Int64())
+			fmt.Printf("Got new block head time = %v, number = %d, KeySignature = %x \n\r", time.Unix(0, newHead.Time.Int64()), newHead.Number.Int64(), newHead.KeySignature)
 			block, _, _ := listerner.BlockFetcher.BlockByNumber(newHead.Number, true)
 			blocks = append(blocks, block)
 			listerner.Repo.SaveBlock(block)

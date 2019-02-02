@@ -43,3 +43,19 @@ func TestHashWithJson(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, a, a1)
 }
+func TestBytesWithJson(t *testing.T) {
+	type A struct {
+		Bytes repo.Bytes `json:"bytes"`
+	}
+
+	a := A{repo.Bytes{1, 2}}
+
+	b, err := json.Marshal(a)
+	assert.NoError(t, err)
+	assert.Equal(t, "{\"bytes\":\"0x0102\"}", string(b))
+
+	a1 := A{}
+	err = json.Unmarshal(b, &a1)
+	assert.NoError(t, err)
+	assert.Equal(t, a, a1)
+}

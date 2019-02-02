@@ -51,7 +51,7 @@ func (repo *Repo) InitDb() {
 func (repo *Repo) SaveBlock(block *types.Block) error {
 	record := transformBlockToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
-		db.Create(record)
+		db.Debug().Create(record)
 		return nil
 	})
 	return nil
@@ -175,7 +175,7 @@ func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
 
 var blockColumnsConfig = map[Scenario][]string{
 	HomePage: []string{"number", "txn", "time"},
-	ListPage: []string{"number", "txn", "time", "gas_used", "gas_limit"},
+	ListPage: []string{"number", "txn", "time", "gas_used", "gas_limit", "key_signature"},
 }
 var keyBlockColumnsConfig = map[Scenario][]string{
 	HomePage: []string{"number", "time"},
