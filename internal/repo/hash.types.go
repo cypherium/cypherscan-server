@@ -13,18 +13,14 @@ type Hash common.Hash
 
 // Value is the Sacn interface
 func (role Hash) Value() (driver.Value, error) {
-	b := fmt.Sprintf("%x", role)
+	b := role[:]
 	return b, nil
 }
 
 // Scan is the Scan interface
 func (role *Hash) Scan(value interface{}) error {
-	data, err := hex.DecodeString(string(value.([]byte)))
-	if err != nil {
-		return err
-	}
 	r := (*common.Hash)(role)
-	copy(r[:], data)
+	copy(r[:], value.([]byte))
 	return nil
 }
 

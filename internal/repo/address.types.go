@@ -11,6 +11,19 @@ import (
 // Address is common.Hash
 type Address common.Address
 
+// Value is the Sacn interface
+func (role Address) Value() (driver.Value, error) {
+	b := role[:]
+	return b, nil
+}
+
+// Scan is the Scan interface
+func (role *Address) Scan(value interface{}) error {
+	r := (*common.Address)(role)
+	copy(r[:], value.([]byte))
+	return nil
+}
+
 // MarshalJSON is to support json
 func (role Address) MarshalJSON() ([]byte, error) {
 	dst := make([]byte, hex.EncodedLen(len(role)))
@@ -32,21 +45,7 @@ func (role *Address) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// Value is the Sacn interface
-func (role Address) Value() (driver.Value, error) {
-	b := role[:]
-	return b, nil
-}
-
-// Scan is the Scan interface
-func (role *Address) Scan(value interface{}) error {
-	r := (*common.Address)(role)
-	copy(r[:], value.([]byte))
-	return nil
-}
-
-// Hex is to change the Hash to hex string
-func (role Address) Hex() string {
+func (role Address) String() string {
 	r := common.Address(role)
 	return r.Hex()
 }
