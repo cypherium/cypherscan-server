@@ -16,3 +16,7 @@ After that, connect via:
 
 ### Create a database for local test
 `create database scan_test`
+
+## Test
+`go get github.com/eaburns/Watch`
+`watch -t -p ./ go test`

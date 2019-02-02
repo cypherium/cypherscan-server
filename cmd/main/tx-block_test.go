@@ -43,6 +43,11 @@ func (m *MockedRepo) GetTransactions(condition *repo.TransactionSearchCondition)
 	return args.Get(0).([]repo.Transaction), args.Error(1)
 }
 
+func (m *MockedRepo) GetTransaction(hash repo.Hash) (*repo.Transaction, error) {
+	args := m.Called(hash)
+	return args.Get(0).(*repo.Transaction), args.Error(1)
+}
+
 type MockedWebSocketServer struct {
 	mock.Mock
 }
