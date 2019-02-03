@@ -4,6 +4,7 @@ import (
 
 	// "encoding/json"
 
+	"math"
 	"net/http"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
@@ -50,8 +51,26 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, err.Error())
 		return
 	}
+	latestBlocksNumber, err := a.blocksFetcher.GetLatestBlockNumber()
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
+	latestKeyBlocksNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
+
 	payload := HomePayload{
-		Metrics: []HomeMetric{},
+		Metrics: []HomeMetric{
+			HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Unit: "txs/sec"}},
+			HomeMetric{Key: "bps", Name: "BPS", Value: MetricValue{Unit: "blocks/sec"}},
+			HomeMetric{Key: "key-blocks-nodes", Name: "Key Block Nodes", Value: MetricValue{Value: 10}},
+			HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{}},
+			HomeMetric{Key: "tx-blocks-number", Name: "Tx Blocks Number", Value: MetricValue{Value: latestBlocksNumber}},
+			HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: latestKeyBlocksNumber}},
+		},
 		TxBlocks: func() []HomeTxBlock {
 			ret := make([]HomeTxBlock, 0, len(txBlocks))
 			for _, b := range txBlocks {
@@ -91,7 +110,12 @@ func getHomeTxsFromBlock(block *types.Block, count int) []HomeTx {
 	return ret
 }
 
-func transformTxBlocksToFrontendMessage(blocks []*types.Block) *HomePayload {
+type metrics struct {
+	latestKeyBlockNumber    int64
+	latestKeyBlockDifficult int64
+}
+
+func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) *HomePayload {
 	txBlocks := make([]HomeTxBlock, 0, len(blocks))
 	for _, b := range blocks {
 		txBlocks = append(txBlocks, *transformTxBlockToFrontend(b))
@@ -105,11 +129,25 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block) *HomePayload {
 			break
 		}
 	}
+	totalTxs := int64(0)
+	for _, b := range blocks {
+		totalTxs += int64(len(b.Transactions()))
+	}
+	firstBlock := blocks[0]
+	lastBlock := blocks[len(blocks)-1]
+	tps := totalTxs * int64(math.Pow(10, 9)) / (lastBlock.Time().Int64() - firstBlock.Time().Int64())
+	bps := int64(len(blocks)) * int64(math.Pow(10, 9)) / (lastBlock.Time().Int64() - firstBlock.Time().Int64())
 	return &HomePayload{
 		TxBlocks:  txBlocks,
 		Txs:       txs,
 		KeyBlocks: []HomeKeyBlock{},
-		Metrics:   []HomeMetric{},
+		Metrics: []HomeMetric{
+			HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Value: tps, Unit: "txs/sec"}},
+			HomeMetric{Key: "bps", Name: "BPS", Value: MetricValue{Value: bps, Unit: "blocks/sec"}},
+			HomeMetric{Key: "tx-blocks-number", Name: "Tx Blocks Number", Value: MetricValue{Value: lastBlock.Number().Int64()}},
+			HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: metrics.latestKeyBlockNumber}},
+			HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{Value: metrics.latestKeyBlockDifficult}},
+		},
 	}
 }
 
@@ -146,9 +184,9 @@ type HomeKeyBlock struct {
 
 // MetricValue is the MetricValue type transfore to frontend in home page
 type MetricValue struct {
-	unit   string
-	value  float32
-	digits int
+	Unit   string `json:"unit"`
+	Value  int64  `json:"value"`
+	Digits int    `json:"digits"`
 }
 
 // HomeTx is the HomeTx type trransfore to frontend in home page
@@ -162,10 +200,10 @@ type HomeTx struct {
 
 // HomeMetric is the HomeMetric type transfore to frontend in home page
 type HomeMetric struct {
-	key       string
-	name      string
-	value     MetricValue
-	needGraph bool
+	Key       string      `json:"key"`
+	Name      string      `json:"name"`
+	Value     MetricValue `json:"value"`
+	NeedGraph bool        `json:"needGraph"`
 }
 
 // HomePayload is the HomePayload type transfore to fronent in home page

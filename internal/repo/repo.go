@@ -22,7 +22,7 @@ type Get interface {
 // BlockSaver is the interface contains SaveBlock
 type BlockSaver interface {
 	SaveBlock(block *types.Block) error
-	SaveKeyBlock(block *types.KeyBlockHeader) error
+	SaveKeyBlock(block *types.KeyBlock) error
 }
 
 // Repo is the database access layer
@@ -51,18 +51,17 @@ func (repo *Repo) InitDb() {
 func (repo *Repo) SaveBlock(block *types.Block) error {
 	record := transformBlockToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
-		db.Debug().Create(record)
+		db.Create(record)
 		return nil
 	})
 	return nil
 }
 
 // SaveKeyBlock is to save key block into db
-func (repo *Repo) SaveKeyBlock(block *types.KeyBlockHeader) error {
+func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
 	record := transferKeyBlockHeaderToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
-		db.NewRecord(record)
-		db.Debug().Create(record)
+		db.Create(record)
 		return nil
 	})
 	return nil

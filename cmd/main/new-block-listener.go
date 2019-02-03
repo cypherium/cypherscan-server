@@ -26,24 +26,29 @@ type NewBlockListener struct {
 func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadChan chan *types.KeyBlockHeader) {
 	ticker := time.NewTicker(2 * time.Second)
 	blocks := make([]*types.Block, 0, 1000)
+	latestKeyBlocksNumber, _ := listerner.BlockFetcher.GetLatestKeyBlockNumber()
+	var latestKeyBlockDifficult int64
 	for {
 		select {
 
 		case newHead := <-newHeader:
-			fmt.Printf("Got new block head time = %v, number = %d, KeySignature = %x \n\r", time.Unix(0, newHead.Time.Int64()), newHead.Number.Int64(), newHead.KeySignature)
+			// fmt.Printf("Got new block head time = %v, number = %d, KeySignature = %x \n\r", time.Unix(0, newHead.Time.Int64()), newHead.Number.Int64(), newHead.KeySignature)
 			block, _, _ := listerner.BlockFetcher.BlockByNumber(newHead.Number, true)
 			blocks = append(blocks, block)
 			listerner.Repo.SaveBlock(block)
 			listerner.BlockFetcher.SetLatestNumbers(newHead.Number.Int64(), -1)
 		case <-ticker.C:
 			if blocks != nil || len(blocks) > 0 {
-				fmt.Printf("Broadcst %d blocks", len(blocks))
-				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks))
+				// fmt.Printf("Broadcst %d blocks", len(blocks))
+				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{latestKeyBlockNumber: latestKeyBlocksNumber, latestKeyBlockDifficult: latestKeyBlockDifficult}))
 				blocks = nil
 			}
 		case newKeyHead := <-keyHeadChan:
-			fmt.Printf("Got new key block head: hash = %s, number = %d\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64())
-			listerner.Repo.SaveKeyBlock(newKeyHead)
+			keyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(newKeyHead.Number)
+			latestKeyBlocksNumber = keyBlock.Number().Int64()
+			latestKeyBlocksNumber = keyBlock.Difficulty().Int64()
+			fmt.Printf("Got new key block head: hash = %s, number = %d %v, %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue, keyBlock.Body().LeaderPubKey)
+			listerner.Repo.SaveKeyBlock(keyBlock)
 			listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(newKeyHead))
 			listerner.BlockFetcher.SetLatestNumbers(-1, newKeyHead.Number.Int64())
 		}

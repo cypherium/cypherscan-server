@@ -25,15 +25,6 @@ type TxBlock struct {
 	KeySignature Bytes         `json:"keySignature"`
 }
 
-func transferKeyBlockHeaderToDbRecord(b *types.KeyBlockHeader) *KeyBlock {
-	return &KeyBlock{
-		Hash:       Hash(b.Hash()),
-		Number:     b.Number.Int64(),
-		Difficulty: UInt64(b.Difficulty.Uint64()),
-		Time:       time.Unix(b.Time.Int64(), 0),
-	}
-}
-
 func transformBlockToDbRecord(b *types.Block) *TxBlock {
 	return &TxBlock{
 		Number:       b.Number().Int64(),

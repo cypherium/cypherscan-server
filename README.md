@@ -19,4 +19,4 @@ After that, connect via:
 
 ## Test
 `go get github.com/eaburns/Watch`
-`watch -t -p ./ go test`
+`watch -t -p ./ go test ./...`
