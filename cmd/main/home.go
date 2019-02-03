@@ -135,8 +135,13 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 	}
 	firstBlock := blocks[0]
 	lastBlock := blocks[len(blocks)-1]
-	tps := totalTxs * int64(math.Pow(10, 9)) / (lastBlock.Time().Int64() - firstBlock.Time().Int64())
-	bps := int64(len(blocks)) * int64(math.Pow(10, 9)) / (lastBlock.Time().Int64() - firstBlock.Time().Int64())
+	tps, bps := func() (int64, int64) {
+		ns := (lastBlock.Time().Int64() - firstBlock.Time().Int64())
+		if ns == 0 {
+			return 0, 0
+		}
+		return totalTxs * int64(math.Pow(10, 9)) / ns, int64(len(blocks)) * int64(math.Pow(10, 9)) / ns
+	}()
 	return &HomePayload{
 		TxBlocks:  txBlocks,
 		Txs:       txs,
