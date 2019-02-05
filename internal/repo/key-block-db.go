@@ -13,7 +13,7 @@ type KeyBlock struct {
 	Time         time.Time `json:"timestamp"`
 	ParentHash   Hash      `json:"parentHash"`
 	Difficulty   UInt64    `json:"difficulty"`
-	MixDigest    Hash      `json:"mixHash"`
+	MixDigest    Hash      `json:"MixDigest"`
 	Nonce        UInt64    `json:"nonce"`
 	Signature    Bytes     `json:"signature"`
 	LeaderPubKey Bytes     `json:"leaderPubKey"`
@@ -27,5 +27,7 @@ func transferKeyBlockHeaderToDbRecord(b *types.KeyBlock) *KeyBlock {
 		Time:         time.Unix(b.Time().Int64(), 0),
 		Signature:    Bytes(b.Body().Signatrue),
 		LeaderPubKey: Bytes(b.Body().LeaderPubKey),
+		Nonce:        UInt64(b.Nonce()),
+		MixDigest:    Hash(b.MixDigest()),
 	}
 }

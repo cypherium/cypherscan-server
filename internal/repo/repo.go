@@ -161,7 +161,7 @@ func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
 			return db.Select([]string{"time", "number"})
-		}).Where(whereStatment, whereArgs).Select(getColumnsByScenario(transactionColumnsConfig, ListPage)).Find(&txs).Error
+		}).Where(whereStatment, whereArgs).Find(&txs).Error
 	})
 	if err != nil {
 		return nil, err

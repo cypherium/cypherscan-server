@@ -5,6 +5,7 @@ import (
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/cypherium/CypherTestNet/go-cypherium/crypto"
+	"golang.org/x/crypto/ed25519"
 )
 
 // TxBlock is the Database Table class
@@ -59,6 +60,15 @@ func transformBlockToDbRecord(b *types.Block) *TxBlock {
 					BlockNumber:      b.Number().Int64(),
 					TransactionIndex: uint32(i),
 					Payload:          t.Data(),
+					Signature: func() Bytes {
+						sig := make([]byte, ed25519.SignatureSize)
+						_, r, s := t.RawSignatureValues()
+						rBytes, sBytes := r.Bytes(), s.Bytes()
+						copy(sig[32-len(rBytes):32], rBytes)
+						copy(sig[64-len(sBytes):64], sBytes)
+						return sig
+					}(),
+
 					// Recipient:        util.Parse(t.Recipient, util.BytesType).([]byte),
 					// AccountNonce:     UInt64(t.Nonce()),
 					// V: func() BigInt {

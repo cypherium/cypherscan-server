@@ -140,7 +140,7 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 		if ns == 0 {
 			return 0, 0
 		}
-		return totalTxs * int64(math.Pow(10, 9)) / ns, int64(len(blocks)) * int64(math.Pow(10, 9)) / ns
+		return div(totalTxs*int64(math.Pow(10, 9)), ns), div(int64(len(blocks))*int64(math.Pow(10, 9)), ns)
 	}()
 	return &HomePayload{
 		TxBlocks:  txBlocks,
@@ -154,6 +154,15 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 			HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{Value: metrics.latestKeyBlockDifficult}},
 		},
 	}
+}
+
+func div(x, y int64) int64 {
+	ret := x / y * 6 / 5
+	mod := x % y
+	if mod > 1 {
+		return ret + 1
+	}
+	return ret
 }
 
 func transformKeyBlockToFrontendMessage(block *types.KeyBlockHeader) *HomePayload {

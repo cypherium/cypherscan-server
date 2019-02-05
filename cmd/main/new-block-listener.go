@@ -38,7 +38,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 			listerner.Repo.SaveBlock(block)
 			listerner.BlockFetcher.SetLatestNumbers(newHead.Number.Int64(), -1)
 		case <-ticker.C:
-			if blocks != nil || len(blocks) > 0 {
+			if blocks != nil && len(blocks) > 0 {
 				// fmt.Printf("Broadcst %d blocks", len(blocks))
 				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{latestKeyBlockNumber: latestKeyBlocksNumber, latestKeyBlockDifficult: latestKeyBlockDifficult}))
 				blocks = nil

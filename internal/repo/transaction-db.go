@@ -14,5 +14,6 @@ type Transaction struct {
 	TransactionIndex uint32  `json:"transactionIndex"`
 	BlockHash        Hash    `json:"blockHash"`
 	BlockNumber      int64   `json:"blockNumber"`
-	Block            TxBlock `json:"block"                                  gorm:"foreignkey:BlockNumber;association_foreignkey:Number"`
+	Block            TxBlock `json:"block" gorm:"foreignkey:BlockNumber;association_foreignkey:Number"`
+	Signature        Bytes   `json:"signature" `
 }
