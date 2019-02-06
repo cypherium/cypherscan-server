@@ -166,7 +166,7 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 }
 
 func div(x, y int64) int64 {
-	ret := x / y * 6 / 5
+	ret := x / y * 5 / 2
 	mod := x % y
 	if mod > 1 {
 		return ret + 1
