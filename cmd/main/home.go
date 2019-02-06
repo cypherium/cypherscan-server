@@ -4,6 +4,7 @@ import (
 
 	// "encoding/json"
 
+	"log"
 	"math"
 	"net/http"
 
@@ -142,6 +143,7 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 		}
 		return div(totalTxs*int64(math.Pow(10, 9)), ns), div(int64(len(blocks))*int64(math.Pow(10, 9)), ns)
 	}()
+	log.Printf("calu tps: total tx: %d, lastBlock time: %v, firstBlock time: %v", totalTxs, lastBlock.Time(), firstBlock.Time())
 	return &HomePayload{
 		TxBlocks:  txBlocks,
 		Txs:       txs,
