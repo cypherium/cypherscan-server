@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 
@@ -22,12 +23,24 @@ type BlockChain struct {
 
 // BlockHeadersByNumbers is to get BlockHeaders by numbers
 func (blockChain *BlockChain) BlockHeadersByNumbers(numbers []int64) ([]*types.Header, error) {
-	return blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
+	// return blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
+	headers, error := blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
+	if error == nil {
+		for _, h := range headers {
+			setToCurrentTime(h, nil)
+		}
+	}
+	return headers, error
 }
 
 // BlockByNumber is to get Block by number, if number is nil , and return number of transactions without retreive whole transation slice
 func (blockChain *BlockChain) BlockByNumber(number *big.Int, incTx bool) (*types.Block, int, error) {
-	return blockChain.client.BlockByNumber(blockChain.context, number, incTx)
+	// return blockChain.client.BlockByNumber(blockChain.context, number, incTx)
+	block, txn, err := blockChain.client.BlockByNumber(blockChain.context, number, incTx)
+	if err == nil {
+		setToCurrentTime(nil, block)
+	}
+	return block, txn, err
 }
 
 // KeyBlockByNumber is to get Key Block by number
@@ -90,4 +103,13 @@ func (blockChain *BlockChain) Subscribe(chBlock chan<- *types.Header, chKeyBlock
 	}
 
 	return &CypherSubscribed{blockSub, keyBlockSub}, nil
+}
+
+func setToCurrentTime(header *types.Header, block *types.Block) {
+	if header != nil {
+		header.Time = big.NewInt(time.Now().UnixNano())
+	}
+	if block != nil {
+		block.SetToCurrentTime()
+	}
 }

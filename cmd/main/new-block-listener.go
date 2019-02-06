@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
@@ -27,7 +28,8 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 	ticker := time.NewTicker(2 * time.Second)
 	blocks := make([]*types.Block, 0, 1000)
 	latestKeyBlocksNumber, _ := listerner.BlockFetcher.GetLatestKeyBlockNumber()
-	var latestKeyBlockDifficult int64
+	currentKeyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(latestKeyBlocksNumber))
+	listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage([]*types.Block{}, metrics{currentKeyBlock: currentKeyBlock}))
 	for {
 		select {
 
@@ -40,13 +42,12 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		case <-ticker.C:
 			if blocks != nil && len(blocks) > 0 {
 				// fmt.Printf("Broadcst %d blocks", len(blocks))
-				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{latestKeyBlockNumber: latestKeyBlocksNumber, latestKeyBlockDifficult: latestKeyBlockDifficult}))
+				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{currentKeyBlock: currentKeyBlock}))
 				blocks = nil
 			}
 		case newKeyHead := <-keyHeadChan:
 			keyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(newKeyHead.Number)
-			latestKeyBlocksNumber = keyBlock.Number().Int64()
-			latestKeyBlocksNumber = keyBlock.Difficulty().Int64()
+			currentKeyBlock = keyBlock
 			fmt.Printf("Got new key block head: hash = %s, number = %d %v, %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue, keyBlock.Body().LeaderPubKey)
 			listerner.Repo.SaveKeyBlock(keyBlock)
 			listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(newKeyHead))

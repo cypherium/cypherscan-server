@@ -4,7 +4,6 @@ import (
 
 	// "encoding/json"
 
-	"log"
 	"math"
 	"net/http"
 
@@ -65,9 +64,9 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 
 	payload := HomePayload{
 		Metrics: []HomeMetric{
-			HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Unit: "txs/sec"}},
+			HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Unit: ""}},
 			HomeMetric{Key: "bps", Name: "BPS", Value: MetricValue{Unit: "blocks/sec"}},
-			HomeMetric{Key: "key-blocks-nodes", Name: "Key Block Nodes", Value: MetricValue{Value: 10}},
+			HomeMetric{Key: "key-blocks-nodes", Name: "Nodes", Value: MetricValue{Value: 10}},
 			HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{}},
 			HomeMetric{Key: "tx-blocks-number", Name: "Tx Blocks Number", Value: MetricValue{Value: latestBlocksNumber}},
 			HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: latestKeyBlocksNumber}},
@@ -112,8 +111,7 @@ func getHomeTxsFromBlock(block *types.Block, count int) []HomeTx {
 }
 
 type metrics struct {
-	latestKeyBlockNumber    int64
-	latestKeyBlockDifficult int64
+	currentKeyBlock *types.KeyBlock
 }
 
 func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) *HomePayload {
@@ -134,27 +132,36 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 	for _, b := range blocks {
 		totalTxs += int64(len(b.Transactions()))
 	}
-	firstBlock := blocks[0]
-	lastBlock := blocks[len(blocks)-1]
-	tps, bps := func() (int64, int64) {
-		ns := (lastBlock.Time().Int64() - firstBlock.Time().Int64())
-		if ns == 0 {
-			return 0, 0
-		}
-		return div(totalTxs*int64(math.Pow(10, 9)), ns), div(int64(len(blocks))*int64(math.Pow(10, 9)), ns)
-	}()
-	log.Printf("calu tps: total tx: %d, lastBlock time: %v, firstBlock time: %v", totalTxs, lastBlock.Time(), firstBlock.Time())
+	homeMetrics := []HomeMetric{
+		HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: metrics.currentKeyBlock.Number().Int64()}},
+		HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{Unit: "M", Digits: 2, Value: metrics.currentKeyBlock.Difficulty().Int64() / 10000}},
+	}
+	if len(blocks) > 0 {
+		firstBlock := blocks[0]
+		lastBlock := blocks[len(blocks)-1]
+		tps, bps := func() (int64, int64) {
+			ns := (lastBlock.Time().Int64() - firstBlock.Time().Int64())
+			if ns == 0 {
+				return 0, 0
+			}
+			return div(totalTxs*int64(math.Pow(10, 9)), ns), div(int64(len(blocks))*int64(math.Pow(10, 9)), ns)
+		}()
+		homeMetrics = append(
+			[]HomeMetric{
+				HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Value: tps, Unit: ""}},
+				HomeMetric{Key: "bps", Name: "BPS", Value: MetricValue{Value: bps, Unit: "blocks/sec"}},
+				HomeMetric{Key: "tx-blocks-number", Name: "Tx Blocks Number", Value: MetricValue{Value: lastBlock.Number().Int64()}},
+			},
+			homeMetrics...,
+		)
+
+	}
+	// log.Printf("calu tps: total tx: %d, lastBlock time: %v, firstBlock time: %v", totalTxs, lastBlock.Time(), firstBlock.Time())
 	return &HomePayload{
 		TxBlocks:  txBlocks,
 		Txs:       txs,
 		KeyBlocks: []HomeKeyBlock{},
-		Metrics: []HomeMetric{
-			HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Value: tps, Unit: "txs/sec"}},
-			HomeMetric{Key: "bps", Name: "BPS", Value: MetricValue{Value: bps, Unit: "blocks/sec"}},
-			HomeMetric{Key: "tx-blocks-number", Name: "Tx Blocks Number", Value: MetricValue{Value: lastBlock.Number().Int64()}},
-			HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: metrics.latestKeyBlockNumber}},
-			HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{Value: metrics.latestKeyBlockDifficult}},
-		},
+		Metrics:   homeMetrics,
 	}
 }
 
