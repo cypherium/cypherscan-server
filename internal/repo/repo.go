@@ -41,6 +41,7 @@ func (repo *Repo) InitDb() {
 		db.AutoMigrate(&TxBlock{}, &Transaction{}, &KeyBlock{})
 		db.Model(&TxBlock{}).AddIndex("idx_block_number", "number")
 		db.Model(&Transaction{}).AddIndex("idx_tx_hash", "hash")
+		db.Model(&Transaction{}).AddIndex("idx_tx_block_number", "block_number")
 		db.Model(&KeyBlock{}).AddIndex("idx_key_block_number", "number")
 
 		return nil
