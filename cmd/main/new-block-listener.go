@@ -30,6 +30,14 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 	latestKeyBlocksNumber, _ := listerner.BlockFetcher.GetLatestKeyBlockNumber()
 	currentKeyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(latestKeyBlocksNumber))
 	listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage([]*types.Block{}, metrics{currentKeyBlock: currentKeyBlock}))
+
+	_k, err := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(400))
+	if err != nil {
+		fmt.Printf("ERrrrrrror, %s", err.Error())
+	} else {
+		fmt.Printf("got b: %x %x\n", _k.Body().LeaderPubKey, _k.Body().Signatrue)
+	}
+
 	for {
 		select {
 
