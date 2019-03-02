@@ -60,5 +60,5 @@ func (role *UInt64) Scan(value interface{}) error {
 
 // MarshalJSON is to support json
 func (role UInt64) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"0x%x"`, uint64(role))), nil
+	return []byte(fmt.Sprintf(`"%d"`, uint64(role))), nil
 }
