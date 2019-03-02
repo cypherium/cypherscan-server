@@ -24,7 +24,7 @@ type BlockChain struct {
 // BlockHeadersByNumbers is to get BlockHeaders by numbers
 func (blockChain *BlockChain) BlockHeadersByNumbers(numbers []int64) ([]*types.Header, error) {
 	// return blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
-	headers, error := blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
+	headers, _, error := blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
 	if error == nil {
 		for _, h := range headers {
 			setToCurrentTime(h, nil)
