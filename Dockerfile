@@ -4,12 +4,12 @@ RUN apk update && \
     apk upgrade && \
     apk add git curl gcc libc-dev
 
-RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+#RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
 
 RUN mkdir /go/src/github.com/cypherium -p && \
     cd /go/src/github.com/cypherium && \
-    git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/CypherTestNet.git --branch reconfigTestNet
+    git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherBFT.git --branch dTN-0.3
 
 RUN mkdir /go/src/gitlab.com/ron-liu -p && \
     cd /go/src/gitlab.com/ron-liu && \
