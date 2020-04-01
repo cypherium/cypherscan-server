@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"

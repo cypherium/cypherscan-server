@@ -8,14 +8,14 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
-	"github.com/cypherium/CypherTestNet/go-cypherium/ethclient"
+	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT/go-cypherium/cphclient"
 	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
 
 // BlockChain is the struct of the Client
 type BlockChain struct {
-	client               *ethclient.Client
+	client               *cphclient.Client
 	context              context.Context
 	latestBlockNumber    int64
 	latestKeyBlockNumber int64

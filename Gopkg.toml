@@ -25,10 +25,10 @@
 #   unused-packages = true
 
 
-ignored = ["github.com/cypherium/CypherTestNet/*"]
+ignored = ["github.com/cypherium/cypherBFT/*"]
 
 #[[constraint]]
-#  name = "github.com/cypherium/CypherTestNet"
+#  name = "github.com/cypherium/cypherBFT"
 #  branch = "reconfigTestNet"
 
 [[constraint]]
@@ -47,7 +47,7 @@ ignored = ["github.com/cypherium/CypherTestNet/*"]
   go-tests = true
   unused-packages = true
   [[prune.project]]
-    name = "github.com/cypherium/CypherTestNet"
+    name = "github.com/cypherium/cypherBFT"
     unused-packages = false
 
 [[constraint]]

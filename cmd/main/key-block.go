@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
 	"github.com/gorilla/mux"
 	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
 )

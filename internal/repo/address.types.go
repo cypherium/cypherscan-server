@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/cypherium/CypherTestNet/go-cypherium/common"
+	"github.com/cypherium/cypherBFT/go-cypherium/common"
 )
 
 // Address is common.Hash

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"

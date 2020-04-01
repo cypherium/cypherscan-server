@@ -3,7 +3,7 @@ package repo
 import (
 	"time"
 
-	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
 )
 
 // KeyBlock is the Database Table class

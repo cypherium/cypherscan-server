@@ -1,6 +1,6 @@
 package blockchain
 
-import ethereum "github.com/cypherium/CypherTestNet/go-cypherium"
+import ethereum "github.com/cypherium/cypherBFT/go-cypherium"
 
 // CypherSubscribed is the struct subscribed to blockchain
 type CypherSubscribed struct {

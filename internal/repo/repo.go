@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
 	"github.com/jinzhu/gorm"
 	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
