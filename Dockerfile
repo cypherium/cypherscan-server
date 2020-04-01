@@ -3,8 +3,8 @@ FROM golang:alpine
 RUN apk update && \
     apk upgrade && \
     apk add git curl gcc libc-dev
-
 #RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+RUN ./install.sh | sh
 
 
 RUN mkdir /go/src/github.com/cypherium -p && \
