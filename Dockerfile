@@ -4,10 +4,10 @@ RUN apk update && \
     apk upgrade && \
     apk add git curl gcc libc-dev
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-RUN apk  update && \
-    apk add libssl-dev openssl  bzip2 m4
+RUN apt-get update  \
+    && apt-get install -y libssl-dev openssl libgmp-dev bzip2 m4
 
-RUN \
+RUN && \
     wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
     tar -xjf gmp-6.1.2.tar.bz2 && \
     cd gmp-6.1.2 && \
