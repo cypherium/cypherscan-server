@@ -1,13 +1,10 @@
 FROM golang:alpine
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.ustc.edu.cn/g' /etc/apk/repositories
-#RUN apk update && \
-#    apk upgrade && \
-#    apk add git curl gcc libc-dev
-#RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-#RUN ./install.sh | sh
-#FROM golang:1.10-alpine as builder
 
-RUN apk add --no-cache make gcc musl-dev linux-headers
+RUN apk update && \
+    apk upgrade && \
+    apk add git curl gcc libc-dev
+RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+
 
 RUN mkdir /go/src/github.com/cypherium -p && \
     cd /go/src/github.com/cypherium && \
