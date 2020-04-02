@@ -1,10 +1,10 @@
 FROM ubuntu:16.04
 RUN apt-get update  \
-    && apt-get install -y gcc cmake libssl-dev openssl libgmp-dev bzip2 m4 build-essential git curl gcc libc-dev
+    && apt-get install -y gcc cmake libssl-dev openssl libgmp-dev bzip2 m4 build-essential git curl gcc libc-dev wget
 
 #RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
-RUN curl https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
+RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
     tar -xjf gmp-6.1.2.tar.bz2 && \
     cd gmp-6.1.2 && \
     ./configure --prefix=/usr --enable-cxx --disable-static --docdir=/usr/share/doc/gmp-6.1.2 && \
