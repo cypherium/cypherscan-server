@@ -11,7 +11,7 @@ RUN  wget https://storage.googleapis.com/golang/go1.10.3.linux-amd64.tar.gz && \
       echo 'export GOBIN=$GOPATH/bin' >> /etc/profile && \
       echo 'export PATH=$GOPATH:$GOBIN:$GOROOT/bin:$PATH' >> ~/.bashrc && \
       /bin/bash -c "source ~/.bashrc"
-RUN /usr/local/go/bin/go get github.com/golang/dep/cmd/dep && \
+RUN /usr/local/go/bin/go get github.com/golang/dep/cmd/dep
 RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
     tar -xjf gmp-6.1.2.tar.bz2 && \
     cd gmp-6.1.2 && \
