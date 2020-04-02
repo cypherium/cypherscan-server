@@ -12,7 +12,7 @@ RUN  wget https://storage.googleapis.com/golang/go1.10.3.linux-amd64.tar.gz && \
       echo 'export PATH=$GOPATH:$GOBIN:$GOROOT/bin:$PATH' >> ~/.bashrc && \
       /bin/bash -c "source ~/.bashrc"
 RUN /usr/local/go/bin/go get github.com/golang/dep/cmd/dep && \
-    go env
+    /usr/local/go/bin/go env
 
 
 #CMD ["$GOPATH/src/github.com/cypherium/cypherscan-server/app"]
