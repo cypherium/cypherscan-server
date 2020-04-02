@@ -12,7 +12,28 @@ RUN  wget https://storage.googleapis.com/golang/go1.10.3.linux-amd64.tar.gz && \
       echo 'export PATH=$GOPATH:$GOBIN:$GOROOT/bin:$PATH' >> ~/.bashrc && \
       /bin/bash -c "source ~/.bashrc"
 RUN /usr/local/go/bin/go get github.com/golang/dep/cmd/dep && \
-    /usr/local/go/bin/go env
+    go env
+RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
+    tar -xjf gmp-6.1.2.tar.bz2 && \
+    cd gmp-6.1.2 && \
+    ./configure --prefix=/usr --enable-cxx --disable-static --docdir=/usr/share/doc/gmp-6.1.2 && \
+     make && \
+     make check && \
+     make install && \
+     cp -rf /usr/lib/libgmp* /usr/local/lib/
+RUN mkdir $GOPATH/src/github.com/cypherium -p && \
+    cd $GOPATH/src/github.com/cypherium && \
+    git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherBFT.git --branch dTN-0.3
 
+RUN mkdir $GOPATH/src/github.com/cypherium -p && \
+    cd $GOPATH/src/github.com/cypherium && \
+    git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherscan-server.git && \
+    cd cypherscan-server/cmd/main/ && \
+    /root/go/bin/dep ensure && \
+    /usr/local/go/bin/go build -o app ./*
+
+COPY app /usr/local/bin/
+EXPOSE 8000
+ENTRYPOINT ["app"]
 
 #CMD ["$GOPATH/src/github.com/cypherium/cypherscan-server/app"]
