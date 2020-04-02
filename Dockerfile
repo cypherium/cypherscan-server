@@ -9,7 +9,7 @@ RUN  wget https://storage.googleapis.com/golang/go1.10.3.linux-amd64.tar.gz && \
       export GOPATH=$HOME/work && \
       export GOBIN=$GOPATH/bin && \
       export PATH=$GOPATH:$GOBIN:$GOROOT/bin:$PATH
-RUN /usr/local/bin/go get github.com/golang/dep/cmd/dep
+RUN /usr/local/go/bin/go get github.com/golang/dep/cmd/dep
 RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
     tar -xjf gmp-6.1.2.tar.bz2 && \
     cd gmp-6.1.2 && \
@@ -26,8 +26,8 @@ RUN mkdir $GOPATH/src/github.com/cypherium -p && \
     cd $GOPATH/src/github.com/cypherium && \
     git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherscan-server.git && \
     cd cypherscan-server/cmd/main/ && \
-    /usr/local/bin/dep ensure && \
-    /usr/local/bin/go build -o app ./*
+    $GOBIN/dep ensure && \
+    /usr/local/go/bin/go build -o app ./*
 
 COPY app /usr/local/bin/
 EXPOSE 8000
