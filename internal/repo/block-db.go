@@ -36,10 +36,9 @@ func transformBlockToDbRecord(b *types.Block) *TxBlock {
 		Root:         Hash(b.Root()),
 		TxHash:       Hash(b.TxHash()),
 		ReceiptHash:  Hash(b.ReceiptHash()),
-		Bloom:        b.Bloom().Bytes(),
 		GasLimit:     UInt64(b.GasLimit()),
 		GasUsed:      UInt64(b.GasUsed()),
-		KeySignature: Bytes(b.Header().KeySignature),
+		KeySignature: Bytes(b.Header().Signature),
 		Transactions: func(ts []*types.Transaction) []Transaction {
 			transactions := make([]Transaction, len(ts))
 			for i, t := range ts {
