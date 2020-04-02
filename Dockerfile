@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 RUN apt-get update  \
     && apt-get install -y gcc cmake libssl-dev openssl libgmp-dev bzip2 m4 build-essential git curl gcc libc-dev wget texinfo
 
-$RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+#RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 RUN  wget https://storage.googleapis.com/golang/go1.10.3.linux-amd64.tar.gz && \
      tar -C /usr/local -xzf go1.10.3.linux-amd64.tar.gz && \
 
