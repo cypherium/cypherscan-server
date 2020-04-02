@@ -1,7 +1,6 @@
 FROM ubuntu:16.04
-RUN apt-get update && \
-    apt-get upgrade && \
-    apt-get install -y  git curl gcc libc-dev
+RUN apt-get update  \
+   && apt-get install  git curl gcc libc-dev
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 RUN apt-get update  \
     && apt-get install -y gcc cmake libressl-dev openssl gmp-dev bzip2 m4 build-essential
