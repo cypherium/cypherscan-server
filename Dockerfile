@@ -1,8 +1,8 @@
 #FROM golang:alpine
 FROM ubuntu:16.04
-RUN apk update && \
-    apk upgrade && \
-    apk add git curl gcc libc-dev
+RUN apt-get update && \
+    apt-get upgrade && \
+    apt-get install git curl gcc libc-dev
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 RUN apt-get update  \
     && apt-get install -y libssl-dev openssl libgmp-dev bzip2 m4
