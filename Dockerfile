@@ -6,10 +6,11 @@ RUN apt-get update  \
 RUN  wget https://storage.googleapis.com/golang/go1.10.3.linux-amd64.tar.gz && \
      tar -C /usr/local -xzf go1.10.3.linux-amd64.tar.gz && \
      rm go1.10.3.linux-amd64.tar.gz && \
-      RUN echo 'export GOROOT=/usr/local/go' >> /etc/profile && \
+      echo 'export GOROOT=/usr/local/go' >> /etc/profile && \
       echo 'export GOPATH=$HOME/work' >> /etc/profile && \
       echo 'export GOBIN=$GOPATH/bin' >> /etc/profile && \
       echo 'export PATH=$GOPATH:$GOBIN:$GOROOT/bin:$PATH' >> /etc/profile
+
 RUN /usr/local/go/bin/go get github.com/golang/dep/cmd/dep
 RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
     tar -xjf gmp-6.1.2.tar.bz2 && \
