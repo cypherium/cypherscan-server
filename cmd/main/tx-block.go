@@ -48,7 +48,7 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 	dbListTxBlocks := func(bs []repo.TxBlock) []*listTxBlock {
 		ret := make([]*listTxBlock, 0, len(txBlocks))
 		for _, b := range bs {
-			ret = append(ret, &listTxBlock{Number: b.Number, Txn: b.Txn, Time: b.Time, GasUsed: uint64(b.GasUsed), GasLimit: uint64(b.GasLimit), KeySignature: b.KeySignature})
+			ret = append(ret, &listTxBlock{Number: b.Number, Txn: b.Txn, Time: b.Time, GasUsed: uint64(b.GasUsed), GasLimit: uint64(b.GasLimit), Signature: b.Signature})
 		}
 		return ret
 	}(txBlocks)
@@ -88,12 +88,12 @@ type responseOfGetBlocks struct {
 }
 
 type listTxBlock struct {
-	Number       int64      `json:"number"`
-	Time         time.Time  `json:"createdAt"`
-	Txn          int        `json:"txn"`
-	GasUsed      uint64     `json:"gasUsed"`
-	GasLimit     uint64     `json:"gasLimit"`
-	KeySignature repo.Bytes `json:"keySignature"`
+	Number    int64      `json:"number"`
+	Time      time.Time  `json:"createdAt"`
+	Txn       int        `json:"txn"`
+	GasUsed   uint64     `json:"gasUsed"`
+	GasLimit  uint64     `json:"gasLimit"`
+	Signature repo.Bytes `json:"Signature"`
 }
 
 func transferBlockHeadToListTxBlock(h *types.Header) *listTxBlock {
@@ -101,9 +101,9 @@ func transferBlockHeadToListTxBlock(h *types.Header) *listTxBlock {
 		Number: h.Number.Int64(),
 		Time:   time.Unix(0, h.Time.Int64()),
 		// txn
-		GasUsed:      h.GasUsed,
-		GasLimit:     h.GasLimit,
-		KeySignature: repo.Bytes(h.KeySignature),
+		GasUsed:   h.GasUsed,
+		GasLimit:  h.GasLimit,
+		Signature: repo.Bytes(h.Signature),
 	}
 }
 

@@ -11,23 +11,23 @@ import (
 )
 
 func TestSaveBlockWithTransaction(t *testing.T) {
-	keySignature := repo.Bytes([]byte{1, 2})
-	nonExistedKeySignature := repo.Bytes([]byte{1, 2, 3})
+	Signature := repo.Bytes([]byte{1, 2})
+	nonExistedSignature := repo.Bytes([]byte{1, 2, 3})
 	testOnAnCleanDb(func(db *gorm.DB) {
-		block := repo.TxBlock{Number: 1, Transactions: []repo.Transaction{repo.Transaction{}}, KeySignature: keySignature}
+		block := repo.TxBlock{Number: 1, Transactions: []repo.Transaction{repo.Transaction{}}, Signature: Signature}
 		db.Debug().Save(&block)
 		var retBlocks []repo.TxBlock
 		var retTransactions []repo.Transaction
 		db.Debug().Find(&retBlocks)
 		db.Debug().Find(&retTransactions)
 		assert.Len(t, retBlocks, 1)
-		assert.Equal(t, keySignature, retBlocks[0].KeySignature)
+		assert.Equal(t, Signature, retBlocks[0].Signature)
 		assert.Len(t, retTransactions, 1)
 
-		db.Debug().Where("key_signature = ?", keySignature).Find(&retBlocks)
+		db.Debug().Where("key_signature = ?", Signature).Find(&retBlocks)
 		assert.Len(t, retBlocks, 1)
 
-		db.Debug().Where("key_signature = ?", nonExistedKeySignature).Find(&retBlocks)
+		db.Debug().Where("key_signature = ?", nonExistedSignature).Find(&retBlocks)
 		assert.Len(t, retBlocks, 0)
 	})
 }
