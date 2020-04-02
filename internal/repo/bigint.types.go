@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"gitlab.com/ron-liu/cypherscan-server/internal/util"
+	"github.com/cypherium/cypherscan-server/internal/util"
 )
 
 // BigInt is big.Int

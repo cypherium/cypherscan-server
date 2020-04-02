@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
+	"github.com/cypherium/cypherscan-server/internal/repo"
 )
 
 func TestBigIntWithJson(t *testing.T) {

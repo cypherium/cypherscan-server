@@ -3,11 +3,11 @@ package main
 import (
 	"net/http"
 
+	"github.com/cypherium/cypherscan-server/internal/blockchain"
+	"github.com/cypherium/cypherscan-server/internal/publisher"
+	"github.com/cypherium/cypherscan-server/internal/repo"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
-	"gitlab.com/ron-liu/cypherscan-server/internal/publisher"
-	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
 )
 
 // App is the application structuer

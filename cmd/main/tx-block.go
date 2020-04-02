@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
+	"github.com/cypherium/cypherscan-server/internal/repo"
 	"github.com/gorilla/mux"
-	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
 )
 
 func getBlock(a *App, w http.ResponseWriter, r *http.Request) {

@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
+	"github.com/cypherium/cypherscan-server/internal/repo"
 
 	"github.com/gorilla/mux"
 )

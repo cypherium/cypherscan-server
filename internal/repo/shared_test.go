@@ -7,9 +7,9 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 
+	"github.com/cypherium/cypherscan-server/internal/repo"
+	"github.com/cypherium/cypherscan-server/internal/util"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
-	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
 
 type testFunc func(db *gorm.DB)

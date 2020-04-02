@@ -5,8 +5,8 @@ import (
 	"math"
 
 	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
+	"github.com/cypherium/cypherscan-server/internal/util"
 	"github.com/jinzhu/gorm"
-	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
 
 // Get is the interface to get saved information

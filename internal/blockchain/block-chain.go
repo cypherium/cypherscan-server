@@ -10,7 +10,7 @@ import (
 
 	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
 	"github.com/cypherium/cypherBFT/go-cypherium/cphclient"
-	"gitlab.com/ron-liu/cypherscan-server/internal/util"
+	"github.com/cypherium/cypherscan-server/internal/util"
 )
 
 // BlockChain is the struct of the Client

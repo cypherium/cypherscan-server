@@ -6,10 +6,10 @@ import (
 	"time"
 
 	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
-	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
-	"gitlab.com/ron-liu/cypherscan-server/internal/publisher"
+	"github.com/cypherium/cypherscan-server/internal/blockchain"
+	"github.com/cypherium/cypherscan-server/internal/publisher"
 
-	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
+	"github.com/cypherium/cypherscan-server/internal/repo"
 )
 
 const (

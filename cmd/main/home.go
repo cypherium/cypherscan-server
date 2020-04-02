@@ -12,7 +12,7 @@ import (
 
 	// log "github.com/sirupsen/logrus"
 
-	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
+	"github.com/cypherium/cypherscan-server/internal/repo"
 
 	"time"
 )

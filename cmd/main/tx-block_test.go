@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
+	"github.com/cypherium/cypherscan-server/internal/repo"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
 )
 
 type MockedRepo struct {
