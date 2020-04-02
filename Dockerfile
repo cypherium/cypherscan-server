@@ -4,7 +4,11 @@ RUN apt-get update  \
 
 #RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 RUN  wget https://storage.googleapis.com/golang/go1.10.3.linux-amd64.tar.gz && \
-     tar -C /usr/local -xzf go1.10.3.linux-amd64.tar.gz
+     tar -C /usr/local -xzf go1.10.3.linux-amd64.tar.gz && \
+      ENV GOROOT=/usr/local/go && \
+      ENV GOPATH=$HOME/work && \
+      ENV GOBIN=$GOPATH/bin && \
+      ENV PATH=$GOPATH:$GOBIN:$GOROOT/bin:$PATH
 
 RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
     tar -xjf gmp-6.1.2.tar.bz2 && \
