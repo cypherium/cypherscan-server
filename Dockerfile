@@ -4,7 +4,7 @@ RUN apt-get update  \
 
 #RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 
-RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
+RUN curl https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
     tar -xjf gmp-6.1.2.tar.bz2 && \
     cd gmp-6.1.2 && \
     ./configure --prefix=/usr --enable-cxx --disable-static --docdir=/usr/share/doc/gmp-6.1.2 && \
