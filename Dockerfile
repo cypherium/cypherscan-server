@@ -1,5 +1,5 @@
-FROM golang:alpine
-
+#FROM golang:alpine
+FROM ubuntu:16.04
 RUN apk update && \
     apk upgrade && \
     apk add git curl gcc libc-dev
