@@ -20,12 +20,12 @@ RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
      make check && \
      make install && \
      cp -rf /usr/lib/libgmp* /usr/local/lib/
-RUN mkdir $GOPATH/src/github.com/cypherium -p && \
-    cd $GOPATH/src/github.com/cypherium && \
+RUN mkdir /root/go/src/github.com/cypherium -p && \
+    cd /root/go/src/github.com/cypherium && \
     git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherBFT.git --branch dTN-0.3
 
-RUN mkdir $GOPATH/src/github.com/cypherium -p && \
-    cd $GOPATH/src/github.com/cypherium && \
+RUN mkdir /root/go/src/github.com/cypherium -p && \
+    cd /root/go/src/github.com/cypherium && \
     git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherscan-server.git && \
     cd cypherscan-server/cmd/main/ && \
     /root/go/bin/dep ensure && \
