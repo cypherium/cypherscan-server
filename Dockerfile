@@ -28,7 +28,7 @@ RUN mkdir $GOPATH/src/github.com/cypherium -p && \
     cd $GOPATH/src/github.com/cypherium && \
     git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherscan-server.git && \
     cd cypherscan-server/cmd/main/ && \
-    $GOBIN/dep ensure && \
+    /root/work/bin/dep ensure && \
     /usr/local/go/bin/go build -o app ./*
 
 COPY app /usr/local/bin/
