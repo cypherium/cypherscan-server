@@ -14,6 +14,32 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
 )
+import (
+	"net/http"
+	"os"
+	"testing"
+	"github.com/jet/go-interstellar"
+
+)
+
+// CreateTestClient creates an *interstellar.Client for tests
+// It gets the cosmos db connection string from the environment variable `AZURE_COSMOS_DB_CONNECTION_STRING`
+// If the environment variable is not set, it will cause the test to be skipped.
+// If the environment variable fails to parse, the test will fail.
+func CreateTestClient(t *testing.T) *interstellar.Client {
+	cstring := os.Getenv("AZURE_COSMOS_DB_CONNECTION_STRING")
+
+	if cstring == "" {
+		t.Skip("Must provide AZURE_COSMOS_DB_CONNECTION_STRING environment variable to test")
+	}
+
+	cs, err := interstellar.ParseConnectionString(cstring)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, _ := interstellar.NewClient(cs, NewTestLoggingRequester(t, http.DefaultClient))
+	return client
+}
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})

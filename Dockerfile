@@ -31,4 +31,4 @@ RUN mkdir /root/go/src/github.com/cypherium -p && \
     /root/go/bin/dep ensure && \
     /usr/local/go/bin/go build -o app ./*
 EXPOSE 8000
-CMD ["/root/go/src/github.com/cypherium/cypherscan-server/app"]
+CMD ["/root/go/src/github.com/cypherium/cypherscan-server/cmd/main"]
