@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jinzhu/gorm"
 )
@@ -37,6 +38,7 @@ func ConnectDb(drive string, args ...interface{}) (*DbClient, error) {
 		connectionStr = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", args...)
 	} else {
 		connectionStr = args[2].(string)
+		fmt.Println("connectionStr", connectionStr)
 	}
 	_db, err := gorm.Open(drive, connectionStr)
 	if err != nil {

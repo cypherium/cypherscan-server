@@ -41,6 +41,7 @@ func CreateTestClient(t *testing.T) *interstellar.Client {
 }
 
 func main() {
+
 	log.SetFormatter(&log.JSONFormatter{})
 	context := context.Background()
 	config := config.GetFromEnv()
@@ -54,7 +55,7 @@ func main() {
 
 	repoInstance := repo.NewRepo(dbClient)
 	repoInstance.InitDb()
-
+	config.BlockChainWsURL = "ws://40.117.112.213:8546"
 	blockChainClient, err := blockchain.Dial(context, config.BlockChainWsURL)
 	if err != nil {
 		log.Fatal("Can NOT connect to blockchain")
