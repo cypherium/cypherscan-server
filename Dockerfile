@@ -29,6 +29,6 @@ RUN mkdir /root/go/src/github.com/cypherium -p && \
     git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherscan-server.git && \
     cd cypherscan-server/cmd/main/ && \
     /root/go/bin/dep ensure && \
-    /usr/local/go/bin/go build -o app ./*
-EXPOSE 8000
-CMD ["/root/go/src/github.com/cypherium/cypherscan-server/cmd/main"]
+    /usr/local/go/bin/go build -o scan ./*
+
+CMD ["/root/go/src/github.com/cypherium/cypherscan-server/cmd/main/scan"]
