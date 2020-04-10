@@ -47,12 +47,18 @@ func main() {
 	config := config.GetFromEnv()
 	log.Info("Config:", fmt.Sprintf("%v", config))
 
-	dbClient, err := util.ConnectDb("sqlite3", config.RdsHostName, config.RdsPort, config.RdsDbName, config.RdsUserName, config.RdsPassword, config.RdsSslMode)
+	//dbClient, err := util.ConnectDb("sqlite3", config.RdsHostName, config.RdsPort, config.RdsDbName, config.RdsUserName, config.RdsPassword, config.RdsSslMode)
+	dbClient, err := util.ConnectDb("sqlite3", "AccountEndpoint=https://cyphercosdb.documents.azure.com:443/;AccountKey=y6wbVjoSCpVeM4tCLF6bn6CBdgOeRMnVtVlEwujkq9iUeZXxetP6roBWxMI02EMxQtxfv3NeIBpRStVisGhFag==")
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Can NOT connect to database: %s", err.Error()))
 	}
 	defer dbClient.Close()
 
+	//cs, err := interstellar.ParseConnectionString("AccountEndpoint=https://cyphercosdb.documents.azure.com:443/;AccountKey=y6wbVjoSCpVeM4tCLF6bn6CBdgOeRMnVtVlEwujkq9iUeZXxetP6roBWxMI02EMxQtxfv3NeIBpRStVisGhFag==")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//client, _ := interstellar.NewClient(cs, NewTestLoggingRequester(t, http.DefaultClient))
 	repoInstance := repo.NewRepo(dbClient)
 	repoInstance.InitDb()
 	config.BlockChainWsURL = "ws://40.117.112.213:8546"

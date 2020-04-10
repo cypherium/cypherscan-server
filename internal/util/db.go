@@ -2,7 +2,7 @@ package util
 
 import (
 	"fmt"
-
+	"github.com/jet/go-interstellar"
 	"github.com/jinzhu/gorm"
 )
 
@@ -13,7 +13,8 @@ type DbRunner interface {
 
 // DbClient is a Database access client
 type DbClient struct {
-	db *gorm.DB
+	db             *gorm.DB
+	cosmosdbClient interstellar.Client
 }
 
 // Close close db connection
@@ -38,7 +39,6 @@ func ConnectDb(drive string, args ...interface{}) (*DbClient, error) {
 	} else {
 		connectionStr = args[2].(string)
 		fmt.Println("connectionStr", connectionStr)
-
 	}
 	_db, err := gorm.Open(drive, connectionStr)
 	if err != nil {
