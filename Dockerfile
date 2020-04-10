@@ -30,7 +30,6 @@ RUN mkdir /root/go/src/github.com/cypherium -p && \
     cd cypherscan-server/cmd/main/ && \
     /root/go/bin/dep ensure && \
     /usr/local/go/bin/go build -o scan ./*
-    /usr/local/go/bin/go build -o syncer ./*
-    /usr/local/go/bin/go build -o query ./*
+
 
 CMD ["/root/go/src/github.com/cypherium/cypherscan-server/cmd/main/scan"]

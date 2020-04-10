@@ -15,11 +15,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 import (
+	"github.com/jet/go-interstellar"
 	"net/http"
 	"os"
 	"testing"
-	"github.com/jet/go-interstellar"
-
 )
 
 // CreateTestClient creates an *interstellar.Client for tests
@@ -47,7 +46,7 @@ func main() {
 	config := config.GetFromEnv()
 	log.Info("Config:", fmt.Sprintf("%v", config))
 
-	dbClient, err := util.ConnectDb(config.DbDrive, config.RdsHostName, config.RdsPort, config.RdsDbName, config.RdsUserName, config.RdsPassword, config.RdsSslMode)
+	dbClient, err := util.ConnectDb("sqlite3", config.RdsHostName, config.RdsPort, config.RdsDbName, config.RdsUserName, config.RdsPassword, config.RdsSslMode)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Can NOT connect to database: %s", err.Error()))
 	}
