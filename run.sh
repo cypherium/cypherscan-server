@@ -9,7 +9,7 @@ docker run \
  -e "REGION=us-east-2" \
  -e "RECENT_TTL_DURATION_IN_SECONDS=36000000" \
  --name syncer \
- -d scan ./syncer
+ -d scan
 
 docker run \
  -e "EXECUTION_TIMEOUT=0" \
@@ -21,4 +21,4 @@ docker run \
  -e "RECENT_TTL_DURATION_IN_SECONDS=36000000" \
  -p 8000:8000 \
  --name query \
- -d scan ./query
+ -d scan
