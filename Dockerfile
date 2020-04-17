@@ -1,4 +1,11 @@
 FROM ubuntu:16.04
+ENV EXECUTION_TIMEOUT 0
+ENV NODES_URLS ws://40.117.112.213:8546
+ENV DYNAMODB_REGION us-east-2
+ENV AWS_ACCESS_KEY_ID AKIAJYWTBXV3Z2HWLE3Q
+ENV AWS_SECRET_ACCESS_KEY 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
+ENV REGION us-east-2
+ENV RECENT_TTL_DURATION_IN_SECONDS 36000000
 RUN apt-get update  \
     && apt-get install -y gcc cmake libssl-dev openssl libgmp-dev bzip2 m4 build-essential git curl gcc libc-dev wget texinfo
 RUN mkdir /root/go/src/github.com/cypherium -p && \
