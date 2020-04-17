@@ -8,12 +8,12 @@ RUN mkdir /root/go/src/github.com/cypherium -p && \
 #RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 RUN  wget https://storage.googleapis.com/golang/go1.10.3.linux-amd64.tar.gz && \
      tar -C /usr/local -xzf go1.10.3.linux-amd64.tar.gz && \
-     rm go1.10.3.linux-amd64.tar.gz && \
-      echo 'export GOROOT=/usr/local/go' >> /etc/profile && \
-      echo 'export GOPATH=$HOME/work' >> /etc/profile && \
-      echo 'export GOBIN=$GOPATH/bin' >> /etc/profile && \
-      echo 'export PATH=$GOPATH:$GOBIN:$GOROOT/bin:$PATH' >> ~/.bashrc && \
-      /bin/bash -c "source ~/.bashrc"
+     rm go1.10.3.linux-amd64.tar.gz
+#      echo 'export GOROOT=/usr/local/go' >> /etc/profile && \
+#      echo 'export GOPATH=$HOME/work' >> /etc/profile && \
+#      echo 'export GOBIN=$GOPATH/bin' >> /etc/profile && \
+#      echo 'export PATH=$GOPATH:$GOBIN:$GOROOT/bin:$PATH' >> /etc/profile && \
+#      /bin/bash -c "source /etc/profile"
 RUN /usr/local/go/bin/go get github.com/golang/dep/cmd/dep
 RUN wget https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2 && \
     tar -xjf gmp-6.1.2.tar.bz2 && \
