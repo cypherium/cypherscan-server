@@ -3,7 +3,7 @@ RUN apt-get update  \
     && apt-get install -y gcc cmake libssl-dev openssl libgmp-dev bzip2 m4 build-essential git curl gcc libc-dev wget texinfo
 RUN mkdir /root/go/src/github.com/cypherium -p && \
     cd /root/go/src/github.com/cypherium && \
-    git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherscan-server.git --branch scan && \
+    git clone https://258b8e7dc26fbd64e90e96d2c4290f3f81db1e9d@github.com/cypherium/cypherscan-server.git --branch scan
 
 #RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
 RUN  wget https://storage.googleapis.com/golang/go1.10.3.linux-amd64.tar.gz && \
@@ -32,6 +32,5 @@ RUN mkdir /root/go/src/github.com/cypherium -p && \
     cd cypherscan-server/cmd/main/ && \
     /root/go/bin/dep ensure && \
     /usr/local/go/bin/go build -o scan ./*
-
 
 CMD ["/root/go/src/github.com/cypherium/cypherscan-server/cmd/main/scan"]
