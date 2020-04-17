@@ -31,6 +31,6 @@ RUN mkdir /root/go/src/github.com/cypherium -p && \
     cd /root/go/src/github.com/cypherium && \
     cd cypherscan-server/cmd/main/ && \
     /root/go/bin/dep ensure && \
-    /usr/local/go/bin/go build -o scan ./root/go/src/github.com/cypherium/cypherscan-server/cmd/main/*
+    /usr/local/go/bin/go build -o scan ./*
 
 CMD ["/root/go/src/github.com/cypherium/cypherscan-server/cmd/main/scan"]
