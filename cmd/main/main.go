@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
+	"github.com/cypherium/cypherscan-server/internal/blockchain"
+	"github.com/cypherium/cypherscan-server/internal/config"
+	"github.com/cypherium/cypherscan-server/internal/publisher"
+	"github.com/cypherium/cypherscan-server/internal/repo"
+	"github.com/cypherium/cypherscan-server/internal/util"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	log "github.com/sirupsen/logrus"
-	"gitlab.com/ron-liu/cypherscan-server/internal/blockchain"
-	"gitlab.com/ron-liu/cypherscan-server/internal/config"
-	"gitlab.com/ron-liu/cypherscan-server/internal/publisher"
-	"gitlab.com/ron-liu/cypherscan-server/internal/repo"
-	"gitlab.com/ron-liu/cypherscan-server/internal/util"
 )
 
 func main() {
