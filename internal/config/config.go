@@ -27,7 +27,7 @@ func GetFromEnv() *Config {
 		"40.117.112.213",
 		//os.Getenv("RDS_HOSTNAME"),
 		//os.Getenv("RDS_PORT"),
-		os.Getenv("8546"),
+		"8546",
 		os.Getenv("RDS_DB_NAME"),
 		os.Getenv("RDS_USERNAME"),
 		os.Getenv("RDS_PASSWORD"),
