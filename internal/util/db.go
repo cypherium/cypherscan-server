@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jet/go-interstellar"
 	"github.com/jinzhu/gorm"
+	log "github.com/sirupsen/logrus"
 )
 
 // DbRunner is a interface mainly for a tests
@@ -38,7 +39,7 @@ func ConnectDb(drive string, args ...interface{}) (*DbClient, error) {
 		connectionStr = fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", args...)
 	} else {
 		connectionStr = args[2].(string)
-		fmt.Println("connectionStr", connectionStr)
+		log.Info("connectionStr", fmt.Sprintf("%v", connectionStr))
 	}
 	_db, err := gorm.Open(drive, connectionStr)
 	if err != nil {

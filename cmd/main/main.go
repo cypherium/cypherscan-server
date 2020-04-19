@@ -32,7 +32,7 @@ func main() {
 	blockChainClient, err := blockchain.Dial(context, config.BlockChainWsURL)
 	if err != nil {
 		log.Fatal("Can NOT connect to blockchain")
-		log.Info("err", err)
+		log.Info("err:", fmt.Sprintf("%v", err))
 	}
 
 	hub := publisher.NewHub()
