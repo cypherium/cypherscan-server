@@ -20,7 +20,6 @@ func main() {
 	context := context.Background()
 	config := config.GetFromEnv()
 	log.Info("Config:", fmt.Sprintf("%v", config))
-	if err != nil {
 	dbClient, err := util.ConnectDb("postgres", config.RdsHostName, config.RdsPort, "cypherdb", "postgres", "postgres", "disable")
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Can NOT connect to database: %s", err.Error()))
