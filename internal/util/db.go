@@ -40,7 +40,7 @@ func ConnectDb(drive string, args ...interface{}) (*DbClient, error) {
 		log.Info("connectionStr", fmt.Sprintf("%v", connectionStr))
 	} else {
 		connectionStr = args[2].(string)
-		log.Info("connectionStr", fmt.Sprintf("%v", connectionStr))
+		log.Info("connectionStr", fmt.Sprintf("%s", connectionStr))
 	}
 	_db, err := gorm.Open(drive, connectionStr)
 	if err != nil {
