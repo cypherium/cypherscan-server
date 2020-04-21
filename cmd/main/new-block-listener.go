@@ -8,8 +8,8 @@ import (
 	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
 	"github.com/cypherium/cypherscan-server/internal/blockchain"
 	"github.com/cypherium/cypherscan-server/internal/publisher"
-
 	"github.com/cypherium/cypherscan-server/internal/repo"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -28,7 +28,14 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 	ticker := time.NewTicker(2 * time.Second)
 	blocks := make([]*types.Block, 0, 1000)
 	latestKeyBlocksNumber, _ := listerner.BlockFetcher.GetLatestKeyBlockNumber()
-	currentKeyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(latestKeyBlocksNumber))
+	currentKeyBlock, err := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(latestKeyBlocksNumber))
+	if err != nil {
+		log.Error("err", fmt.Sprintf("%v", err))
+		return
+	}
+	if currentKeyBlock.Number() == nil {
+		currentKeyBlock.SetNumber(big.NewInt(latestKeyBlocksNumber))
+	}
 	listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage([]*types.Block{}, metrics{currentKeyBlock: currentKeyBlock}))
 
 	// _k, err := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(400))
