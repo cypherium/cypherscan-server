@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
+	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/cypherium/cypherscan-server/internal/repo"
 	"github.com/gorilla/mux"
 )
@@ -103,7 +103,7 @@ func transferBlockHeadToListTxBlock(h *types.Header) *listTxBlock {
 		// txn
 		GasUsed:   h.GasUsed,
 		GasLimit:  h.GasLimit,
-		Signature: repo.Bytes(h.Signature),
+		Signature: repo.Bytes(h.KeySignature),
 	}
 }
 

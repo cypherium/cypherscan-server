@@ -7,8 +7,8 @@ import (
 	"math"
 	"net/http"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
-	"github.com/cypherium/cypherBFT/go-cypherium/crypto"
+	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	"github.com/cypherium/CypherTestNet/go-cypherium/crypto"
 
 	// log "github.com/sirupsen/logrus"
 

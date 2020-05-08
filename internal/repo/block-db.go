@@ -3,8 +3,8 @@ package repo
 import (
 	"time"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
-	"github.com/cypherium/cypherBFT/go-cypherium/crypto"
+	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
+	"github.com/cypherium/CypherTestNet/go-cypherium/crypto"
 	"github.com/cypherium/cypherscan-server/ed25519"
 )
 
@@ -38,7 +38,7 @@ func transformBlockToDbRecord(b *types.Block) *TxBlock {
 		ReceiptHash: Hash(b.ReceiptHash()),
 		GasLimit:    UInt64(b.GasLimit()),
 		GasUsed:     UInt64(b.GasUsed()),
-		Signature:   Bytes(b.Header().Signature),
+		Signature:   Bytes(b.Header().KeySignature),
 		Transactions: func(ts []*types.Transaction) []Transaction {
 			transactions := make([]Transaction, len(ts))
 			for i, t := range ts {

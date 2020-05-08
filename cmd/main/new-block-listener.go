@@ -25,6 +25,8 @@ type NewBlockListener struct {
 
 // Listen is to listen
 func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadChan chan *types.KeyBlockHeader) {
+	// nTxBlock := big.NewInt(0)
+	nKeyBlock := big.NewInt(0)
 	ticker := time.NewTicker(2 * time.Second)
 	blocks := make([]*types.Block, 0, 1000)
 	latestKeyBlocksNumber, _ := listerner.BlockFetcher.GetLatestKeyBlockNumber()
@@ -63,10 +65,31 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		case newKeyHead := <-keyHeadChan:
 			keyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(newKeyHead.Number)
 			currentKeyBlock = keyBlock
-			fmt.Printf("Got new key block head: hash = %s, number = %d %v, %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue, keyBlock.Body().LeaderPubKey)
+			fmt.Printf("Got new key block head: hash = %s, number = %d %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue)
 			listerner.Repo.SaveKeyBlock(keyBlock)
 			listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(newKeyHead))
 			listerner.BlockFetcher.SetLatestNumbers(-1, newKeyHead.Number.Int64())
+
+		default:
+			// latestBlocksNumber, _ := listerner.BlockFetcher.GetLatestBlockNumber()
+			latestKeyBlocksNumber, _ := listerner.BlockFetcher.GetLatestKeyBlockNumber()
+			// if nTxBlock.Int64() <= latestBlocksNumber {
+			// 	block, _, _ := listerner.BlockFetcher.BlockByNumber(nTxBlock, true)
+			// 	blocks = append(blocks, block)
+			// 	listerner.Repo.SaveBlock(block)
+			// 	listerner.BlockFetcher.SetLatestNumbers(nTxBlock.Int64(), -1)
+			// 	nTxBlock = nTxBlock.Add(nTxBlock, big.NewInt(1))
+			// }
+			if nKeyBlock.Int64() <= latestKeyBlocksNumber {
+				keyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(nKeyBlock)
+				currentKeyBlock = keyBlock
+				listerner.Repo.SaveKeyBlock(keyBlock)
+				listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(keyBlock.Header()))
+				// listerner.BlockFetcher.SetLatestNumbers(-1, nKeyBlock.Int64())
+				nKeyBlock = nKeyBlock.Add(nKeyBlock, big.NewInt(1))
+			}
+			time.Sleep(500 * time.Millisecond)
+
 		}
 	}
 }

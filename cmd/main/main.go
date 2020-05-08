@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
+	"github.com/cypherium/CypherTestNet/go-cypherium/core/types"
 	"github.com/cypherium/cypherscan-server/internal/blockchain"
 	"github.com/cypherium/cypherscan-server/internal/config"
 	"github.com/cypherium/cypherscan-server/internal/publisher"

@@ -5,7 +5,7 @@ import (
 
 	"github.com/cypherium/cypherscan-server/internal/repo"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/common"
+	"github.com/cypherium/CypherTestNet/go-cypherium/common"
 	"github.com/jinzhu/gorm"
 	"github.com/stretchr/testify/assert"
 )
