@@ -1,0 +1,12 @@
+[Unit]
+Description=Cypherium scan server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/root/work/src/github.com/cypherium/cypherscan-client/main >> ./log/server.log &
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
