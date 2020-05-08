@@ -67,14 +67,14 @@ func (blockChain *BlockChain) GetLatestBlockNumber() (int64, error) {
 
 // GetLatestKeyBlockNumber is to get the latest KeyBlock Number
 func (blockChain *BlockChain) GetLatestKeyBlockNumber() (int64, error) {
-	if blockChain.latestKeyBlockNumber <= 0 {
-		b, err := blockChain.client.KeyBlockByNumber(blockChain.context, nil)
-		if err != nil {
-			fmt.Printf("xxxxxx: %s\n", err.Error())
-			return 0, err
-		}
-		blockChain.latestKeyBlockNumber = b.Number().Int64()
+	// if blockChain.latestKeyBlockNumber <= 0 {
+	b, err := blockChain.client.KeyBlockByNumber(blockChain.context, nil)
+	if err != nil {
+		fmt.Printf("xxxxxx: %s\n", err.Error())
+		return 0, err
 	}
+	blockChain.latestKeyBlockNumber = b.Number().Int64()
+	// }
 	return blockChain.latestKeyBlockNumber, nil
 }
 

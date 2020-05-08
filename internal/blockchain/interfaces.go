@@ -11,6 +11,7 @@ type BlockFetcher interface {
 	BlockByNumber(number *big.Int, incTx bool) (*types.Block, int, error)
 	KeyBlockByNumber(number *big.Int) (*types.KeyBlock, error)
 	SetLatestNumbers(blockNumber int64, keyBlockNumber int64)
+	GetLatestBlockNumber() (int64, error)
 	GetLatestKeyBlockNumber() (int64, error)
 }
 
