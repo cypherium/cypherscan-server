@@ -1,6 +1,8 @@
 package blockchain
 
-import ethereum "github.com/cypherium/cypherBFT/go-cypherium/event"
+import (
+	ethereum "github.com/cypherium/cypherBFT/go-cypherium/event"
+)
 
 // CypherSubscribed is the struct subscribed to blockchain
 type CypherSubscribed struct {
@@ -16,5 +18,7 @@ func (subscribed *CypherSubscribed) Unsubscribe() {
 
 // Err is to merge to Blockchains' err
 func (subscribed *CypherSubscribed) Err() <-chan error {
-	return nil
+	var err chan error
+	err = make(chan error)
+	return err
 }
