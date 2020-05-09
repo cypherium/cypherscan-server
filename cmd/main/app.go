@@ -43,9 +43,6 @@ func (a *App) initializeRoutes() {
 	a.Router.Path("/block-txs/{number:[0-9]+}").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/block-txs/{number:[0-9]+}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/tx/{hash}").HandlerFunc(cors(a.GetTx)).Methods("GET", "OPTIONS")
-	a.Router.Path("/search/{q:[0-9|a-x]+}").Queries("after", "{after}", "before", "{before}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetSearch)).Methods("GET", "OPTIONS")
-	a.Router.Path("/search/{q:[0-9|a-x]+}").HandlerFunc(cors(a.GetSearch)).Methods("GET", "OPTIONS")
-
 }
 
 // GetHome is: GET /home
@@ -86,11 +83,6 @@ func (a *App) GetBlockTxs(w http.ResponseWriter, r *http.Request) {
 // GetTx is: GET /tx/{number}
 func (a *App) GetTx(w http.ResponseWriter, r *http.Request) {
 	getTx(a, w, r)
-}
-
-// GetSearch is: GET /search/{q}
-func (a *App) GetSearch(w http.ResponseWriter, r *http.Request) {
-	getSearch(a, w, r)
 }
 
 // Run starts the app and serves on the specified addr
