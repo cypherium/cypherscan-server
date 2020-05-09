@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-ExecStart=/root/work/src/github.com/cypherium/cypherscan-client/main >> ./log/server.log &
+ExecStart=/root/work/src/github.com/cypherium/cypherscan-server/main >> ./log/server.log &
 Restart=on-abort
 
 [Install]
