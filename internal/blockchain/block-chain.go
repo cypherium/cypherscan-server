@@ -15,10 +15,12 @@ import (
 
 // BlockChain is the struct of the Client
 type BlockChain struct {
-	client               *cphclient.Client
-	context              context.Context
-	latestBlockNumber    int64
-	latestKeyBlockNumber int64
+	client                     *cphclient.Client
+	context                    context.Context
+	latestBlockNumber          int64
+	latestKeyBlockNumber       int64
+	chaseHighestBlockNumber    int64
+	chaseHighestKeyBlockNumber int64
 }
 
 // BlockHeadersByNumbers is to get BlockHeaders by numbers
@@ -65,6 +67,17 @@ func (blockChain *BlockChain) GetLatestBlockNumber() (int64, error) {
 	return blockChain.latestBlockNumber, nil
 }
 
+func (blockChain *BlockChain) GetChaseBlockNumber() int64 {
+	return blockChain.chaseHighestBlockNumber
+}
+
+func (blockChain *BlockChain) IsBlockFallBehindLatest() bool {
+	if blockChain.latestBlockNumber-blockChain.chaseHighestBlockNumber > 200 {
+		return true
+	}
+	return false
+}
+
 // GetLatestKeyBlockNumber is to get the latest KeyBlock Number
 func (blockChain *BlockChain) GetLatestKeyBlockNumber() (int64, error) {
 	// if blockChain.latestKeyBlockNumber <= 0 {
@@ -78,6 +91,17 @@ func (blockChain *BlockChain) GetLatestKeyBlockNumber() (int64, error) {
 	return blockChain.latestKeyBlockNumber, nil
 }
 
+func (blockChain *BlockChain) GetChaseKeyBlockNumber() int64 {
+	return blockChain.chaseHighestKeyBlockNumber
+}
+
+func (blockChain *BlockChain) IsKeyBlockFallBehindLatest() bool {
+	if blockChain.latestKeyBlockNumber-blockChain.chaseHighestKeyBlockNumber > 2 {
+		return true
+	}
+	return false
+}
+
 // SetLatestNumbers is to set the latest block/key block number
 func (blockChain *BlockChain) SetLatestNumbers(blockNumber int64, keyBlockNumber int64) {
 	if blockNumber > 0 {
@@ -85,6 +109,15 @@ func (blockChain *BlockChain) SetLatestNumbers(blockNumber int64, keyBlockNumber
 	}
 	if keyBlockNumber > 0 {
 		blockChain.latestKeyBlockNumber = keyBlockNumber
+	}
+}
+
+func (blockChain *BlockChain) SetChaseNumbers(blockNumber int64, keyBlockNumber int64) {
+	if blockNumber > 0 {
+		blockChain.chaseHighestBlockNumber = blockNumber
+	}
+	if keyBlockNumber > 0 {
+		blockChain.chaseHighestKeyBlockNumber = keyBlockNumber
 	}
 }
 

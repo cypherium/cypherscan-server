@@ -53,7 +53,9 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		case newHead := <-newHeader:
 			fmt.Printf("Got new block head time = %v, number = %d, Signature = %x \n\r", time.Unix(0, newHead.Time.Int64()), newHead.Number.Int64(), newHead.Signature)
 			block, _, _ := listerner.BlockFetcher.BlockByNumber(newHead.Number, true)
-			blocks = append(blocks, block)
+			if !listerner.BlockFetcher.IsBlockFallBehindLatest() {
+				blocks = append(blocks, block)
+			}
 			listerner.Repo.SaveBlock(block)
 			listerner.BlockFetcher.SetLatestNumbers(newHead.Number.Int64(), -1)
 		case <-ticker.C:
@@ -67,7 +69,10 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 			currentKeyBlock = keyBlock
 			fmt.Printf("Got new key block head: hash = %s, number = %d %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue)
 			listerner.Repo.SaveKeyBlock(keyBlock)
+			//if !listerner.BlockFetcher.IsKeyBlockFallBehindLatest() {
 			listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(newKeyHead))
+			//}
+
 			listerner.BlockFetcher.SetLatestNumbers(-1, newKeyHead.Number.Int64())
 
 		default:
@@ -78,6 +83,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 				blocks = append(blocks, block)
 				listerner.Repo.SaveBlock(block)
 				listerner.BlockFetcher.SetLatestNumbers(nTxBlock.Int64(), -1)
+				listerner.BlockFetcher.SetChaseNumbers(nTxBlock.Int64(), -1)
 				nTxBlock = nTxBlock.Add(nTxBlock, big.NewInt(1))
 			}
 			if nKeyBlock.Int64() <= latestKeyBlocksNumber {
@@ -85,7 +91,8 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 				currentKeyBlock = keyBlock
 				listerner.Repo.SaveKeyBlock(keyBlock)
 				listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(keyBlock.Header()))
-				// listerner.BlockFetcher.SetLatestNumbers(-1, nKeyBlock.Int64())
+				//listerner.BlockFetcher.SetLatestNumbers(-1, nKeyBlock.Int64())
+				//listerner.BlockFetcher.SetChaseNumbers(-1, nKeyBlock.Int64())
 				nKeyBlock = nKeyBlock.Add(nKeyBlock, big.NewInt(1))
 			}
 			time.Sleep(500 * time.Millisecond)
