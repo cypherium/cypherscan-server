@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
+	"github.com/cypherium/cypherscan-server/internal/bizutil"
 	"github.com/cypherium/cypherscan-server/internal/blockchain"
 	"github.com/cypherium/cypherscan-server/internal/config"
 	"github.com/cypherium/cypherscan-server/internal/publisher"
@@ -26,6 +28,9 @@ func main() {
 	}
 	defer dbClient.Close()
 
+	executionTimeout, _ := strconv.Atoi(config.ExecutionTimeout)
+	ctx, cancel := bizutil.GetContext(executionTimeout)
+
 	repoInstance := repo.NewRepo(dbClient)
 	repoInstance.InitDb()
 
@@ -45,8 +50,12 @@ func main() {
 	if err != nil {
 		log.Fatal("Cannot subscribe blockchain")
 	}
+	pool, poolTerminaterd := blockchain.NewPool(ctx, &blockchain.NewPoolOptions{BorrowTimeoutMs: 5000, MaxSize: 2, NodesUrls: []string{config.BlockChainWsURL}})
 	go newBlockListener.Listen(chBlock, chKeyBlock)
-
-	app := NewApp(repoInstance, hub, blockChainClient, config.OriginAllowed)
+	defer func() {
+		cancel()
+		<-poolTerminaterd
+	}()
+	app := NewApp(repoInstance, hub, blockChainClient, config.OriginAllowed, pool)
 	app.Run()
 }

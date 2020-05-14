@@ -13,10 +13,13 @@ import (
 type Get interface {
 	GetBlocks(condition *BlockSearchContdition) ([]TxBlock, error)
 	GetBlock(number int64) (*TxBlock, error)
+	GetBlockByHash(hash Hash) (*TxBlock, error)
 	GetKeyBlock(number int64) (*KeyBlock, error)
+	GetKeyBlockByHash(hash Hash) (*KeyBlock, error)
 	GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error)
 	GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error)
 	GetTransaction(hash Hash) (*Transaction, error)
+	QueryAddress(request *QueryAddressRequest) (*QueryResult, error)
 }
 
 // BlockSaver is the interface contains SaveBlock
@@ -101,6 +104,24 @@ func (repo *Repo) GetBlock(number int64) (*TxBlock, error) {
 	return &txBlocks[0], nil
 }
 
+func (repo *Repo) GetBlockByHash(hash Hash) (*TxBlock, error) {
+	var txBlocks []TxBlock
+	whereStatment, whereArgs := func() (string, []interface{}) {
+		return "hash = ?", []interface{}{hash}
+	}()
+
+	err := repo.dbRunner.Run(func(db *gorm.DB) error {
+		return db.Debug().Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&txBlocks).Error
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(txBlocks) <= 0 {
+		return nil, &util.MyError{Message: fmt.Sprintf("No Block(hash=%d) found in Db", hash)}
+	}
+	return &txBlocks[0], nil
+}
+
 // GetKeyBlocks is
 func (repo *Repo) GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error) {
 	var keyBlocks []KeyBlock
@@ -130,6 +151,24 @@ func (repo *Repo) GetKeyBlock(number int64) (*KeyBlock, error) {
 	}
 	if len(keyBlocks) <= 0 {
 		return nil, &util.MyError{Message: fmt.Sprintf("No Block(number=%d) found in Db", number)}
+	}
+	return &keyBlocks[0], nil
+}
+
+func (repo *Repo) GetKeyBlockByHash(hash Hash) (*KeyBlock, error) {
+	var keyBlocks []KeyBlock
+	whereStatment, whereArgs := func() (string, []interface{}) {
+		return "hash = ?", []interface{}{hash}
+	}()
+
+	err := repo.dbRunner.Run(func(db *gorm.DB) error {
+		return db.Debug().Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&keyBlocks).Error
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(keyBlocks) <= 0 {
+		return nil, &util.MyError{Message: fmt.Sprintf("No Block(hash=%d) found in Db", hash)}
 	}
 	return &keyBlocks[0], nil
 }

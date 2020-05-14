@@ -73,24 +73,52 @@ func getTx(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJSON(w, http.StatusOK, tx)
+	respondWithJSON(w, http.StatusOK, convertToTx(tx))
 }
 
 type listTx struct {
-	CreatedAt time.Time    `json:"createdAt"`
-	Value     uint64       `json:"value"`
-	Hash      repo.Hash    `json:"hash"`
-	From      repo.Address `json:"from"`
-	To        repo.Address `json:"to"`
+	Time   time.Time    `json:"createdAt"`
+	Value  uint64       `json:"value"`
+	Hash   repo.Hash    `json:"hash"`
+	From   repo.Address `json:"from"`
+	To     repo.Address `json:"to"`
+	Number int64        `json:"number"`
 }
 
 func transferTransactionToListTx(tx repo.Transaction) *listTx {
 	return &listTx{
-		Hash:      tx.Hash,
-		Value:     uint64(tx.Value),
-		From:      tx.From,
-		To:        tx.To,
-		CreatedAt: tx.Block.Time,
+		Hash:   tx.Hash,
+		Value:  uint64(tx.Value),
+		From:   tx.From,
+		To:     tx.To,
+		Time:   tx.Block.Time,
+		Number: tx.Block.Number,
+	}
+}
+
+type tx struct {
+	listTx
+	GasPrice    uint64 `json:"gasPrice"`
+	Gas         uint64 `json:"gas"`
+	Cost        uint64 `json:"cost"`
+	Payload     Bytes  `json:"input"`
+	TxIndex     int    `json:"transactionIndex"`
+	BlockHash   Bytes  `json:"blockHash"`
+	BlockNumber int64  `json:"blockNumber"`
+	Signature   Bytes  `json:"signature" `
+}
+
+func convertToTx(b *repo.Transaction) *tx {
+	return &tx{
+		listTx:      *transferTransactionToListTx(*b),
+		GasPrice:    uint64(b.GasPrice),
+		Gas:         uint64(b.Gas),
+		Cost:        uint64(b.Cost),
+		Payload:     b.Payload,
+		TxIndex:     int(b.TransactionIndex),
+		BlockHash:   b.BlockHash.Bytes(),
+		BlockNumber: b.BlockNumber,
+		Signature:   Bytes(b.Signature),
 	}
 }
 

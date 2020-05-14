@@ -17,11 +17,12 @@ type App struct {
 	blocksFetcher blockchain.BlocksFetcher
 	Router        *mux.Router
 	originAllowed string
+	pool          *blockchain.Pool
 }
 
 // NewApp is the constructor for App
-func NewApp(rep repo.Get, wsServer publisher.WebSocketServer, blocksFetcher blockchain.BlocksFetcher, originAllowed string) *App {
-	a := App{rep, wsServer, blocksFetcher, mux.NewRouter(), originAllowed}
+func NewApp(rep repo.Get, wsServer publisher.WebSocketServer, blocksFetcher blockchain.BlocksFetcher, originAllowed string, pool *blockchain.Pool) *App {
+	a := App{rep, wsServer, blocksFetcher, mux.NewRouter(), originAllowed, pool}
 	// a.setupCors()
 	a.initializeRoutes()
 	return &a
@@ -39,10 +40,13 @@ func (a *App) initializeRoutes() {
 	a.Router.Path("/key-block/{number:[0-9]+}").HandlerFunc(cors(a.GetKeyBlock)).Methods("GET", "OPTIONS")
 
 	a.Router.Path("/txs").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
+	// a.Router.Path("/txs").Queries("after", "{after}", "before", "{before}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/txs").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/block-txs/{number:[0-9]+}").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/block-txs/{number:[0-9]+}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/tx/{hash}").HandlerFunc(cors(a.GetTx)).Methods("GET", "OPTIONS")
+	a.Router.Path("/search/{q:[0-9|a-x]+}").Queries("after", "{after}", "before", "{before}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetSearch)).Methods("GET", "OPTIONS")
+	a.Router.Path("/search/{q:[0-9|a-x]+}").HandlerFunc(cors(a.GetSearch)).Methods("GET", "OPTIONS")
 }
 
 // GetHome is: GET /home
@@ -83,6 +87,11 @@ func (a *App) GetBlockTxs(w http.ResponseWriter, r *http.Request) {
 // GetTx is: GET /tx/{number}
 func (a *App) GetTx(w http.ResponseWriter, r *http.Request) {
 	getTx(a, w, r)
+}
+
+// GetSearch is: GET /search/{q}
+func (a *App) GetSearch(w http.ResponseWriter, r *http.Request) {
+	getSearch(a, w, r)
 }
 
 // Run starts the app and serves on the specified addr

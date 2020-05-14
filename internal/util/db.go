@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+
 	"github.com/jet/go-interstellar"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
@@ -31,7 +32,7 @@ func (dbClient *DbClient) Run(f RunFunc) error {
 // ConnectDb will return a open db connection
 func ConnectDb(drive string, args ...interface{}) (*DbClient, error) {
 	if drive != "postgres" && drive != "sqlite3" {
-		return nil, &MyError{fmt.Sprintf("Unsupported db: %s, only supporting sqlite3 and postgres", drive)}
+		return nil, &MyError{Message: fmt.Sprintf("Unsupported db: %s, only supporting sqlite3 and postgres", drive)}
 	}
 	// name, port, dbName, userName, password := args
 	connectionStr := ""

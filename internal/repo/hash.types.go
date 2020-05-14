@@ -8,6 +8,13 @@ import (
 	"github.com/cypherium/cypherBFT/go-cypherium/common"
 )
 
+// Lengths of hashes and addresses in bytes.
+const (
+	HashLength    = 32
+	AddressLength = 20
+	PubkeyLength  = 32
+)
+
 // Hash is common.Hash
 type Hash common.Hash
 
@@ -28,6 +35,30 @@ func (role *Hash) Scan(value interface{}) error {
 func (role Hash) String() string {
 	r := common.Hash(role)
 	return r.Hex()
+}
+
+// SetBytes sets the hash to the value of b.
+// If b is larger than len(h), b will be cropped from the left.
+func (h *Hash) SetBytes(b []byte) {
+	if len(b) > len(h) {
+		b = b[len(b)-HashLength:]
+	}
+
+	copy(h[HashLength-len(b):], b)
+}
+
+// BytesToHash sets b to hash.
+// If b is larger than len(h), b will be cropped from the left.
+func BytesToHash(b []byte) Hash {
+	var h Hash
+	h.SetBytes(b)
+	return h
+}
+
+// Hex is to change the Hash to hex []byte
+func (role Hash) Bytes() []byte {
+	r := common.Hash(role)
+	return r.Bytes()
 }
 
 // MarshalJSON is to support json

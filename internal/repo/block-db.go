@@ -23,14 +23,14 @@ type TxBlock struct {
 	GasLimit     UInt64        `json:"gasLimit"`
 	GasUsed      UInt64        `json:"gasUsed"`
 	Transactions []Transaction `json:"transactions" gorm:"foreignkey:BlockNumber;association_foreignkey:Number"`
-	Signature    Bytes         `json:"Signature"`
+	Signature    Bytes         `json:"signature"`
 }
 
 func transformBlockToDbRecord(b *types.Block) *TxBlock {
 	return &TxBlock{
 		Number:      b.Number().Int64(),
 		Hash:        Hash(b.Hash()),
-		Time:        time.Unix(0, b.Time().Int64()),
+		Time:        time.Unix(b.Time().Int64(), 0),
 		Txn:         len(b.Transactions()),
 		ParentHash:  Hash(b.ParentHash()),
 		Root:        Hash(b.Root()),
