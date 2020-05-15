@@ -1,8 +1,6 @@
 package repo
 
-import (
-	"github.com/jinzhu/gorm"
-)
+import "github.com/jinzhu/gorm"
 
 // QueryAddressRequest is the struct to pass the query options
 type QueryAddressRequest struct {
@@ -22,8 +20,14 @@ func (r *Repo) QueryAddress(request *QueryAddressRequest) (*QueryResult, error) 
 		skip = "1"
 	}
 
+	// err := r.dbRunner.Run(func(db *gorm.DB) error {
+	// 	return db.Debug().Where("\"from\" = ?", request.Address).Or("\"to\" = ?", request.Address).Order("id desc").Offset(skip).Limit(request.CursorPaginationRequest.PageSize).Find(&txs).Error
+	// })
+
 	err := r.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Where("\"from\" = ?", request.Address).Or("\"to\" = ?", request.Address).Order("id desc").Offset(skip).Limit(request.CursorPaginationRequest.PageSize).Find(&txs).Error
+		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
+			return db.Select([]string{"time", "number"})
+		}).Where("\"from\" = ?", request.Address).Or("\"to\" = ?", request.Address).Order("id desc").Offset(skip).Limit(request.CursorPaginationRequest.PageSize).Find(&txs).Error
 	})
 	if err != nil {
 		return nil, err

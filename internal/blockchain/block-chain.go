@@ -24,24 +24,24 @@ type BlockChain struct {
 }
 
 // BlockHeadersByNumbers is to get BlockHeaders by numbers
-func (blockChain *BlockChain) BlockHeadersByNumbers(numbers []int64) ([]*types.Header, error) {
+func (blockChain *BlockChain) BlockHeadersByNumbers(numbers []int64) ([]*types.Header, []int, error) {
 	// return blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
-	headers, _, error := blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
-	if error == nil {
-		for _, h := range headers {
-			setToCurrentTime(h, nil)
-		}
-	}
-	return headers, error
+	headers, txns, error := blockChain.client.BlockHeadersByNumbers(blockChain.context, numbers)
+	// if error == nil {
+	// 	for _, h := range headers {
+	// 		setToCurrentTime(h, nil)
+	// 	}
+	// }
+	return headers, txns, error
 }
 
 // BlockByNumber is to get Block by number, if number is nil , and return number of transactions without retreive whole transation slice
 func (blockChain *BlockChain) BlockByNumber(number *big.Int, incTx bool) (*types.Block, int, error) {
 	// return blockChain.client.BlockByNumber(blockChain.context, number, incTx)
 	block, txn, err := blockChain.client.BlockByNumber(blockChain.context, number, incTx)
-	if err == nil {
-		setToCurrentTime(nil, block)
-	}
+	// if err == nil {
+	// 	setToCurrentTime(nil, block)
+	// }
 	return block, txn, err
 }
 

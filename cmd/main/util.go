@@ -91,24 +91,6 @@ func getNumberRequest(r *http.Request, name string) (int64, error) {
 	return number, nil
 }
 
-// func respondWithError(w http.ResponseWriter, code int, message string) {
-// 	respondWithJSON(w, code, map[string]string{"error": message})
-// }
-
-// func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-
-// 	response, err := json.Marshal(payload)
-// 	if err != nil {
-// 		log.Error(err.Error())
-// 		w.WriteHeader(http.StatusInternalServerError)
-// 		w.Write([]byte("Error when marshal object to json string"))
-// 		return
-// 	}
-// 	w.Header().Set("Content-Type", "application/json")
-// 	w.WriteHeader(code)
-// 	w.Write(response)
-// }
-
 // CursoredList is used to hold any list of data to frontend to display
 type CursoredList struct {
 	Items []interface{} `json:"records"`

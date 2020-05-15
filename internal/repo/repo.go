@@ -267,5 +267,11 @@ func getWhere(startWith int64, pageSize int64) (string, []interface{}) {
 	if startWith < 0 {
 		return "number <= ?", []interface{}{math.MaxInt64}
 	}
-	return "number BETWEEN ? AND ?", []interface{}{startWith - pageSize + 1, startWith}
+	var start int64
+	if (startWith - pageSize + 1) >= 0 {
+		start = startWith - pageSize + 1
+	} else {
+		start = 0
+	}
+	return "number BETWEEN ? AND ?", []interface{}{start, startWith}
 }
