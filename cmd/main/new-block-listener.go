@@ -82,8 +82,8 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 				block, _, _ := listerner.BlockFetcher.BlockByNumber(nTxBlock, true)
 				blocks = append(blocks, block)
 				listerner.Repo.SaveBlock(block)
-				listerner.BlockFetcher.SetLatestNumbers(nTxBlock.Int64(), -1)
-				listerner.BlockFetcher.SetChaseNumbers(nTxBlock.Int64(), -1)
+				// listerner.BlockFetcher.SetLatestNumbers(nTxBlock.Int64(), -1)
+				// listerner.BlockFetcher.SetChaseNumbers(nTxBlock.Int64(), -1)
 				nTxBlock = nTxBlock.Add(nTxBlock, big.NewInt(1))
 			}
 			if nKeyBlock.Int64() <= latestKeyBlocksNumber {

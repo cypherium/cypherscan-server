@@ -77,7 +77,7 @@ func getKeyBlock(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJSON(w, http.StatusOK, block)
+	respondWithJSON(w, http.StatusOK, convertToKeyBlock(block))
 }
 
 type responseOfGetKeyBlocks struct {
@@ -89,6 +89,42 @@ type listKeyBlock struct {
 	Number     int64       `json:"number"`
 	Time       time.Time   `json:"createdAt"`
 	Difficulty repo.UInt64 `json:"difficulty"`
+}
+
+type keyBlock struct {
+	listKeyBlock
+	Hash         Bytes  `json:"hash"`
+	ParentHash   Bytes  `json:"parentHash"`
+	MixDigest    Bytes  `json:"mixDigest"`
+	Nonce        uint64 `json:"nonce"`
+	Signature    Bytes  `json:"signature"`
+	LeaderPubKey Bytes  `json:"leaderPubKey"`
+}
+
+func convertBlockItemToListKeyBlock(b *repo.KeyBlock) *listKeyBlock {
+	if b == nil {
+		return nil
+	}
+	return &listKeyBlock{
+		Number:     b.Number,
+		Time:       b.Time,
+		Difficulty: b.Difficulty,
+	}
+}
+
+func convertToKeyBlock(blockItem *repo.KeyBlock) *keyBlock {
+	if blockItem == nil {
+		return nil
+	}
+	return &keyBlock{
+		listKeyBlock: *convertBlockItemToListKeyBlock(blockItem),
+		Hash:         Bytes(blockItem.Hash[:]),
+		ParentHash:   Bytes(blockItem.ParentHash[:]),
+		MixDigest:    Bytes(blockItem.MixDigest[:]),
+		Nonce:        uint64(blockItem.Nonce),
+		Signature:    Bytes(blockItem.Signature),
+		LeaderPubKey: Bytes(blockItem.LeaderPubKey),
+	}
 }
 
 func transferKeyBlockHeadToListKeyBlock(h *types.KeyBlock) *listKeyBlock {

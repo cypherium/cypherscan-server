@@ -26,7 +26,7 @@ func getBlock(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	respondWithJSON(w, http.StatusOK, block)
+	respondWithJSON(w, http.StatusOK, convertToTxBlock(block))
 }
 
 func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
@@ -48,7 +48,7 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 	dbListTxBlocks := func(bs []repo.TxBlock) []*listTxBlock {
 		ret := make([]*listTxBlock, 0, len(txBlocks))
 		for _, b := range bs {
-			ret = append(ret, &listTxBlock{Number: b.Number, Txn: b.Txn, Time: b.Time, GasUsed: uint64(b.GasUsed), GasLimit: uint64(b.GasLimit), Signature: b.Signature})
+			ret = append(ret, convertBlockItemToListTxBlock(&b))
 		}
 		return ret
 	}(txBlocks)
@@ -65,11 +65,11 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 			return []*listTxBlock{}
 		}
 		missedNumber := getMissedNumbers(latestNumber-int64(pageSize)*(pageNo-1), pageSize, numbersAlreadyGot)
-		missedBlocks, _ := a.blocksFetcher.BlockHeadersByNumbers(missedNumber)
+		missedBlocks, txns, _ := a.blocksFetcher.BlockHeadersByNumbers(missedNumber)
 		return func(bs []*types.Header) []*listTxBlock {
 			ret := make([]*listTxBlock, 0, len(txBlocks))
-			for _, h := range bs {
-				ret = append(ret, transferBlockHeadToListTxBlock(h))
+			for i, h := range bs {
+				ret = append(ret, transferBlockHeadToListTxBlock(h, txns[i]))
 			}
 			return ret
 
@@ -77,7 +77,7 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 	}()
 	retList := append(dbListTxBlocks, missedListTxBlocks...)
 	sort.Sort(numberDescSorterForListTxBlock(retList))
-	respondWithJSON(w, http.StatusOK, &responseOfGetBlocks{Total: latestNumber + 1, Blocks: retList})
+	respondWithJSON(w, http.StatusOK, convertQueryResultToListTxBlocks(retList, latestNumber))
 
 }
 
@@ -88,23 +88,71 @@ type responseOfGetBlocks struct {
 }
 
 type listTxBlock struct {
-	Number    int64      `json:"number"`
-	Time      time.Time  `json:"createdAt"`
-	Txn       int        `json:"txn"`
-	GasUsed   uint64     `json:"gasUsed"`
-	GasLimit  uint64     `json:"gasLimit"`
-	Signature repo.Bytes `json:"Signature"`
+	Number       int64      `json:"number"`
+	Hash         Bytes      `json:"hash"`
+	Time         time.Time  `json:"createdAt"`
+	Txn          int        `json:"txn"`
+	GasUsed      uint64     `json:"gasUsed"`
+	GasLimit     uint64     `json:"gasLimit"`
+	KeySignature repo.Bytes `json:"keySignature"`
 }
 
-func transferBlockHeadToListTxBlock(h *types.Header) *listTxBlock {
-	return &listTxBlock{
-		Number: h.Number.Int64(),
-		Time:   time.Unix(0, h.Time.Int64()),
-		// txn
-		GasUsed:   h.GasUsed,
-		GasLimit:  h.GasLimit,
-		Signature: repo.Bytes(h.Signature),
+func convertBlockItemToListTxBlock(b *repo.TxBlock) *listTxBlock {
+	if b == nil {
+		return nil
 	}
+	return &listTxBlock{
+		Number:       b.Number,
+		Hash:         Bytes(b.Hash[:]),
+		Time:         b.Time,
+		Txn:          b.Txn,
+		GasUsed:      uint64(b.GasUsed),
+		GasLimit:     uint64(b.GasLimit),
+		KeySignature: b.Signature,
+	}
+}
+
+type txBlock struct {
+	listTxBlock
+	ParentHash  Bytes `json:"parentHash"`
+	Root        Bytes `json:"stateRoot"`
+	TxHash      Bytes `json:"transactionsRoot"`
+	ReceiptHash Bytes `json:"receiptsRoot"`
+	// Bloom       Bytes `json:"logsBloom"`
+}
+
+func convertToTxBlock(blockItem *repo.TxBlock) *txBlock {
+	if blockItem == nil {
+		return nil
+	}
+	return &txBlock{
+		listTxBlock: *convertBlockItemToListTxBlock(blockItem),
+		ParentHash:  blockItem.ParentHash.Bytes(),
+		Root:        blockItem.Root.Bytes(),
+		TxHash:      blockItem.TxHash.Bytes(),
+		ReceiptHash: blockItem.ReceiptHash.Bytes(),
+		// Bloom:       blockItem.Bloom,
+	}
+}
+
+func transferBlockHeadToListTxBlock(h *types.Header, n int) *listTxBlock {
+	return &listTxBlock{
+		Number:       h.Number.Int64(),
+		Hash:         Bytes(h.TxHash[:]),
+		Time:         time.Unix(0, h.Time.Int64()),
+		Txn:          n,
+		GasUsed:      h.GasUsed,
+		GasLimit:     h.GasLimit,
+		KeySignature: repo.Bytes(h.Signature),
+	}
+}
+
+func convertQueryResultToListTxBlocks(result []*listTxBlock, total int64) *OffsetedList {
+	ret := make([]interface{}, 0, len(result))
+	for _, b := range result {
+		ret = append(ret, b)
+	}
+	return &OffsetedList{Items: ret, TotalCount: total}
 }
 
 type numberDescSorterForListTxBlock []*listTxBlock

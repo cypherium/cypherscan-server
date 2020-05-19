@@ -22,7 +22,7 @@ type BlockFetcher interface {
 
 // BlocksFetcher is the interface to fetch the Blocks
 type BlocksFetcher interface {
-	BlockHeadersByNumbers(numbers []int64) ([]*types.Header, error)
+	BlockHeadersByNumbers(numbers []int64) ([]*types.Header, []int, error)
 	KeyBlocksByNumbers(numbers []int64) ([]*types.KeyBlock, error)
 	GetLatestBlockNumber() (int64, error)
 	GetLatestKeyBlockNumber() (int64, error)

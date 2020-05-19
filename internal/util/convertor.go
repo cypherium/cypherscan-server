@@ -113,7 +113,7 @@ func StringToBigInt(s string, base int) (*big.Int, error) {
 	n, ok := n.SetString(s, base)
 	if !ok {
 		log.Error("StringToBigInt error")
-		return n, &MyError{"StringToBigInt error"}
+		return n, &MyError{Message: "StringToBigInt error"}
 	}
 	return n, nil
 }
