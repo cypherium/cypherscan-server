@@ -39,8 +39,8 @@ func (a *App) initializeRoutes() {
 	a.Router.Path("/key-blocks").HandlerFunc(cors(a.GetKeyBlocks)).Methods("GET", "OPTIONS")
 	a.Router.Path("/key-block/{number:[0-9]+}").HandlerFunc(cors(a.GetKeyBlock)).Methods("GET", "OPTIONS")
 
-	a.Router.Path("/txs").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
-	// a.Router.Path("/txs").Queries("after", "{after}", "before", "{before}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
+	// a.Router.Path("/txs").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
+	a.Router.Path("/txs").Queries("after", "{after}", "before", "{before}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/txs").HandlerFunc(cors(a.GetTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/block-txs/{number:[0-9]+}").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/block-txs/{number:[0-9]+}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")

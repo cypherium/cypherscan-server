@@ -17,17 +17,37 @@ const (
 )
 
 func getTxs(a *App, w http.ResponseWriter, r *http.Request) {
-	pageNo, pageSize, err := getPaginationRequest(r)
-	txs, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: -1, PageSize: pageSize, Skip: (pageNo - 1) * int64(pageSize), Scenario: repo.ListPage})
+	var skip int64
+	var cursor repo.Cursor = repo.Cursor{"", "1"}
+
+	pagination, err := getCursorPaginationRequest(r)
+	if pagination.Before != "" {
+		skip, _ = strconv.ParseInt(pagination.Before, 10, 64)
+		if skip > 0 {
+			cursor.First = strconv.FormatInt(skip-1, 10)
+			cursor.Last = strconv.FormatInt(skip+1, 10)
+		}
+	} else if pagination.After != "" {
+		skip, _ = strconv.ParseInt(pagination.After, 10, 64)
+		cursor.First = strconv.FormatInt(skip-1, 10)
+		cursor.Last = strconv.FormatInt(skip+1, 10)
+	}
+	txs, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: -1, PageSize: pagination.PageSize, Skip: skip * int64(pagination.PageSize), Scenario: repo.ListPage})
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	list := make([]*listTx, 0, len(txs))
-	for _, t := range txs {
-		list = append(list, transferTransactionToListTx(t))
+	if pagination.PageSize > len(txs) {
+		if pagination.Before != "" {
+			cursor.First = ""
+		} else {
+			cursor.Last = ""
+		}
 	}
-	respondWithJSON(w, http.StatusOK, &responseOfGetTxs{Total: TotalTxsNumber, Txs: list})
+
+	respondWithJSON(w, http.StatusOK, convertQueryResultToListTxs(&repo.QueryResult{
+		Cursor: cursor,
+		Items:  txs}))
 }
 
 func getBlockTxs(a *App, w http.ResponseWriter, r *http.Request) {
