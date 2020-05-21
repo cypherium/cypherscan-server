@@ -93,12 +93,13 @@ type listKeyBlock struct {
 
 type keyBlock struct {
 	listKeyBlock
-	Hash         Bytes  `json:"hash"`
-	ParentHash   Bytes  `json:"parentHash"`
-	MixDigest    Bytes  `json:"mixDigest"`
-	Nonce        uint64 `json:"nonce"`
-	Signature    Bytes  `json:"signature"`
-	LeaderPubKey Bytes  `json:"leaderPubKey"`
+	Hash         Bytes     `json:"hash"`
+	ParentHash   Bytes     `json:"parentHash"`
+	MixDigest    Bytes     `json:"mixHash"`
+	Nonce        uint64    `json:"nonce"`
+	Signature    Bytes     `json:"signature"`
+	LeaderPubKey Bytes     `json:"leaderPubKey"`
+	Time         time.Time `json:"timestamp"`
 }
 
 func convertBlockItemToListKeyBlock(b *repo.KeyBlock) *listKeyBlock {
@@ -124,6 +125,7 @@ func convertToKeyBlock(blockItem *repo.KeyBlock) *keyBlock {
 		Nonce:        uint64(blockItem.Nonce),
 		Signature:    Bytes(blockItem.Signature),
 		LeaderPubKey: Bytes(blockItem.LeaderPubKey),
+		Time:         blockItem.Time,
 	}
 }
 

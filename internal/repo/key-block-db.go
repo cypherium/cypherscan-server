@@ -13,7 +13,7 @@ type KeyBlock struct {
 	Time         time.Time `json:"timestamp"`
 	ParentHash   Hash      `json:"parentHash"`
 	Difficulty   UInt64    `json:"difficulty"`
-	MixDigest    Hash      `json:"mixDigest"`
+	MixDigest    Hash      `json:"mixHash"`
 	Nonce        UInt64    `json:"nonce"`
 	Signature    Bytes     `json:"signature"`
 	LeaderPubKey Bytes     `json:"leaderPubKey"`
