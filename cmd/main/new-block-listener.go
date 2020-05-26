@@ -30,6 +30,9 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 	ticker := time.NewTicker(2 * time.Second)
 	blocks := make([]*types.Block, 0, 1000)
 	latestKeyBlocksNumber, _ := listerner.BlockFetcher.GetLatestKeyBlockNumber()
+	latestBlocksNumber, _ := listerner.BlockFetcher.GetLatestBlockNumber()
+	log.Infof("latestKeyBlocksNumber %d", latestKeyBlocksNumber)
+	log.Infof("latestBlocksNumber %d", latestBlocksNumber)
 	currentKeyBlock, err := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(latestKeyBlocksNumber))
 	if err != nil {
 		log.Error("err", fmt.Sprintf("%v", err))
@@ -38,42 +41,45 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 	if currentKeyBlock.Number() == nil {
 		currentKeyBlock.SetNumber(big.NewInt(latestKeyBlocksNumber))
 	}
+
 	listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage([]*types.Block{}, metrics{currentKeyBlock: currentKeyBlock}))
 
 	// _k, err := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(400))
 	// if err != nil {
-	// 	fmt.Printf("ERrrrrrror, %s", err.Error())
+	// 	log.Infof("ERrrrrrror, %s", err.Error())
 	// } else {
-	// 	fmt.Printf("got b: %x %x\n", _k.Body().LeaderPubKey, _k.Body().Signatrue)
+	// 	log.Infof("got b: %x %x\n", _k.Body().LeaderPubKey, _k.Body().Signatrue)
 	// }
 
 	for {
 		select {
 
 		case newHead := <-newHeader:
-			fmt.Printf("Got new block head time = %v, number = %d, Signature = %x \n\r", time.Unix(0, newHead.Time.Int64()), newHead.Number.Int64(), newHead.Signature)
+			log.Infof("Got new block head time = %v, number = %d, Signature = %x \n\r", time.Unix(0, newHead.Time.Int64()), newHead.Number.Int64(), newHead.Signature)
 			block, _, _ := listerner.BlockFetcher.BlockByNumber(newHead.Number, true)
 			if !listerner.BlockFetcher.IsBlockFallBehindLatest() {
 				blocks = append(blocks, block)
 			}
-			listerner.Repo.SaveBlock(block)
-			listerner.BlockFetcher.SetLatestNumbers(newHead.Number.Int64(), -1)
+			if err := listerner.Repo.SaveBlock(block); err == nil {
+				listerner.BlockFetcher.SetLatestNumbers(newHead.Number.Int64(), -1)
+			}
 		case <-ticker.C:
 			if blocks != nil && len(blocks) > 0 {
-				fmt.Printf("Broadcst %d blocks", len(blocks))
+				log.Infof("Broadcst %d blocks", len(blocks))
 				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{currentKeyBlock: currentKeyBlock}))
 				blocks = nil
 			}
 		case newKeyHead := <-keyHeadChan:
 			keyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(newKeyHead.Number)
 			currentKeyBlock = keyBlock
-			fmt.Printf("Got new key block head: hash = %s, number = %d %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue)
-			listerner.Repo.SaveKeyBlock(keyBlock)
-			//if !listerner.BlockFetcher.IsKeyBlockFallBehindLatest() {
-			listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(newKeyHead))
-			//}
+			log.Infof("Got new key block head: hash = %s, number = %d %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue)
+			if err := listerner.Repo.SaveKeyBlock(keyBlock); err == nil {
 
-			listerner.BlockFetcher.SetLatestNumbers(-1, newKeyHead.Number.Int64())
+				listerner.BlockFetcher.SetLatestNumbers(-1, newKeyHead.Number.Int64())
+				//if !listerner.BlockFetcher.IsKeyBlockFallBehindLatest() {
+				listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(newKeyHead))
+				//}
+			}
 
 		default:
 			latestBlocksNumber, _ := listerner.BlockFetcher.GetLatestBlockNumber()
