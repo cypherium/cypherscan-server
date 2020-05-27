@@ -87,19 +87,21 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 			if nTxBlock.Int64() <= latestBlocksNumber {
 				block, _, _ := listerner.BlockFetcher.BlockByNumber(nTxBlock, true)
 				blocks = append(blocks, block)
-				listerner.Repo.SaveBlock(block)
-				// listerner.BlockFetcher.SetLatestNumbers(nTxBlock.Int64(), -1)
-				// listerner.BlockFetcher.SetChaseNumbers(nTxBlock.Int64(), -1)
-				nTxBlock = nTxBlock.Add(nTxBlock, big.NewInt(1))
+				if err := listerner.Repo.SaveBlock(block); err == nil {
+					// listerner.BlockFetcher.SetLatestNumbers(nTxBlock.Int64(), -1)
+					// listerner.BlockFetcher.SetChaseNumbers(nTxBlock.Int64(), -1)
+					nTxBlock = nTxBlock.Add(nTxBlock, big.NewInt(1))
+				}
 			}
 			if nKeyBlock.Int64() <= latestKeyBlocksNumber {
 				keyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(nKeyBlock)
 				currentKeyBlock = keyBlock
-				listerner.Repo.SaveKeyBlock(keyBlock)
-				listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(keyBlock.Header()))
-				//listerner.BlockFetcher.SetLatestNumbers(-1, nKeyBlock.Int64())
-				//listerner.BlockFetcher.SetChaseNumbers(-1, nKeyBlock.Int64())
-				nKeyBlock = nKeyBlock.Add(nKeyBlock, big.NewInt(1))
+				if err := listerner.Repo.SaveKeyBlock(keyBlock); err == nil {
+					listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(keyBlock.Header()))
+					//listerner.BlockFetcher.SetLatestNumbers(-1, nKeyBlock.Int64())
+					//listerner.BlockFetcher.SetChaseNumbers(-1, nKeyBlock.Int64())
+					nKeyBlock = nKeyBlock.Add(nKeyBlock, big.NewInt(1))
+				}
 			}
 			time.Sleep(500 * time.Millisecond)
 
