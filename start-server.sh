@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cp server.service  /etc/init.d/
+cp -rf server.service  /etc/init.d/
 chmod 700 /etc/init.d/server.service
 
 systemctl daemon-reload
