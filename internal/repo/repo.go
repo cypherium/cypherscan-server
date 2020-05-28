@@ -53,12 +53,6 @@ func (repo *Repo) InitDb() {
 
 // SaveBlock is to save blocks into db
 func (repo *Repo) SaveBlock(block *types.Block) error {
-	if block.NumberU64() > 1 {
-		block, err := repo.GetBlock(block.Number().Int64())
-		if block != nil {
-			return err
-		}
-	}
 	record := transformBlockToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
 		db.Create(record)
@@ -69,12 +63,6 @@ func (repo *Repo) SaveBlock(block *types.Block) error {
 
 // SaveKeyBlock is to save key block into db
 func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
-	if block.NumberU64() > 1 {
-		block, err := repo.GetBlock(block.Number().Int64())
-		if block != nil {
-			return err
-		}
-	}
 	record := transferKeyBlockHeaderToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
 		db.Create(record)
