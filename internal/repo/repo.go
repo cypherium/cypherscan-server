@@ -54,8 +54,8 @@ func (repo *Repo) InitDb() {
 // SaveBlock is to save blocks into db
 func (repo *Repo) SaveBlock(block *types.Block) error {
 	if block.NumberU64() > 1 {
-		parentBlock, err := repo.GetBlockByHash(Hash(block.ParentHash()))
-		if parentBlock == nil {
+		block, err := repo.GetBlock(block.Number().Int64())
+		if block != nil {
 			return err
 		}
 	}
@@ -70,8 +70,8 @@ func (repo *Repo) SaveBlock(block *types.Block) error {
 // SaveKeyBlock is to save key block into db
 func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
 	if block.NumberU64() > 1 {
-		parentKeyBlock, err := repo.GetKeyBlockByHash(Hash(block.ParentHash()))
-		if parentKeyBlock == nil {
+		block, err := repo.GetBlock(block.Number().Int64())
+		if block != nil {
 			return err
 		}
 	}
