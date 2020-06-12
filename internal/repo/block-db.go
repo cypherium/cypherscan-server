@@ -5,7 +5,7 @@ import (
 
 	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
 	"github.com/cypherium/cypherBFT/go-cypherium/crypto"
-	"github.com/cypherium/cypherscan-server/ed25519"
+	"golang.org/x/crypto/ed25519"
 )
 
 // TxBlock is the Database Table class
