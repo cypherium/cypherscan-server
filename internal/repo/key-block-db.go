@@ -21,10 +21,11 @@ type KeyBlock struct {
 
 func transferKeyBlockHeaderToDbRecord(b *types.KeyBlock) *KeyBlock {
 	return &KeyBlock{
-		Hash:         Hash(b.Hash()),
-		Number:       b.Number().Int64(),
-		Difficulty:   UInt64(b.Difficulty().Uint64()),
-		Time:         time.Unix(b.Time().Int64(), 0),
+		Hash:       Hash(b.Hash()),
+		Number:     b.Number().Int64(),
+		Difficulty: UInt64(b.Difficulty().Uint64()),
+		//Time:         time.Unix(b.Time().Int64(), 0),
+		Time:         time.Now(),
 		Signature:    Bytes(b.Body().Signatrue),
 		LeaderPubKey: Bytes(b.Body().LeaderPubKey),
 		Nonce:        UInt64(b.Nonce()),
