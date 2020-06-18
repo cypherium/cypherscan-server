@@ -20,12 +20,17 @@ type KeyBlock struct {
 }
 
 func transferKeyBlockHeaderToDbRecord(b *types.KeyBlock) *KeyBlock {
+	var timeStamp time.Time
+	if b.Time() == nil {
+		timeStamp = time.Now()
+	} else {
+		timeStamp = time.Unix(b.Time().Int64(), 0)
+	}
 	return &KeyBlock{
-		Hash:       Hash(b.Hash()),
-		Number:     b.Number().Int64(),
-		Difficulty: UInt64(b.Difficulty().Uint64()),
-		Time:       time.Unix(b.Time().Int64(), 0),
-		//Time:         time.Now(),
+		Hash:         Hash(b.Hash()),
+		Number:       b.Number().Int64(),
+		Difficulty:   UInt64(b.Difficulty().Uint64()),
+		Time:         timeStamp,
 		Signature:    Bytes(b.Body().Signatrue),
 		LeaderPubKey: Bytes(b.Body().LeaderPubKey),
 		Nonce:        UInt64(b.Nonce()),
