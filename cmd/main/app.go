@@ -96,5 +96,5 @@ func (a *App) GetSearch(w http.ResponseWriter, r *http.Request) {
 
 // Run starts the app and serves on the specified addr
 func (a *App) Run() {
-	log.Fatal(http.ListenAndServe(":8080", a.Router))
+	log.Fatal(http.ListenAndServe(":8000", a.Router))
 }
