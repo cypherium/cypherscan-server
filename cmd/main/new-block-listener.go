@@ -72,7 +72,6 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		case newKeyHead := <-keyHeadChan:
 			log.Infof("keyHeadChan timestamp %s\n\r", newKeyHead.Time)
 			keyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(newKeyHead.Number)
-			keyBlock.SetTime(newKeyHead.Time)
 			currentKeyBlock = keyBlock
 			log.Infof("Got new key block head: hash = %s, number = %d %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue)
 			if err := listerner.Repo.SaveKeyBlock(keyBlock); err == nil {

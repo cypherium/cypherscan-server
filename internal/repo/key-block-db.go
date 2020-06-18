@@ -22,7 +22,12 @@ type KeyBlock struct {
 func transferKeyBlockHeaderToDbRecord(b *types.KeyBlock) *KeyBlock {
 	var timeStamp time.Time
 	if b.Time() == nil {
-		timeStamp = time.Now()
+		if b.ReceivedAt.Second() != 0 {
+			timeStamp = b.ReceivedAt
+		} else {
+			timeStamp = time.Now()
+		}
+
 	} else {
 		timeStamp = time.Unix(b.Time().Int64(), 0)
 	}
