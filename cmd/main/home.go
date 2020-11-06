@@ -66,7 +66,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		Metrics: []HomeMetric{
 			HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Unit: ""}},
 			HomeMetric{Key: "bps", Name: "BPS", Value: MetricValue{Unit: "blocks/sec"}},
-			HomeMetric{Key: "key-blocks-nodes", Name: "Nodes", Value: MetricValue{Value: 10}},
+			HomeMetric{Key: "key-blocks-nodes", Name: "Nodes", Value: MetricValue{Value: 22}},
 			HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{}},
 			HomeMetric{Key: "tx-blocks-number", Name: "Tx Blocks Number", Value: MetricValue{Value: latestBlocksNumber}},
 			HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: latestKeyBlocksNumber}},
