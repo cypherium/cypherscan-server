@@ -3,7 +3,7 @@ package blockchain
 import (
 	"math/big"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
 )
 
 // BlockFetcher is the interface to fetch the Block and Keyblock

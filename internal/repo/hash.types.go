@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/common"
+	"github.com/cypherium/cypherBFT-P/go-cypherium/common"
 )
 
 // Lengths of hashes and addresses in bytes.

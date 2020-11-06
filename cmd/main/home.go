@@ -7,8 +7,8 @@ import (
 	"math"
 	"net/http"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/core/types"
-	"github.com/cypherium/cypherBFT/go-cypherium/crypto"
+	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto"
 
 	// log "github.com/sirupsen/logrus"
 
@@ -92,8 +92,8 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 					t.Block.Time,
 					t.Value,
 					t.Hash,
-					t.From,
-					t.To,
+					t.From.String(),
+					t.To.String(),
 				})
 			}
 			return ret
@@ -214,11 +214,11 @@ type MetricValue struct {
 
 // HomeTx is the HomeTx type trransfore to frontend in home page
 type HomeTx struct {
-	CreatedAt time.Time    `json:"createdAt"`
-	Value     repo.UInt64  `json:"value"`
-	Hash      repo.Hash    `json:"hash"`
-	From      repo.Address `json:"from"`
-	To        repo.Address `json:"to"`
+	CreatedAt time.Time   `json:"createdAt"`
+	Value     repo.UInt64 `json:"value"`
+	Hash      repo.Hash   `json:"hash"`
+	From      string      `json:"from"`
+	To        string      `json:"to"`
 }
 
 // HomeMetric is the HomeMetric type transfore to frontend in home page
@@ -257,8 +257,8 @@ func transformTxToFrontend(tx *types.Transaction, block *types.Block) *HomeTx {
 		CreatedAt: time.Unix(0, block.Time().Int64()),
 		Value:     repo.UInt64(tx.Value().Uint64()),
 		Hash:      repo.Hash(tx.Hash()),
-		From:      repo.Address(crypto.PubKeyToAddressCypherium(tx.SenderKey())),
-		To:        repo.Address(*tx.To()),
+		From:      repo.Address(crypto.PubKeyToAddressCypherium(tx.SenderKey())).String(),
+		To:        repo.Address(*tx.To()).String(),
 	}
 }
 

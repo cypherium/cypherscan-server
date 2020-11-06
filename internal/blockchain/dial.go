@@ -3,7 +3,7 @@ package blockchain
 import (
 	"context"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/cphclient"
+	"github.com/cypherium/cypherBFT-P/go-cypherium/cphclient"
 
 	log "github.com/sirupsen/logrus"
 )

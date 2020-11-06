@@ -3,7 +3,7 @@ package blockchain
 import (
 	"math/big"
 
-	"github.com/cypherium/cypherBFT/go-cypherium/common"
+	"github.com/cypherium/cypherBFT-P/go-cypherium/common"
 )
 
 // Close is to close the client
