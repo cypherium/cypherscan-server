@@ -173,7 +173,6 @@ func (repo *Repo) GetKeyBlockByHash(hash Hash) (*KeyBlock, error) {
 	return &keyBlocks[0], nil
 }
 
-// GetTransactions is
 func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error) {
 	var txs []Transaction
 	pageSize := getPageSizeDefault(condition.PageSize)

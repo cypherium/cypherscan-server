@@ -97,20 +97,20 @@ func getTx(a *App, w http.ResponseWriter, r *http.Request) {
 }
 
 type listTx struct {
-	Time   time.Time    `json:"createdAt"`
-	Value  uint64       `json:"value"`
-	Hash   repo.Hash    `json:"hash"`
-	From   repo.Address `json:"from"`
-	To     repo.Address `json:"to"`
-	Number int64        `json:"number"`
+	Time   time.Time `json:"createdAt"`
+	Value  uint64    `json:"value"`
+	Hash   repo.Hash `json:"hash"`
+	From   string    `json:"from"`
+	To     string    `json:"to"`
+	Number int64     `json:"number"`
 }
 
 func transferTransactionToListTx(tx repo.Transaction) *listTx {
 	return &listTx{
 		Hash:   tx.Hash,
 		Value:  uint64(tx.Value),
-		From:   tx.From,
-		To:     tx.To,
+		From:   tx.From.String(),
+		To:     tx.To.String(),
 		Time:   tx.Block.Time,
 		Number: tx.Block.Number,
 	}

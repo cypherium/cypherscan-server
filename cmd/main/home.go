@@ -1,16 +1,14 @@
 package main
 
 import (
-
 	// "encoding/json"
 
+	"github.com/sirupsen/logrus"
 	"math"
 	"net/http"
 
 	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
 	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto"
-
-	// log "github.com/sirupsen/logrus"
 
 	"github.com/cypherium/cypherscan-server/internal/repo"
 
@@ -24,6 +22,7 @@ const (
 )
 
 func getHome(a *App, w http.ResponseWriter, r *http.Request) {
+	logrus.Info("getHome")
 	blockLatestNumber, err := a.blocksFetcher.GetLatestBlockNumber()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
