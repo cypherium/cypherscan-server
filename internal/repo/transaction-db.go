@@ -8,7 +8,7 @@ type Transaction struct {
 	Gas              UInt64  `json:"gas"`
 	From             Address `json:"from"`
 	To               Address `json:"to"`
-	Value            UInt64  `json:"value"`
+	Value            string  `json:"value"`
 	Cost             UInt64  `json:"cost"`
 	Payload          []byte  `json:"input"`
 	TransactionIndex uint32  `json:"transactionIndex"`

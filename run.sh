@@ -1,5 +1,6 @@
 #!/bin/bash
 killall -9 main
+rm -rf ./out.log
 localProjectPath="./vendor/github.com/cypherium/cypherBFT-P/go-cypherium"
 cp -rf $localProjectPath/crypto/bls/lib/mac/*     $localProjectPath/crypto/bls/lib/
 cp -rf $localProjectPath/pow/cphash/randomX/lib/Darwin/*  $localProjectPath/pow/cphash/randomX/

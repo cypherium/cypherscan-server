@@ -10,6 +10,7 @@ import (
 	"github.com/cypherium/cypherscan-server/internal/repo"
 
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -98,7 +99,7 @@ func getTx(a *App, w http.ResponseWriter, r *http.Request) {
 
 type listTx struct {
 	Time   time.Time `json:"createdAt"`
-	Value  uint64    `json:"value"`
+	Value  string    `json:"value"`
 	Hash   repo.Hash `json:"hash"`
 	From   string    `json:"from"`
 	To     string    `json:"to"`
@@ -106,9 +107,10 @@ type listTx struct {
 }
 
 func transferTransactionToListTx(tx repo.Transaction) *listTx {
+	log.Info("transferTransactionToListTx:", tx.Value)
 	return &listTx{
 		Hash:   tx.Hash,
-		Value:  uint64(tx.Value),
+		Value:  tx.Value,
 		From:   tx.From.String(),
 		To:     tx.To.String(),
 		Time:   tx.Block.Time,
