@@ -5,7 +5,6 @@ import (
 
 	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
 	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ed25519"
 )
 
@@ -43,8 +42,6 @@ func transformBlockToDbRecord(b *types.Block) *TxBlock {
 		Transactions: func(ts []*types.Transaction) []Transaction {
 			transactions := make([]Transaction, len(ts))
 			for i, t := range ts {
-				log.Info("Value:", t.Value())
-				log.Info("ValueUint64:", t.Value().Uint64())
 				transactions[i] = Transaction{
 					Hash:     Hash(t.Hash()),
 					Gas:      UInt64(t.Gas()),

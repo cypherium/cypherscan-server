@@ -199,7 +199,7 @@ func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
 	}()
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
-			return db.Select([]string{"time", "number"})
+			return db.Select([]string{"time", "hash"})
 		}).Where(whereStatment, whereArgs).Find(&txs).Error
 	})
 	if err != nil {

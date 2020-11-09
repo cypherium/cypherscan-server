@@ -107,7 +107,8 @@ type listTx struct {
 }
 
 func transferTransactionToListTx(tx repo.Transaction) *listTx {
-	log.Info("transferTransactionToListTx:", tx.Value)
+	log.Info("transferTransactionToListTx address:", tx.To.String())
+	log.Info("transferTransactionToListTx value:", tx.Value)
 	return &listTx{
 		Hash:   tx.Hash,
 		Value:  tx.Value,
