@@ -175,6 +175,7 @@ func (repo *Repo) GetKeyBlockByHash(hash Hash) (*KeyBlock, error) {
 
 func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error) {
 	var txs []Transaction
+
 	pageSize := getPageSizeDefault(condition.PageSize)
 	columns := getColumnsByScenario(transactionColumnsConfig, condition.Scenario)
 	skip := condition.Skip
@@ -194,12 +195,13 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 // GetTransaction is
 func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
 	var txs []Transaction
+	//log.Info("GetTransaction")
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		return "hash = ?", []interface{}{hash}
 	}()
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
-			return db.Select([]string{"time", "hash"})
+			return db.Select([]string{"time", "number"})
 		}).Where(whereStatment, whereArgs).Find(&txs).Error
 	})
 	if err != nil {
@@ -208,6 +210,7 @@ func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
 	if len(txs) <= 0 {
 		return nil, &util.MyError{Message: fmt.Sprintf("No Tranasction(number=%v) found in Db", hash)}
 	}
+	//log.Info("GetTransaction  BlockNumber",&txs[0].BlockNumber)
 	return &txs[0], nil
 }
 
