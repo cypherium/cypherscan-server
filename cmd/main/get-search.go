@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"reflect"
 
 	"github.com/cypherium/cypherscan-server/internal/bizutil"
 	"github.com/cypherium/cypherscan-server/internal/repo"
 	"github.com/cypherium/cypherscan-server/internal/util"
-	log "github.com/sirupsen/logrus"
 )
 
 func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
-	log.Info("getNumberRequest")
+	//log.Info("getNumberRequest")
 	number, err := getNumberRequest(r, "q")
 	if err == nil {
 		block, _ := a.repo.GetBlock(number)
@@ -23,7 +23,7 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithJSON(w, 200, convertToNumberResult(block, keyBlock))
 		return
 	}
-	log.Info("getHashRequest")
+	//log.Info("getHashRequest")
 	bytes, err := getHashRequest(r, "q")
 	if err != nil {
 		bizutil.HandleError(err, "query failed")
@@ -31,7 +31,7 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info("getBytesType")
+	//log.Info("getBytesType")
 	bytesType := getBytesType(bytes)
 	if bytesType == unknownType {
 		bizutil.HandleError(err, "query failed")
@@ -40,21 +40,21 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if bytesType == addressType {
-		log.Info("getCursorPaginationRequest")
+		//log.Info("getCursorPaginationRequest")
 		pagination, err := getCursorPaginationRequest(r)
 		if err != nil {
 			bizutil.HandleError(err, "get cursor pagination request failed")
 			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("GET /search/{q} failed, because failed to get pagination queries"))
 			return
 		}
-		log.Info("QueryAddress")
+		//log.Info("QueryAddress")
 		queryResult, err := a.repo.QueryAddress(&repo.QueryAddressRequest{Address: bytes, CursorPaginationRequest: *pagination})
 		if err != nil {
 			bizutil.HandleError(err, "query address failed")
 			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("GET /search/{q} failed, because failed to get query address: %#v and pagination: %#v", bytes, pagination))
 			return
 		}
-		log.Info("Borrow")
+
 		client, err := a.pool.Borrow()
 		if err != nil {
 			bizutil.HandleError(util.NewError(err, "Borrow from pool failed"), "error when fetch block")
@@ -68,7 +68,7 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("GET /search/%d failed, because failed to get balance", bytes))
 			return
 		}
-		log.Info("respondWithJSON")
+		//log.Info("respondWithJSON")
 		respondWithJSON(w, 200, &searchResult{
 			ResultType: address,
 			Result:     convertQueryResultToListTxs(queryResult),
@@ -76,41 +76,57 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	log.Info("GetTransaction")
+	//log.Info("GetTransaction")
 	//tx hash
 	tx, err := a.repo.GetTransaction(repo.BytesToHash(bytes))
 	if tx != nil {
 		respondWithJSON(w, 200, convertToHashSearchTx(tx))
 		return
 	}
-	log.Info("GetBlockByHash")
+	//log.Info("GetBlockByHash")
 	//block hash
 	block, err := a.repo.GetBlockByHash(repo.BytesToHash(bytes))
 	if block != nil {
 		respondWithJSON(w, 200, convertToHashSearchBlock(block))
 		return
 	}
-	log.Info("GetKeyBlockByHash")
+	//log.Info("GetKeyBlockByHash")
 	//keyblock hash
 	keyblock, err := a.repo.GetKeyBlockByHash(repo.BytesToHash(bytes))
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.Info("keyblock")
+	//log.Info("keyblock")
 	if keyblock != nil {
 		respondWithJSON(w, 200, convertToHashSearchKeyBlock(keyblock))
 		return
 	}
 }
-
+func deepEqualWithoutId(trans1 repo.Transaction, trans2 repo.Transaction) bool {
+	var tempTrans1 = trans1
+	var tempTrans2 = trans2
+	tempTrans1.ID = 1
+	tempTrans2.ID = tempTrans1.ID
+	if !reflect.DeepEqual(tempTrans1, tempTrans2) {
+		return false
+	}
+	return true
+}
 func convertQueryResultToListTxs(queryResult *repo.QueryResult) *CursoredList {
 	if len(queryResult.Items) <= 0 {
 		return nil
 	}
+
 	ret := make([]interface{}, 0, len(queryResult.Items))
+	i := 0
+	var preItems repo.Transaction
 	for _, b := range queryResult.Items {
-		ret = append(ret, transferTransactionToListTx(b))
+		if !deepEqualWithoutId(preItems, b) || i == 0 {
+			ret = append(ret, transferTransactionToListTx(b))
+			preItems = b
+			i += 1
+		}
 	}
 	return &CursoredList{Items: ret, Last: queryResult.Last, First: queryResult.First}
 }
