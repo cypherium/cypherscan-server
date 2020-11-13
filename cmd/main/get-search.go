@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
+	"math/big"
 	"net/http"
 
 	"github.com/cypherium/cypherscan-server/internal/bizutil"
 	"github.com/cypherium/cypherscan-server/internal/repo"
 	"github.com/cypherium/cypherscan-server/internal/util"
+	log "github.com/sirupsen/logrus"
 )
 
 func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
+	log.Info("getNumberRequest")
 	number, err := getNumberRequest(r, "q")
 	if err == nil {
 		block, _ := a.repo.GetBlock(number)
@@ -20,13 +23,15 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithJSON(w, 200, convertToNumberResult(block, keyBlock))
 		return
 	}
-
+	log.Info("getHashRequest")
 	bytes, err := getHashRequest(r, "q")
 	if err != nil {
 		bizutil.HandleError(err, "query failed")
 		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("GET /search/{q} failed"))
 		return
 	}
+
+	log.Info("getBytesType")
 	bytesType := getBytesType(bytes)
 	if bytesType == unknownType {
 		bizutil.HandleError(err, "query failed")
@@ -35,18 +40,21 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 	}
 
 	if bytesType == addressType {
+		log.Info("getCursorPaginationRequest")
 		pagination, err := getCursorPaginationRequest(r)
 		if err != nil {
 			bizutil.HandleError(err, "get cursor pagination request failed")
 			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("GET /search/{q} failed, because failed to get pagination queries"))
 			return
 		}
+		log.Info("QueryAddress")
 		queryResult, err := a.repo.QueryAddress(&repo.QueryAddressRequest{Address: bytes, CursorPaginationRequest: *pagination})
 		if err != nil {
 			bizutil.HandleError(err, "query address failed")
 			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("GET /search/{q} failed, because failed to get query address: %#v and pagination: %#v", bytes, pagination))
 			return
 		}
+		log.Info("Borrow")
 		client, err := a.pool.Borrow()
 		if err != nil {
 			bizutil.HandleError(util.NewError(err, "Borrow from pool failed"), "error when fetch block")
@@ -60,6 +68,7 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 			respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("GET /search/%d failed, because failed to get balance", bytes))
 			return
 		}
+		log.Info("respondWithJSON")
 		respondWithJSON(w, 200, &searchResult{
 			ResultType: address,
 			Result:     convertQueryResultToListTxs(queryResult),
@@ -67,24 +76,28 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
+	log.Info("GetTransaction")
 	//tx hash
 	tx, err := a.repo.GetTransaction(repo.BytesToHash(bytes))
 	if tx != nil {
 		respondWithJSON(w, 200, convertToHashSearchTx(tx))
 		return
 	}
+	log.Info("GetBlockByHash")
 	//block hash
 	block, err := a.repo.GetBlockByHash(repo.BytesToHash(bytes))
 	if block != nil {
 		respondWithJSON(w, 200, convertToHashSearchBlock(block))
 		return
 	}
+	log.Info("GetKeyBlockByHash")
 	//keyblock hash
 	keyblock, err := a.repo.GetKeyBlockByHash(repo.BytesToHash(bytes))
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	log.Info("keyblock")
 	if keyblock != nil {
 		respondWithJSON(w, 200, convertToHashSearchKeyBlock(keyblock))
 		return
@@ -111,9 +124,11 @@ const (
 )
 
 func getBytesType(bytes []byte) bytesType {
+
 	if len(bytes) == 32 {
 		return hashType
 	}
+
 	if len(bytes) == 20 {
 		return addressType
 	}
@@ -149,13 +164,13 @@ func convertToNumberResult(block *repo.TxBlock, keyBlock *repo.KeyBlock) *search
 	}
 }
 
-// func convertToAddressSearchResult(queryResult *repo.QueryResult, balance *big.Int) *searchResult {
-// 	return &searchResult{
-// 		ResultType: address,
-// 		Result:     convertQueryResultToListTxs(queryResult),
-// 		Balance:    fmt.Sprintf("%d", balance),
-// 	}
-// }
+func convertToAddressSearchResult(queryResult *repo.QueryResult, balance *big.Int) *searchResult {
+	return &searchResult{
+		ResultType: address,
+		Result:     convertQueryResultToListTxs(queryResult),
+		Balance:    fmt.Sprintf("%d", balance),
+	}
+}
 
 type hashSearchResultType string
 

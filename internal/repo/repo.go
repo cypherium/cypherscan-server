@@ -195,7 +195,7 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 // GetTransaction is
 func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
 	var txs []Transaction
-	//log.Info("GetTransaction")
+	//xlog.Info("GetTransaction")
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		return "hash = ?", []interface{}{hash}
 	}()

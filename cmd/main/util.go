@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/cypherium/cypherscan-server/internal/repo"
 	"github.com/cypherium/cypherscan-server/internal/util"
@@ -70,6 +71,7 @@ func getHashRequest(r *http.Request, name string) ([]byte, error) {
 	vars := mux.Vars(r)
 	strHash := vars[name]
 	strBlockHash := fmt.Sprintf("\"%s\"", strHash)
+	strBlockHash = strings.Replace(strBlockHash, "CPH", "0x", -1)
 	blockHash := Bytes(make([]byte, 100))
 	blockHashErr := json.Unmarshal([]byte(strBlockHash), &blockHash)
 	if blockHashErr != nil {

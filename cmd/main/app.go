@@ -45,8 +45,8 @@ func (a *App) initializeRoutes() {
 	a.Router.Path("/block-txs/{number:[0-9]+}").Queries("p", "{p}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/block-txs/{number:[0-9]+}").HandlerFunc(cors(a.GetBlockTxs)).Methods("GET", "OPTIONS")
 	a.Router.Path("/tx/{hash}").HandlerFunc(cors(a.GetTx)).Methods("GET", "OPTIONS")
-	a.Router.Path("/search/{q:[0-9|a-x]+}").Queries("after", "{after}", "before", "{before}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetSearch)).Methods("GET", "OPTIONS")
-	a.Router.Path("/search/{q:[0-9|a-x]+}").HandlerFunc(cors(a.GetSearch)).Methods("GET", "OPTIONS")
+	a.Router.Path("/search/{q:[0-9|a-x|A-X]+}").Queries("after", "{after}", "before", "{before}", "pagesize", "{pageSize}").HandlerFunc(cors(a.GetSearch)).Methods("GET", "OPTIONS")
+	a.Router.Path("/search/{q:[0-9|a-x|A-X]+}").HandlerFunc(cors(a.GetSearch)).Methods("GET", "OPTIONS")
 }
 
 // GetHome is: GET /home
