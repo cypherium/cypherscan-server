@@ -73,7 +73,7 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithJSON(w, 200, &searchResult{
 			ResultType: address,
 			Result:     convertQueryResultToListTxs(queryResult),
-			Balance:    fmt.Sprintf("%d", balance),
+			Balance:    fmt.Sprintf("%v", balance),
 		})
 		return
 	}
