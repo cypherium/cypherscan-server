@@ -69,11 +69,11 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		//log.Info("respondWithJSON")
-		balance.Div(balance, big.NewInt(1e18))
+		//balance.Div(balance,big.NewInt(1e18))
 		respondWithJSON(w, 200, &searchResult{
 			ResultType: address,
 			Result:     convertQueryResultToListTxs(queryResult),
-			Balance:    fmt.Sprintf("%v", balance),
+			Balance:    fmt.Sprintf("%d", balance),
 		})
 		return
 	}
