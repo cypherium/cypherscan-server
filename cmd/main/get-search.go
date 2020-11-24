@@ -69,6 +69,7 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		//log.Info("respondWithJSON")
+		balance.Div(balance, big.NewInt(1e18))
 		respondWithJSON(w, 200, &searchResult{
 			ResultType: address,
 			Result:     convertQueryResultToListTxs(queryResult),
