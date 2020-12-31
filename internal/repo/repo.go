@@ -2,6 +2,7 @@ package repo
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"math"
 
 	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
@@ -63,6 +64,7 @@ func (repo *Repo) SaveBlock(block *types.Block) error {
 
 // SaveKeyBlock is to save key block into db
 func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
+	log.Infof("SaveKeyBlock number %d", block.Number())
 	record := transferKeyBlockHeaderToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
 		db.Create(record)
@@ -74,6 +76,7 @@ func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
 // GetBlocks is
 func (repo *Repo) GetBlocks(condition *BlockSearchContdition) ([]TxBlock, error) {
 	var txBlocks []TxBlock
+	log.Infof("GetBlocks  %d", condition)
 	pageSize := getPageSizeDefault(condition.PageSize)
 	columns := getColumnsByScenario(blockColumnsConfig, condition.Scenario)
 	whereStatment, whereArgs := getWhere(condition.StartWith, pageSize)
@@ -91,9 +94,9 @@ func (repo *Repo) GetBlock(number int64) (*TxBlock, error) {
 		}
 		return "number = ?", []interface{}{number}
 	}()
-
+	log.Infof("GetBlock by number %d", number)
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&txBlocks).Error
+		return db.Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&txBlocks).Error
 	})
 	if err != nil {
 		return nil, err
@@ -109,9 +112,9 @@ func (repo *Repo) GetBlockByHash(hash Hash) (*TxBlock, error) {
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		return "hash = ?", []interface{}{hash}
 	}()
-
+	log.Infof("GetBlock by hash %d", hash)
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&txBlocks).Error
+		return db.Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&txBlocks).Error
 	})
 	if err != nil {
 		return nil, err
@@ -125,11 +128,12 @@ func (repo *Repo) GetBlockByHash(hash Hash) (*TxBlock, error) {
 // GetKeyBlocks is
 func (repo *Repo) GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error) {
 	var keyBlocks []KeyBlock
+	log.Infof("GetKeyBlocks  %d", condition)
 	pageSize := getPageSizeDefault(condition.PageSize)
 	columns := getColumnsByScenario(keyBlockColumnsConfig, condition.Scenario)
 	whereStatment, whereArgs := getWhere(condition.StartWith, pageSize)
 	return keyBlocks, repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Where(whereStatment, whereArgs...).Select(columns).Order("time desc").Limit(pageSize).Find(&keyBlocks).Error
+		return db.Where(whereStatment, whereArgs...).Select(columns).Order("time desc").Limit(pageSize).Find(&keyBlocks).Error
 	})
 }
 
@@ -142,9 +146,9 @@ func (repo *Repo) GetKeyBlock(number int64) (*KeyBlock, error) {
 		}
 		return "number = ?", []interface{}{number}
 	}()
-
+	log.Infof("GetKeyBlock  %d", number)
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&keyBlocks).Error
+		return db.Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&keyBlocks).Error
 	})
 	if err != nil {
 		return nil, err
@@ -160,9 +164,9 @@ func (repo *Repo) GetKeyBlockByHash(hash Hash) (*KeyBlock, error) {
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		return "hash = ?", []interface{}{hash}
 	}()
-
+	log.Infof("GetKeyBlockByHash  %d", hash)
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&keyBlocks).Error
+		return db.Where(whereStatment, whereArgs).Order("time desc").Limit(1).Find(&keyBlocks).Error
 	})
 	if err != nil {
 		return nil, err
@@ -186,7 +190,7 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 		return "block_number = ?", []interface{}{condition.BlockNumber}
 	}()
 	return txs, repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
+		return db.Preload("Block", func(db *gorm.DB) *gorm.DB {
 			return db.Select([]string{"time", "number"})
 		}).Where(whereStatment, whereArgs...).Select(columns).Order("id desc").Offset(skip).Limit(pageSize).Find(&txs).Error
 	})
@@ -196,11 +200,12 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
 	var txs []Transaction
 	//xlog.Info("GetTransaction")
+	log.Infof("GetTransaction  %d", hash)
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		return "hash = ?", []interface{}{hash}
 	}()
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
-		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
+		return db.Preload("Block", func(db *gorm.DB) *gorm.DB {
 			return db.Select([]string{"time", "number"})
 		}).Where(whereStatment, whereArgs).Find(&txs).Error
 	})

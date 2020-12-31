@@ -104,7 +104,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 					nKeyBlock = nKeyBlock.Add(nKeyBlock, big.NewInt(1))
 				}
 			}
-			time.Sleep(500 * time.Millisecond)
+			//time.Sleep(500 * time.Millisecond)
 
 		}
 	}
