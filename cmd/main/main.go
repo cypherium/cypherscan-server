@@ -9,6 +9,7 @@ import (
 	"github.com/cypherium/cypherscan-server/internal/bizutil"
 	"github.com/cypherium/cypherscan-server/internal/blockchain"
 	"github.com/cypherium/cypherscan-server/internal/config"
+	"github.com/cypherium/cypherscan-server/internal/model"
 	"github.com/cypherium/cypherscan-server/internal/publisher"
 	"github.com/cypherium/cypherscan-server/internal/repo"
 	"github.com/cypherium/cypherscan-server/internal/util"
