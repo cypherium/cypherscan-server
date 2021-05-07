@@ -9,7 +9,7 @@ import (
 	"github.com/cypherium/cypherscan-server/internal/bizutil"
 	"github.com/cypherium/cypherscan-server/internal/blockchain"
 	"github.com/cypherium/cypherscan-server/internal/config"
-	"github.com/cypherium/cypherscan-server/internal/model"
+
 	"github.com/cypherium/cypherscan-server/internal/publisher"
 	"github.com/cypherium/cypherscan-server/internal/repo"
 	"github.com/cypherium/cypherscan-server/internal/util"
@@ -23,6 +23,7 @@ func main() {
 	context := context.Background()
 	config := config.GetFromEnv()
 	log.Info("Config:", fmt.Sprintf("%v", config))
+
 	dbClient, err := util.ConnectDb("sqlite3", config.RdsHostName, config.RdsPort, "cypherdb", "postgres", "postgres", "disable")
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Can NOT connect to database: %s", err.Error()))

@@ -53,9 +53,11 @@ func (repo *Repo) InitDb() {
 
 // SaveBlock is to save blocks into db
 func (repo *Repo) SaveBlock(block *types.Block) error {
-	_, err := repo.GetBlock(block.Number().Int64())
-	if err != nil {
-		return err
+	if block.Number().Int64() > 0 {
+		_, err := repo.GetBlock(block.Number().Int64())
+		if err != nil {
+			return err
+		}
 	}
 	record := transformBlockToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {
@@ -68,9 +70,11 @@ func (repo *Repo) SaveBlock(block *types.Block) error {
 // SaveKeyBlock is to save key block into db
 func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
 	log.Infof("SaveKeyBlock number %d", block.Number())
-	_, err := repo.GetKeyBlock(block.Number().Int64())
-	if err != nil {
-		return err
+	if block.Number().Int64() > 0 {
+		_, err := repo.GetKeyBlock(block.Number().Int64())
+		if err != nil {
+			return err
+		}
 	}
 	record := transferKeyBlockHeaderToDbRecord(block)
 	repo.dbRunner.Run(func(db *gorm.DB) error {

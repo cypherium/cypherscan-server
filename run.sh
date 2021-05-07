@@ -1,5 +1,5 @@
 #!/bin/bash
-killall -9 main
+killall -9 scansv
 rm -rf ./out.log
 localProjectPath="./vendor/github.com/cypherium/cypherBFT-P/go-cypherium"
 cp -rf $localProjectPath/crypto/bls/lib/mac/*     $localProjectPath/crypto/bls/lib/
