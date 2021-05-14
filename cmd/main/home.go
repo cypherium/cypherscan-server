@@ -24,37 +24,55 @@ const (
 
 func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 	logrus.Info("getHome")
-	blockLatestNumber, err := a.blocksFetcher.GetLatestBlockNumber()
+	//blockLatestNumber, err := a.blocksFetcher.GetLatestBlockNumber()
+	//if err != nil {
+	//	respondWithError(w, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
+	highestTxBlock, err := a.repo.GetLocalHighestBlock()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: BlocksPageSize})
-	if err != nil {
-		respondWithError(w, 500, err.Error())
-		return
-	}
-	keyBlockLatestNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	keyBlocks, err := a.repo.GetKeyBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, PageSize: KeyBlocksPageSize, StartWith: keyBlockLatestNumber})
-	if err != nil {
-		respondWithError(w, 500, err.Error())
-		return
-	}
-
-	highestTxBlock, _ := a.repo.GetLocalHighestBlock()
 	nTxBlock := big.NewInt(highestTxBlock.Number)
-	transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: nTxBlock.Int64(), Scenario: repo.HomePage, PageSize: TxsPageSize})
+	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: nTxBlock.Int64(), PageSize: BlocksPageSize})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-	logrus.Info("Home transactions[0].BlockNumber ", transactions[0].BlockNumber)
+	//keyBlockLatestNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
+	//if err != nil {
+	//	respondWithError(w, http.StatusInternalServerError, err.Error())
+	//	return
+	//}
+	highestKeyBlock, err := a.repo.GetLocalHighestKeyBlock()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	nKeyBlock := big.NewInt(highestKeyBlock.Number)
+
+	keyBlocks, err := a.repo.GetKeyBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, PageSize: KeyBlocksPageSize, StartWith: nKeyBlock.Int64()})
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
+
+	transactions := make([]repo.Transaction, 0, TransactionCount)
+	for i := len(txBlocks) - 1; i >= 0; i-- {
+		currentBlock := txBlocks[i]
+
+		transactions = append(transactions, currentBlock.Transactions...)
+		if len(transactions) >= TransactionCount {
+			break
+		}
+	}
+	//transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: nTxBlock.Int64(), Scenario: repo.HomePage, PageSize: TxsPageSize})
+	//if err != nil {
+	//	respondWithError(w, 500, err.Error())
+	//	return
+	//}
+
 	latestBlocksNumber, err := a.blocksFetcher.GetLatestBlockNumber()
 	if err != nil {
 		respondWithError(w, 500, err.Error())
