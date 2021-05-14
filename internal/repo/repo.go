@@ -28,6 +28,8 @@ type Get interface {
 type BlockSaver interface {
 	SaveBlock(block *types.Block) error
 	SaveKeyBlock(block *types.KeyBlock) error
+	GetLocalHighestKeyBlock() (*KeyBlock, error)
+	GetLocalHighestBlock() (*TxBlock, error)
 }
 
 // Repo is the database access layer
@@ -66,12 +68,13 @@ func (repo *Repo) SaveBlock(block *types.Block) error {
 		db.Create(record)
 		return nil
 	})
+	log.Infof("SaveBlock number %d", block.Number())
 	return nil
 }
 
 // SaveKeyBlock is to save key block into db
 func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
-	log.Infof("SaveKeyBlock number %d", block.Number())
+
 	record := transferKeyBlockHeaderToDbRecord(block)
 	if block.Number().Int64() > 1 {
 		getBlock, _ := repo.GetKeyBlock(record.Number)
@@ -83,7 +86,34 @@ func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
 		db.Create(record)
 		return nil
 	})
+	log.Infof("SaveKeyBlock number %d", block.Number())
 	return nil
+}
+
+func (repo *Repo) GetLocalHighestKeyBlock() (*KeyBlock, error) {
+
+	var keyBlock KeyBlock
+	err := repo.dbRunner.Run(func(db *gorm.DB) error {
+		db.Last(&keyBlock)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &keyBlock, nil
+}
+
+func (repo *Repo) GetLocalHighestBlock() (*TxBlock, error) {
+
+	var txBlock TxBlock
+	err := repo.dbRunner.Run(func(db *gorm.DB) error {
+		db.Last(&txBlock)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &txBlock, nil
 }
 
 // GetBlocks is
