@@ -21,6 +21,8 @@ type Get interface {
 	GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error)
 	GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error)
 	GetTransaction(hash Hash) (*Transaction, error)
+	GetLocalHighestKeyBlock() (*KeyBlock, error)
+	GetLocalHighestBlock() (*TxBlock, error)
 	QueryAddress(request *QueryAddressRequest) (*QueryResult, error)
 }
 
@@ -226,6 +228,7 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 	pageSize := getPageSizeDefault(condition.PageSize)
 	columns := getColumnsByScenario(transactionColumnsConfig, condition.Scenario)
 	skip := condition.Skip
+	log.Info("GetTransactions BlockNumber", condition.BlockNumber)
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		if condition.BlockNumber <= 0 {
 			return "block_number >= 0", []interface{}{}

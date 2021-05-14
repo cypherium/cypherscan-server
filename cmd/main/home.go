@@ -5,6 +5,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"math"
+	"math/big"
 	"net/http"
 
 	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
@@ -45,11 +46,15 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-	transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: TxsPageSize})
+
+	highestTxBlock, _ := a.repo.GetLocalHighestBlock()
+	nTxBlock := big.NewInt(highestTxBlock.Number)
+	transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: nTxBlock.Int64(), Scenario: repo.HomePage, PageSize: TxsPageSize})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
 		return
 	}
+	logrus.Info("Home transactions[0].BlockNumber ", transactions[0].BlockNumber)
 	latestBlocksNumber, err := a.blocksFetcher.GetLatestBlockNumber()
 	if err != nil {
 		respondWithError(w, 500, err.Error())
