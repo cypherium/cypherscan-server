@@ -5,7 +5,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"math"
-	"math/big"
 	"net/http"
 
 	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
@@ -24,61 +23,29 @@ const (
 
 func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 	logrus.Info("getHome")
-	//blockLatestNumber, err := a.blocksFetcher.GetLatestBlockNumber()
-	//if err != nil {
-	//	respondWithError(w, http.StatusInternalServerError, err.Error())
-	//	return
-	//}
-	highestTxBlock, err := a.repo.GetLocalHighestBlock()
+	blockLatestNumber, err := a.blocksFetcher.GetLatestBlockNumber()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	nTxBlock := big.NewInt(highestTxBlock.Number)
-	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: nTxBlock.Int64(), PageSize: BlocksPageSize})
+
+	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: BlocksPageSize})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-	//keyBlockLatestNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
-	//if err != nil {
-	//	respondWithError(w, http.StatusInternalServerError, err.Error())
-	//	return
-	//}
-	highestKeyBlock, err := a.repo.GetLocalHighestKeyBlock()
+	keyBlockLatestNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	nKeyBlock := big.NewInt(highestKeyBlock.Number)
 
-	keyBlocks, err := a.repo.GetKeyBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, PageSize: KeyBlocksPageSize, StartWith: nKeyBlock.Int64()})
+	keyBlocks, err := a.repo.GetKeyBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, PageSize: KeyBlocksPageSize, StartWith: keyBlockLatestNumber})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-
-	transactions := make([]repo.Transaction, 0, TransactionCount)
-	for i := len(txBlocks) - 1; i >= 0; i-- {
-		currentBlock := txBlocks[i]
-
-		transactions = append(transactions, currentBlock.Transactions...)
-		if len(transactions) >= TransactionCount {
-			break
-		}
-	}
-	//transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: nTxBlock.Int64(), Scenario: repo.HomePage, PageSize: TxsPageSize})
-	//if err != nil {
-	//	respondWithError(w, 500, err.Error())
-	//	return
-	//}
-
-	latestBlocksNumber, err := a.blocksFetcher.GetLatestBlockNumber()
-	if err != nil {
-		respondWithError(w, 500, err.Error())
-		return
-	}
-	latestKeyBlocksNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
+	transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: TxsPageSize})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
 		return
@@ -90,8 +57,8 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			HomeMetric{Key: "bps", Name: "BPS", Value: MetricValue{Unit: "blocks/sec"}},
 			HomeMetric{Key: "key-blocks-nodes", Name: "Validators", Value: MetricValue{Value: 21}},
 			HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{}},
-			HomeMetric{Key: "tx-blocks-number", Name: "Tx Blocks Number", Value: MetricValue{Value: latestBlocksNumber}},
-			HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: latestKeyBlocksNumber}},
+			HomeMetric{Key: "tx-blocks-number", Name: "Tx Blocks Number", Value: MetricValue{Value: blockLatestNumber}},
+			HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: keyBlockLatestNumber}},
 		},
 		TxBlocks: func() []HomeTxBlock {
 			ret := make([]HomeTxBlock, 0, len(txBlocks))
