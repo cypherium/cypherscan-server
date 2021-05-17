@@ -6,6 +6,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"math"
 	"net/http"
+	"reflect"
 
 	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
 	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto"
@@ -50,7 +51,9 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-
+	var preTransaction repo.Transaction
+	var preTxBlock repo.TxBlock
+	var preKeyBlock repo.KeyBlock
 	payload := HomePayload{
 		Metrics: []HomeMetric{
 			HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Unit: ""}},
@@ -63,27 +66,36 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		TxBlocks: func() []HomeTxBlock {
 			ret := make([]HomeTxBlock, 0, len(txBlocks))
 			for _, b := range txBlocks {
-				ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
+				if !reflect.DeepEqual(b, preTxBlock) {
+					preTxBlock = b
+					ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
+				}
 			}
 			return ret
 		}(),
 		KeyBlocks: func() []HomeKeyBlock {
 			ret := make([]HomeKeyBlock, 0, len(keyBlocks))
 			for _, b := range keyBlocks {
-				ret = append(ret, HomeKeyBlock{b.Number, b.Time})
+				if !reflect.DeepEqual(b, preKeyBlock) {
+					preKeyBlock = b
+					ret = append(ret, HomeKeyBlock{b.Number, b.Time})
+				}
 			}
 			return ret
 		}(),
 		Txs: func() []HomeTx {
 			ret := make([]HomeTx, 0, len(transactions))
 			for _, t := range transactions {
-				ret = append(ret, HomeTx{
-					t.Block.Time,
-					t.Value,
-					t.Hash,
-					t.From.String(),
-					t.To.String(),
-				})
+				if !reflect.DeepEqual(t, preTransaction) {
+					preTransaction = t
+					ret = append(ret, HomeTx{
+						t.Block.Time,
+						t.Value,
+						t.Hash,
+						t.From.String(),
+						t.To.String(),
+					})
+				}
 			}
 			return ret
 		}(),
