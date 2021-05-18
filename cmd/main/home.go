@@ -53,7 +53,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 	}
 	var preTransaction repo.Transaction
 	var preTxBlock repo.TxBlock
-	var preKeyBlock repo.KeyBlock
+	//var preKeyBlock repo.KeyBlock
 	payload := HomePayload{
 		Metrics: []HomeMetric{
 			HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Unit: ""}},
@@ -73,14 +73,23 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			}
 			return ret
 		}(),
+		//KeyBlocks: func() []HomeKeyBlock {
+		//	ret := make([]HomeKeyBlock, 0, len(keyBlocks))
+		//	for _, b := range keyBlocks {
+		//		if !reflect.DeepEqual(b, preKeyBlock) {
+		//			preKeyBlock = b
+		//			ret = append(ret, HomeKeyBlock{b.Number, b.Time})
+		//		}
+		//	}
+		//	return ret
+		//}(),
 		KeyBlocks: func() []HomeKeyBlock {
 			ret := make([]HomeKeyBlock, 0, len(keyBlocks))
 			for _, b := range keyBlocks {
-				if !reflect.DeepEqual(b, preKeyBlock) {
-					preKeyBlock = b
-					ret = append(ret, HomeKeyBlock{b.Number, b.Time})
-				}
+				//preKeyBlock = b
+				ret = append(ret, HomeKeyBlock{b.Number, b.Time})
 			}
+
 			return ret
 		}(),
 		Txs: func() []HomeTx {
