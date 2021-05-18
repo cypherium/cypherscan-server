@@ -29,40 +29,45 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	var preTxBlock repo.TxBlock
+	var txBlock, preTxBlock *repo.TxBlock
 	var txBlocks []repo.TxBlock
-	//for {
-	//	&txBlock, err = a.repo.GetBlock(startNumber)
-	//	if err != nil {
-	//		respondWithError(w, 500, err.Error())
-	//		return
-	//	}
-	//	if !reflect.DeepEqual(txBlock,preTxBlock){
-	//		if
-	//		preTxBlock=txBlock
-	//		txBlocks=append(txBlocks,txBlock)
-	//	}
-	//
-	//}
-	ret := make([]HomeTxBlock, 0, BlocksPageSize)
+	startNumber := blockLatestNumber
 	for {
-		txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: BlocksPageSize})
+		txBlock, err = a.repo.GetBlock(startNumber)
 		if err != nil {
 			respondWithError(w, 500, err.Error())
 			return
 		}
-		for _, b := range txBlocks {
-			if !reflect.DeepEqual(b, preTxBlock) {
-				preTxBlock = b
-				ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
-			}
+		if !reflect.DeepEqual(txBlock, preTxBlock) {
+			preTxBlock = txBlock
+			txBlocks = append(txBlocks, *txBlock)
 		}
-		if len(ret) >= BlocksPageSize {
+		if len(txBlocks) >= BlocksPageSize {
 			break
 		} else {
-			blockLatestNumber--
+			startNumber--
 		}
 	}
+	//pageSize:=BlocksPageSize
+	//ret := make([]HomeTxBlock, 0, BlocksPageSize)
+	//for {
+	//	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: pageSize})
+	//	if err != nil {
+	//		respondWithError(w, 500, err.Error())
+	//		return
+	//	}
+	//	for _, b := range txBlocks {
+	//		if !reflect.DeepEqual(b, preTxBlock) {
+	//			preTxBlock = b
+	//			ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
+	//		}
+	//	}
+	//	if len(ret) >=BlocksPageSize{
+	//		break
+	//	}else{
+	//		pageSize++
+	//	}
+	//}
 	keyBlockLatestNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
