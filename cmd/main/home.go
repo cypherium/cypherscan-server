@@ -32,6 +32,8 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 	var txBlock, preTxBlock *repo.TxBlock
 	var txBlocks []repo.TxBlock
 	startNumber := blockLatestNumber
+	var preTransaction repo.Transaction
+	var transactions []repo.Transaction
 	for {
 		txBlock, err = a.repo.GetBlock(startNumber)
 		if err != nil {
@@ -41,6 +43,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		if !reflect.DeepEqual(txBlock, preTxBlock) {
 			preTxBlock = txBlock
 			txBlocks = append(txBlocks, *txBlock)
+			transactions = append(transactions, txBlock.Transactions...)
 		}
 		if len(txBlocks) >= BlocksPageSize {
 			break
@@ -48,26 +51,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			startNumber--
 		}
 	}
-	//pageSize:=BlocksPageSize
-	//ret := make([]HomeTxBlock, 0, BlocksPageSize)
-	//for {
-	//	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: pageSize})
-	//	if err != nil {
-	//		respondWithError(w, 500, err.Error())
-	//		return
-	//	}
-	//	for _, b := range txBlocks {
-	//		if !reflect.DeepEqual(b, preTxBlock) {
-	//			preTxBlock = b
-	//			ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
-	//		}
-	//	}
-	//	if len(ret) >=BlocksPageSize{
-	//		break
-	//	}else{
-	//		pageSize++
-	//	}
-	//}
+
 	keyBlockLatestNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -79,13 +63,32 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-	transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: TxsPageSize})
-	if err != nil {
-		respondWithError(w, 500, err.Error())
-		return
-	}
-	var preTransaction repo.Transaction
 
+	//transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: TxsPageSize})
+	//if err != nil
+	//	respondWithError(w, 500, err.Error())
+	//	return
+	//}
+	if len(transactions) < TxsPageSize {
+		for {
+			txBlock, err = a.repo.GetBlock(startNumber)
+			if err != nil {
+				respondWithError(w, 500, err.Error())
+				return
+			}
+			if !reflect.DeepEqual(txBlock, preTxBlock) {
+				preTxBlock = txBlock
+				transactions = append(transactions, txBlock.Transactions...)
+			}
+			if len(transactions) >= TxsPageSize {
+				break
+			} else {
+				startNumber--
+			}
+		}
+	} else {
+		transactions = transactions[0:5]
+	}
 	//var preKeyBlock repo.KeyBlock
 	payload := HomePayload{
 		Metrics: []HomeMetric{
@@ -123,7 +126,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			return ret
 		}(),
 		Txs: func() []HomeTx {
-			ret := make([]HomeTx, 0, len(transactions))
+			ret := make([]HomeTx, 0, TxsPageSize)
 			for _, t := range transactions {
 				if !reflect.DeepEqual(t, preTransaction) {
 					preTransaction = t
