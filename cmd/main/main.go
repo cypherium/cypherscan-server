@@ -45,7 +45,6 @@ func main() {
 	hub := publisher.NewHub()
 	go hub.StartHub()
 
-	newBlockListener := NewBlockListener{Repo: repoInstance, BlockFetcher: blockChainClient, Broadcastable: hub}
 	chBlock := make(chan *types.Header)
 	chKeyBlock := make(chan *types.KeyBlockHeader)
 	_, err = blockChainClient.Subscribe(chBlock, chKeyBlock)
@@ -53,11 +52,12 @@ func main() {
 		log.Fatal("Cannot subscribe blockchain")
 	}
 	pool, poolTerminaterd := blockchain.NewPool(ctx, &blockchain.NewPoolOptions{BorrowTimeoutMs: 5000, MaxSize: 2, NodesUrls: []string{config.BlockChainWsURL}})
-	go newBlockListener.Listen(chBlock, chKeyBlock)
 	defer func() {
 		cancel()
 		<-poolTerminaterd
 	}()
 	app := NewApp(repoInstance, hub, blockChainClient, config.OriginAllowed, pool)
 	app.Run()
+	newBlockListener := NewBlockListener{Repo: repoInstance, BlockFetcher: blockChainClient, Broadcastable: hub}
+	go newBlockListener.Listen(chBlock, chKeyBlock)
 }
