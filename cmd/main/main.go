@@ -58,6 +58,6 @@ func main() {
 	}()
 	app := NewApp(repoInstance, hub, blockChainClient, config.OriginAllowed, pool)
 	app.Run()
-	newBlockListener := NewBlockListener{Repo: repoInstance, BlockFetcher: blockChainClient, Broadcastable: hub}
+	newBlockListener := NewBlockListener{get: repoInstance, Repo: repoInstance, BlockFetcher: blockChainClient, Broadcastable: hub}
 	go newBlockListener.Listen(chBlock, chKeyBlock)
 }

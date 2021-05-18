@@ -18,6 +18,7 @@ const (
 
 // NewBlockListener is to listen the
 type NewBlockListener struct {
+	get           repo.Get
 	Repo          repo.BlockSaver
 	BlockFetcher  blockchain.BlockFetcher
 	Broadcastable publisher.Broadcastable
@@ -48,7 +49,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		currentKeyBlock.SetNumber(big.NewInt(latestKeyBlocksNumber))
 	}
 
-	listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage([]*types.Block{}, metrics{currentKeyBlock: currentKeyBlock}))
+	listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(listerner.get, []*types.Block{}, metrics{currentKeyBlock: currentKeyBlock}))
 
 	// _k, err := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(400))
 	// if err != nil {
@@ -72,7 +73,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		case <-ticker.C:
 			if blocks != nil && len(blocks) > 0 {
 				//log.Infof("Broadcst %d blocks", len(blocks))
-				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{currentKeyBlock: currentKeyBlock}))
+				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(listerner.get, blocks, metrics{currentKeyBlock: currentKeyBlock}))
 				blocks = nil
 			}
 		case newKeyHead := <-keyHeadChan:

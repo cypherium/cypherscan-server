@@ -142,7 +142,7 @@ type metrics struct {
 	currentKeyBlock *types.KeyBlock
 }
 
-func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) *HomePayload {
+func transformTxBlocksToFrontendMessage(get repo.Get, blocks []*types.Block, metrics metrics) *HomePayload {
 	txBlocks := make([]HomeTxBlock, 0, len(blocks))
 	for _, b := range blocks {
 		txBlocks = append(txBlocks, *transformTxBlockToFrontend(b))
@@ -156,6 +156,18 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 			break
 		}
 	}
+	var preTransaction repo.Transaction
+	defaultListPageSize, _ := strconv.Atoi(DefaultListPageSize)
+	transactions, err := get.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: defaultListPageSize})
+	if err != nil {
+		return nil
+	}
+	if len(transactions) < TxsPageSize {
+
+	} else {
+		transactions = transactions[0:5]
+	}
+
 	totalTxs := int64(0)
 	for _, b := range blocks {
 		totalTxs += int64(len(b.Transactions()))
@@ -186,8 +198,23 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 	}
 	// log.Printf("calu tps: total tx: %d, lastBlock time: %v, firstBlock time: %v", totalTxs, lastBlock.Time(), firstBlock.Time())
 	return &HomePayload{
-		TxBlocks:  txBlocks,
-		Txs:       txs,
+		TxBlocks: txBlocks,
+		Txs: func() []HomeTx {
+			ret := make([]HomeTx, 0, TxsPageSize)
+			for _, t := range transactions {
+				if !reflect.DeepEqual(t, preTransaction) {
+					preTransaction = t
+					ret = append(ret, HomeTx{
+						t.Block.Time,
+						t.Value,
+						t.Hash,
+						t.From.String(),
+						t.To.String(),
+					})
+				}
+			}
+			return ret
+		}(),
 		KeyBlocks: []HomeKeyBlock{},
 		Metrics:   homeMetrics,
 	}
