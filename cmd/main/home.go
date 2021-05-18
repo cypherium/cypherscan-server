@@ -7,12 +7,12 @@ import (
 	"math"
 	"net/http"
 	"reflect"
+	"strconv"
 
 	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
 	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto"
 
 	"github.com/cypherium/cypherscan-server/internal/repo"
-
 	"time"
 )
 
@@ -43,7 +43,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		if !reflect.DeepEqual(txBlock, preTxBlock) {
 			preTxBlock = txBlock
 			txBlocks = append(txBlocks, *txBlock)
-			transactions = append(transactions, txBlock.Transactions...)
+			//transactions = append(transactions, txBlock.Transactions...)
 		}
 		if len(txBlocks) >= BlocksPageSize {
 			break
@@ -63,12 +63,12 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-
-	//transactions, err := a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: TxsPageSize})
-	//if err != nil
-	//	respondWithError(w, 500, err.Error())
-	//	return
-	//}
+	defaultListPageSize, _ := strconv.Atoi(DefaultListPageSize)
+	transactions, err = a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: defaultListPageSize})
+	if err != nil {
+		respondWithError(w, 500, err.Error())
+		return
+	}
 	if len(transactions) < TxsPageSize {
 
 	} else {

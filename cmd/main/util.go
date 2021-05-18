@@ -12,6 +12,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const DefaultListPageSize = "20"
+
 func getOffsetPaginationRequest(r *http.Request, latestNo int64) (*repo.PaginationRequest, error) {
 	pageSize, pageSizeErr := getPagesize(r)
 	if pageSizeErr != nil {
@@ -49,9 +51,7 @@ func getCursorPaginationRequest(r *http.Request) (*repo.CursorPaginationRequest,
 }
 
 func getPagesize(r *http.Request) (int, error) {
-	const (
-		DefaultListPageSize = "20"
-	)
+	const ()
 	v := r.URL.Query()
 	strPageSize := v.Get("pagesize")
 	if strPageSize == "" {

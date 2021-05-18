@@ -56,8 +56,7 @@ func cors(handleFunc func(http.ResponseWriter, *http.Request)) func(http.Respons
 
 func getPaginationRequest(r *http.Request) (int64, int, error) {
 	const (
-		DefaultPageNo       = "1"
-		DefaultListPageSize = "20"
+		DefaultPageNo = "1"
 	)
 	v := r.URL.Query()
 	strPageNo := v.Get("p")
