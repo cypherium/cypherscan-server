@@ -29,11 +29,40 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: BlocksPageSize})
-	if err != nil {
-		respondWithError(w, 500, err.Error())
-		return
+	var preTxBlock repo.TxBlock
+	var txBlocks []repo.TxBlock
+	//for {
+	//	&txBlock, err = a.repo.GetBlock(startNumber)
+	//	if err != nil {
+	//		respondWithError(w, 500, err.Error())
+	//		return
+	//	}
+	//	if !reflect.DeepEqual(txBlock,preTxBlock){
+	//		if
+	//		preTxBlock=txBlock
+	//		txBlocks=append(txBlocks,txBlock)
+	//	}
+	//
+	//}
+	pageSize := BlocksPageSize
+	ret := make([]HomeTxBlock, 0, BlocksPageSize)
+	for {
+		txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: pageSize})
+		if err != nil {
+			respondWithError(w, 500, err.Error())
+			return
+		}
+		for _, b := range txBlocks {
+			if !reflect.DeepEqual(b, preTxBlock) {
+				preTxBlock = b
+				ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
+			}
+		}
+		if len(ret) >= BlocksPageSize {
+			break
+		} else {
+			pageSize++
+		}
 	}
 	keyBlockLatestNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
 	if err != nil {
@@ -52,7 +81,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var preTransaction repo.Transaction
-	var preTxBlock repo.TxBlock
+
 	//var preKeyBlock repo.KeyBlock
 	payload := HomePayload{
 		Metrics: []HomeMetric{
@@ -66,10 +95,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		TxBlocks: func() []HomeTxBlock {
 			ret := make([]HomeTxBlock, 0, len(txBlocks))
 			for _, b := range txBlocks {
-				if !reflect.DeepEqual(b, preTxBlock) {
-					preTxBlock = b
-					ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
-				}
+				ret = append(ret, HomeTxBlock{b.Number, b.Txn, b.Time})
 			}
 			return ret
 		}(),
