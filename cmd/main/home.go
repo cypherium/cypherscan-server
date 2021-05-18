@@ -147,26 +147,26 @@ func transformTxBlocksToFrontendMessage(get repo.Get, blocks []*types.Block, met
 	for _, b := range blocks {
 		txBlocks = append(txBlocks, *transformTxBlockToFrontend(b))
 	}
-	txs := make([]HomeTx, 0, TransactionCount)
-	for i := len(blocks) - 1; i >= 0; i-- {
-		currentBlock := blocks[i]
-		currentTxs := getHomeTxsFromBlock(currentBlock, TransactionCount-len(txs))
-		txs = append(txs, currentTxs...)
-		if len(txs) >= TransactionCount {
-			break
-		}
-	}
+	//txs := make([]HomeTx, 0, TransactionCount)
+	//for i := len(blocks) - 1; i >= 0; i-- {
+	//	currentBlock := blocks[i]
+	//	currentTxs := getHomeTxsFromBlock(currentBlock, TransactionCount-len(txs))
+	//	txs = append(txs, currentTxs...)
+	//	if len(txs) >= TransactionCount {
+	//		break
+	//	}
+	//}
 	var preTransaction repo.Transaction
 	defaultListPageSize, _ := strconv.Atoi(DefaultListPageSize)
 	transactions, err := get.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: defaultListPageSize})
 	if err != nil {
 		return nil
 	}
-	if len(transactions) < TxsPageSize {
-
-	} else {
-		transactions = transactions[0:5]
-	}
+	//if len(transactions) < TxsPageSize {
+	//
+	//} else {
+	//	transactions = transactions[0:5]
+	//}
 
 	totalTxs := int64(0)
 	for _, b := range blocks {
