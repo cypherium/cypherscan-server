@@ -70,22 +70,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 	//	return
 	//}
 	if len(transactions) < TxsPageSize {
-		for {
-			txBlock, err = a.repo.GetBlock(startNumber)
-			if err != nil {
-				respondWithError(w, 500, err.Error())
-				return
-			}
-			if !reflect.DeepEqual(txBlock, preTxBlock) {
-				preTxBlock = txBlock
-				transactions = append(transactions, txBlock.Transactions...)
-			}
-			if len(transactions) >= TxsPageSize {
-				break
-			} else {
-				startNumber--
-			}
-		}
+
 	} else {
 		transactions = transactions[0:5]
 	}
