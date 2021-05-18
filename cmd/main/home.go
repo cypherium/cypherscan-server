@@ -44,10 +44,9 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 	//	}
 	//
 	//}
-	pageSize := BlocksPageSize
 	ret := make([]HomeTxBlock, 0, BlocksPageSize)
 	for {
-		txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: pageSize})
+		txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, StartWith: blockLatestNumber, PageSize: BlocksPageSize})
 		if err != nil {
 			respondWithError(w, 500, err.Error())
 			return
@@ -61,7 +60,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		if len(ret) >= BlocksPageSize {
 			break
 		} else {
-			pageSize++
+			blockLatestNumber--
 		}
 	}
 	keyBlockLatestNumber, err := a.blocksFetcher.GetLatestKeyBlockNumber()
