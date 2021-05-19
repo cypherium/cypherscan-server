@@ -235,11 +235,27 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 		}
 		return "block_number = ?", []interface{}{condition.BlockNumber}
 	}()
-	return txs, repo.dbRunner.Run(func(db *gorm.DB) error {
+	err := repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Preload("Block", func(db *gorm.DB) *gorm.DB {
 			return db.Select([]string{"time", "number"})
 		}).Where(whereStatment, whereArgs...).Select(columns).Order("id desc").Offset(skip).Limit(pageSize).Find(&txs).Error
 	})
+	if err != nil {
+		return nil, err
+	}
+	if len(txs) <= 0 {
+		return nil, &util.MyError{Message: fmt.Sprintf("No Tranasction(number=%v) found in Db", condition.BlockNumber)}
+	}
+	var preTransaction Transaction
+	var tempTransaction []Transaction
+	for _, t := range txs {
+		if !reflect.DeepEqual(t, preTransaction) {
+			preTransaction = t
+			tempTransaction = append(tempTransaction, t)
+		}
+	}
+	txs = tempTransaction
+	return txs, nil
 }
 
 // GetTransaction is
