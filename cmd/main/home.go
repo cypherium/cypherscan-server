@@ -3,14 +3,12 @@ package main
 import (
 	// "encoding/json"
 
+	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto"
 	"github.com/sirupsen/logrus"
 	"math"
 	"net/http"
 	"reflect"
-	"strconv"
-
-	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
-	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto"
 
 	"github.com/cypherium/cypherscan-server/internal/repo"
 	"time"
@@ -33,7 +31,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 	var txBlocks []repo.TxBlock
 	startNumber := blockLatestNumber
 	var preTransaction repo.Transaction
-	var transactions []repo.Transaction
+	var tempTransaction, transactions []repo.Transaction
 	for {
 		txBlock, err = a.repo.GetBlock(startNumber)
 		if err != nil {
@@ -43,7 +41,6 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		if !reflect.DeepEqual(txBlock, preTxBlock) {
 			preTxBlock = txBlock
 			txBlocks = append(txBlocks, *txBlock)
-			//transactions = append(transactions, txBlock.Transactions...)
 		}
 		if len(txBlocks) >= BlocksPageSize {
 			break
@@ -63,17 +60,28 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, err.Error())
 		return
 	}
-	defaultListPageSize, _ := strconv.Atoi(DefaultListPageSize)
-	transactions, err = a.repo.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: defaultListPageSize})
-	if err != nil {
-		respondWithError(w, 500, err.Error())
-		return
+	startTransactionNumber := blockLatestNumber
+	for {
+		transactions, err = a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: startTransactionNumber, Scenario: repo.HomePage, PageSize: BlocksPageSize})
+		if err != nil {
+			respondWithError(w, 500, err.Error())
+			return
+		}
+		for _, t := range transactions {
+			//logrus.Info("getHome transaction ",t)
+			if !reflect.DeepEqual(t, preTransaction) {
+				preTransaction = t
+				tempTransaction = append(tempTransaction, t)
+			}
+		}
+		if len(tempTransaction) < TxsPageSize {
+			startTransactionNumber--
+		} else {
+			transactions = tempTransaction
+			break
+		}
 	}
-	if len(transactions) < TxsPageSize {
-
-	} else {
-		transactions = transactions[0:5]
-	}
+	//logrus.Info("getHome transactions len ", len(transactions))
 	//var preKeyBlock repo.KeyBlock
 	payload := HomePayload{
 		Metrics: []HomeMetric{
@@ -111,8 +119,9 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			return ret
 		}(),
 		Txs: func() []HomeTx {
-			ret := make([]HomeTx, 0, TxsPageSize)
+			ret := make([]HomeTx, 0, len(transactions))
 			for _, t := range transactions {
+				//logrus.Info("getHome transaction ",t)
 				if !reflect.DeepEqual(t, preTransaction) {
 					preTransaction = t
 					ret = append(ret, HomeTx{
@@ -142,32 +151,20 @@ type metrics struct {
 	currentKeyBlock *types.KeyBlock
 }
 
-func transformTxBlocksToFrontendMessage(get repo.Get, blocks []*types.Block, metrics metrics) *HomePayload {
+func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) *HomePayload {
 	txBlocks := make([]HomeTxBlock, 0, len(blocks))
 	for _, b := range blocks {
 		txBlocks = append(txBlocks, *transformTxBlockToFrontend(b))
 	}
-	//txs := make([]HomeTx, 0, TransactionCount)
-	//for i := len(blocks) - 1; i >= 0; i-- {
-	//	currentBlock := blocks[i]
-	//	currentTxs := getHomeTxsFromBlock(currentBlock, TransactionCount-len(txs))
-	//	txs = append(txs, currentTxs...)
-	//	if len(txs) >= TransactionCount {
-	//		break
-	//	}
-	//}
-	var preTransaction repo.Transaction
-	defaultListPageSize, _ := strconv.Atoi(DefaultListPageSize)
-	transactions, err := get.GetTransactions(&repo.TransactionSearchCondition{Scenario: repo.HomePage, PageSize: defaultListPageSize})
-	if err != nil {
-		return nil
+	txs := make([]HomeTx, 0, TransactionCount)
+	for i := len(blocks) - 1; i >= 0; i-- {
+		currentBlock := blocks[i]
+		currentTxs := getHomeTxsFromBlock(currentBlock, TransactionCount-len(txs))
+		txs = append(txs, currentTxs...)
+		if len(txs) >= TransactionCount {
+			break
+		}
 	}
-	//if len(transactions) < TxsPageSize {
-	//
-	//} else {
-	//	transactions = transactions[0:5]
-	//}
-
 	totalTxs := int64(0)
 	for _, b := range blocks {
 		totalTxs += int64(len(b.Transactions()))
@@ -198,23 +195,8 @@ func transformTxBlocksToFrontendMessage(get repo.Get, blocks []*types.Block, met
 	}
 	// log.Printf("calu tps: total tx: %d, lastBlock time: %v, firstBlock time: %v", totalTxs, lastBlock.Time(), firstBlock.Time())
 	return &HomePayload{
-		TxBlocks: txBlocks,
-		Txs: func() []HomeTx {
-			ret := make([]HomeTx, 0, TxsPageSize)
-			for _, t := range transactions {
-				if !reflect.DeepEqual(t, preTransaction) {
-					preTransaction = t
-					ret = append(ret, HomeTx{
-						t.Block.Time,
-						t.Value,
-						t.Hash,
-						t.From.String(),
-						t.To.String(),
-					})
-				}
-			}
-			return ret
-		}(),
+		TxBlocks:  txBlocks,
+		Txs:       txs,
 		KeyBlocks: []HomeKeyBlock{},
 		Metrics:   homeMetrics,
 	}

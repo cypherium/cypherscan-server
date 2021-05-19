@@ -47,6 +47,8 @@ func main() {
 
 	chBlock := make(chan *types.Header)
 	chKeyBlock := make(chan *types.KeyBlockHeader)
+	newBlockListener := NewBlockListener{Repo: repoInstance, BlockFetcher: blockChainClient, Broadcastable: hub}
+	go newBlockListener.Listen(chBlock, chKeyBlock)
 	_, err = blockChainClient.Subscribe(chBlock, chKeyBlock)
 	if err != nil {
 		log.Fatal("Cannot subscribe blockchain")
@@ -58,6 +60,5 @@ func main() {
 	}()
 	app := NewApp(repoInstance, hub, blockChainClient, config.OriginAllowed, pool)
 	app.Run()
-	newBlockListener := NewBlockListener{get: repoInstance, Repo: repoInstance, BlockFetcher: blockChainClient, Broadcastable: hub}
-	go newBlockListener.Listen(chBlock, chKeyBlock)
+
 }
