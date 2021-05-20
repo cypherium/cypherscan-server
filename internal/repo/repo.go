@@ -228,13 +228,18 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 	pageSize := getPageSizeDefault(condition.PageSize)
 	columns := getColumnsByScenario(transactionColumnsConfig, condition.Scenario)
 	skip := condition.Skip
-	log.Info("GetTransactions BlockNumber", condition.BlockNumber)
+	log.Info("GetTransactions BlockNumber ", condition.BlockNumber)
+	log.Info("GetTransactions columns ", columns)
+	log.Info("GetTransactions pageSize ", pageSize)
+	log.Info("GetTransactions skip ", skip)
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		if condition.BlockNumber <= 0 {
 			return "block_number >= 0", []interface{}{}
 		}
 		return "block_number = ?", []interface{}{condition.BlockNumber}
 	}()
+	log.Info("GetTransactions whereStatment ", whereStatment)
+	log.Info("GetTransactions whereArgs ", whereArgs)
 	err := repo.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Preload("Block", func(db *gorm.DB) *gorm.DB {
 			return db.Select([]string{"time", "number"})
@@ -246,15 +251,17 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 	if len(txs) <= 0 {
 		return nil, &util.MyError{Message: fmt.Sprintf("No Tranasction(number=%v) found in Db", condition.BlockNumber)}
 	}
-	var preTransaction Transaction
-	var tempTransaction []Transaction
-	for _, t := range txs {
-		if !reflect.DeepEqual(t, preTransaction) {
-			preTransaction = t
-			tempTransaction = append(tempTransaction, t)
+	if condition.BlockNumber > 0 {
+		var preTransaction Transaction
+		var tempTransaction []Transaction
+		for _, t := range txs {
+			if !reflect.DeepEqual(t, preTransaction) {
+				preTransaction = t
+				tempTransaction = append(tempTransaction, t)
+			}
 		}
+		txs = tempTransaction
 	}
-	txs = tempTransaction
 	return txs, nil
 }
 
