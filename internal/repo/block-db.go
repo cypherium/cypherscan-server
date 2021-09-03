@@ -12,7 +12,7 @@ import (
 type TxBlock struct {
 	ID          int64     `json:"-" gorm:"primary_key"`
 	Number      int64     `json:"number"`
-	Hash        Hash      `json:"hash"`
+	Hash        Hash      `json:"hash" gorm:"index:tx_block_hash;not null;unique"`
 	Time        time.Time `json:"timestamp"`
 	Txn         int       `json:"txn"`
 	ParentHash  Hash      `json:"parentHash"`
