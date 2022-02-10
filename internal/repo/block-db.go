@@ -3,8 +3,8 @@ package repo
 import (
 	"time"
 
-	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
-	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto"
+	"github.com/cypherium/cypherBFT/core/types"
+	"github.com/cypherium/cypherBFT/crypto"
 	"golang.org/x/crypto/ed25519"
 )
 

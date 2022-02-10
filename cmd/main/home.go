@@ -3,8 +3,8 @@ package main
 import (
 	// "encoding/json"
 
-	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
-	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto"
+	"github.com/cypherium/cypherBFT/core/types"
+	"github.com/cypherium/cypherBFT/crypto"
 	"github.com/sirupsen/logrus"
 	"math"
 	"net/http"

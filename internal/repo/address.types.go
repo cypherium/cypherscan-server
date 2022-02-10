@@ -4,9 +4,9 @@ import (
 	"database/sql/driver"
 	"encoding/hex"
 	"fmt"
-	"github.com/cypherium/cypherBFT-P/go-cypherium/crypto/sha3"
+	"github.com/cypherium/cypherBFT/crypto/sha3"
 
-	"github.com/cypherium/cypherBFT-P/go-cypherium/common"
+	"github.com/cypherium/cypherBFT/common"
 )
 
 // Address is common.Hash

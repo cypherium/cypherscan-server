@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT/core/types"
 	"github.com/cypherium/cypherscan-server/internal/bizutil"
 	"github.com/cypherium/cypherscan-server/internal/blockchain"
 	"github.com/cypherium/cypherscan-server/internal/config"

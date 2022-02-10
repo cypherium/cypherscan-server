@@ -3,7 +3,7 @@ package repo
 import (
 	"errors"
 	"fmt"
-	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
+	"github.com/cypherium/cypherBFT/core/types"
 	"github.com/cypherium/cypherscan-server/internal/util"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
@@ -59,6 +59,11 @@ func (repo *Repo) InitDb() {
 
 // SaveBlock is to save blocks into db
 func (repo *Repo) SaveBlock(block *types.Block) error {
+	header := block.Header()
+	if header.Number == nil {
+		log.Infof("Bad block.  Number is nil.")
+		return errors.New("Bad block.  Number is nil.")
+	}
 	record := transformBlockToDbRecord(block)
 	if block.Number().Int64() > 1 {
 		getBlock, _ := repo.GetBlock(record.Number)

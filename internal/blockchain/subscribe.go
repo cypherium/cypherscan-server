@@ -1,7 +1,7 @@
 package blockchain
 
 import (
-	ethereum "github.com/cypherium/cypherBFT-P/go-cypherium/event"
+	ethereum "github.com/cypherium/cypherBFT/event"
 )
 
 // CypherSubscribed is the struct subscribed to blockchain

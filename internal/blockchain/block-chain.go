@@ -8,8 +8,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/cypherium/cypherBFT-P/go-cypherium/core/types"
-	"github.com/cypherium/cypherBFT-P/go-cypherium/cphclient"
+	"github.com/cypherium/cypherBFT/core/types"
+	"github.com/cypherium/cypherBFT/cphclient"
 	"github.com/cypherium/cypherscan-server/internal/util"
 )
 
