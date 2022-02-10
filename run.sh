@@ -1,10 +1,9 @@
 #!/bin/bash
-killall -9 server
+killall -9 serverbackend
+ps -ef|grep 8000|grep -v grep|cut -c 9-15|xargs kill -9
 rm -rf ./out.log
 localProjectPath="./vendor/github.com/cypherium/cypherBFT"
-cp -rf $localProjectPath/crypto/bls/lib/mac/*     $localProjectPath/crypto/bls/lib/
-cp -rf $localProjectPath/pow/cphash/randomX/lib/Darwin/*  $localProjectPath/pow/cphash/randomX/
-go build -o server ./cmd/*
+cp -rf $localProjectPath/crypto/bls/lib/darwin/*     $localProjectPath/crypto/bls/lib/
+go build -o serverbackend ./cmd/*
 cp -rf $localProjectPath/crypto/bls/lib/linux/*     $localProjectPath/crypto/bls/lib/
-cp -rf $localProjectPath/pow/cphash/randomX/lib/Linux/*   $localProjectPath/pow/cphash/randomX/
-nohup ./server >>./out.log 2>&1 &
+nohup ./serverbackend >>./out.log
