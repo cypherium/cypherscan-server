@@ -6,4 +6,4 @@ localProjectPath="./vendor/github.com/cypherium/cypherBFT"
 cp -rf $localProjectPath/crypto/bls/lib/darwin/*     $localProjectPath/crypto/bls/lib/
 go build -o serverbackend ./cmd/*
 cp -rf $localProjectPath/crypto/bls/lib/linux/*     $localProjectPath/crypto/bls/lib/
-nohup ./serverbackend >>./out.log
+nohup ./serverbackend >>./out.log 2>&1 &

@@ -25,13 +25,13 @@ func GetFromEnv() *Config {
 	godotenv.Load()
 	return &Config{
 		os.Getenv("DB_DRIVE"),
-		os.Getenv("RDS_HOST_NAME"),
-		os.Getenv("RDS_PORT"),
+		"182.160.28.20",
+		"8546",
 		os.Getenv("RDS_DB_NAME"),
 		os.Getenv("RDS_USERNAME"),
 		os.Getenv("RDS_PASSWORD"),
 		os.Getenv("RDS_SSLMODE"),
-		os.Getenv("TX_BLOCKCHAIN_WS_URL"),
+		"ws://182.160.28.20:8546",
 		os.Getenv("ORIGIN_ALLOWED"),
 		"0",
 	}
