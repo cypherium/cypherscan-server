@@ -19,7 +19,7 @@ type Get interface {
 	GetKeyBlock(number int64) (*KeyBlock, error)
 	GetKeyBlockByHash(hash Hash) (*KeyBlock, error)
 	GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error)
-	GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error)
+	GetTransactions(condition *TransactionSearchCondition) ([]*Transaction, error)
 	GetTransaction(hash Hash) (*Transaction, error)
 	GetLocalHighestKeyBlock() (*KeyBlock, error)
 	GetLocalHighestBlock() (*TxBlock, error)
@@ -227,8 +227,8 @@ func (repo *Repo) GetKeyBlockByHash(hash Hash) (*KeyBlock, error) {
 	return &keyBlocks[0], nil
 }
 
-func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Transaction, error) {
-	var txs []Transaction
+func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]*Transaction, error) {
+	var txs []*Transaction
 
 	pageSize := getPageSizeDefault(condition.PageSize)
 	columns := getColumnsByScenario(transactionColumnsConfig, condition.Scenario)
@@ -257,8 +257,8 @@ func (repo *Repo) GetTransactions(condition *TransactionSearchCondition) ([]Tran
 		return nil, &util.MyError{Message: fmt.Sprintf("No Tranasction(number=%v) found in Db", condition.BlockNumber)}
 	}
 	if condition.BlockNumber > 0 {
-		var preTransaction Transaction
-		var tempTransaction []Transaction
+		var preTransaction *Transaction
+		var tempTransaction []*Transaction
 		for _, t := range txs {
 			if !reflect.DeepEqual(t, preTransaction) {
 				preTransaction = t

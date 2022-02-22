@@ -1,9 +1,11 @@
 package repo
 
 import (
-	"strconv"
-
+	"fmt"
 	"github.com/jinzhu/gorm"
+	log "github.com/sirupsen/logrus"
+	"sort"
+	"strconv"
 )
 
 // QueryAddressRequest is the struct to pass the query options
@@ -12,12 +14,20 @@ type QueryAddressRequest struct {
 	Address []byte
 }
 
+type SortTxByTime []*Transaction
+
+func (s SortTxByTime) Len() int { return len(s) }
+func (s SortTxByTime) Less(i, j int) bool {
+	return s[i].Block.Time.Before(s[j].Block.Time)
+}
+func (s SortTxByTime) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+
 // QueryAddress is to query transaction by send or recv address
 func (r *Repo) QueryAddress(request *QueryAddressRequest) (*QueryResult, error) {
-	var txs []Transaction
+	var txs SortTxByTime
 	var skip int64
 	var cursor Cursor = Cursor{"", "1"}
-
+	log.Info("QueryAddress", fmt.Sprintf("%s", request.CursorPaginationRequest))
 	if request.CursorPaginationRequest.Before != "" {
 		skip, _ = strconv.ParseInt(request.CursorPaginationRequest.Before, 10, 64)
 		if skip > 0 {
@@ -49,6 +59,10 @@ func (r *Repo) QueryAddress(request *QueryAddressRequest) (*QueryResult, error) 
 			cursor.Last = ""
 		}
 	}
+	sort.Sort(SortTxByTime(txs))
+	log.Info("cursor", fmt.Sprintf("%s", cursor))
+	log.Info("txs", fmt.Sprintf("%s", txs))
+	log.Info("txs len", fmt.Sprintf("%s", len(txs)))
 	return &QueryResult{
 		Cursor: cursor,
 		Items:  txs,

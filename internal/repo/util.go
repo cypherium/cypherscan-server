@@ -43,7 +43,7 @@ package repo
 // QueryResult is the struct hold the query result
 type QueryResult struct {
 	Cursor
-	Items []Transaction
+	Items []*Transaction
 }
 
 // CursorPaginationRequest is the generic request for the pagination request

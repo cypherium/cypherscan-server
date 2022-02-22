@@ -22,6 +22,7 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	context := context.Background()
 	config := config.GetFromEnv()
+
 	log.Info("Config:", fmt.Sprintf("%v", config))
 
 	dbClient, err := util.ConnectDb("sqlite3", config.RdsHostName, config.RdsPort, "cypherdb", "postgres", "postgres", "disable")
@@ -38,13 +39,13 @@ func main() {
 
 	blockChainClient, err := blockchain.Dial(context, config.BlockChainWsURL)
 	if err != nil {
-		log.Fatal("Can NOT connect to blockchain")
 		log.Info("err:", fmt.Sprintf("%v", err))
+		log.Fatal("Can NOT connect to blockchain")
+
 	}
 
 	hub := publisher.NewHub()
 	go hub.StartHub()
-
 	chBlock := make(chan *types.Header)
 	chKeyBlock := make(chan *types.KeyBlockHeader)
 	newBlockListener := NewBlockListener{Repo: repoInstance, BlockFetcher: blockChainClient, Broadcastable: hub}

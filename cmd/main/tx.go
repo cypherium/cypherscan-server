@@ -105,7 +105,7 @@ type listTx struct {
 	Number int64     `json:"number"`
 }
 
-func transferTransactionToListTx(tx repo.Transaction) *listTx {
+func transferTransactionToListTx(tx *repo.Transaction) *listTx {
 	//log.Info("transferTransactionToListTx address:", tx.To.String())
 	//log.Info("transferTransactionToListTx value:", tx.Value)
 	//log.Info("transferTransactionToListTx tx.Block.Time:", tx.Block.Time)
@@ -134,7 +134,7 @@ type tx struct {
 
 func convertToTx(b *repo.Transaction) *tx {
 	return &tx{
-		listTx:      *transferTransactionToListTx(*b),
+		listTx:      *transferTransactionToListTx(b),
 		GasPrice:    uint64(b.GasPrice),
 		Gas:         uint64(b.Gas),
 		Cost:        uint64(b.Cost),
