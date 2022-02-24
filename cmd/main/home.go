@@ -30,8 +30,8 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 	var txBlock, preTxBlock *repo.TxBlock
 	var txBlocks []repo.TxBlock
 	startNumber := blockLatestNumber
-	var preTransaction *repo.Transaction
-	var tempTransaction, transactions []*repo.Transaction
+	var preTransaction repo.Transaction
+	var tempTransaction, transactions []repo.Transaction
 	for {
 		txBlock, err = a.repo.GetBlock(startNumber)
 		if err != nil {

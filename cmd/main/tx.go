@@ -73,7 +73,7 @@ func getBlockTxs(a *App, w http.ResponseWriter, r *http.Request) {
 	}
 	list := make([]*listTx, 0, len(txs))
 	for _, t := range txs {
-		list = append(list, transferTransactionToListTx(t))
+		list = append(list, transferTransactionToListTx(&t))
 	}
 	respondWithJSON(w, http.StatusOK, &responseOfGetTxs{Total: int64(block.Txn), Txs: list})
 }

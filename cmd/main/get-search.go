@@ -104,7 +104,7 @@ func getSearch(a *App, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-func deepEqualWithoutId(trans1 *repo.Transaction, trans2 *repo.Transaction) bool {
+func deepEqualWithoutId(trans1 repo.Transaction, trans2 repo.Transaction) bool {
 	var tempTrans1 = trans1
 	var tempTrans2 = trans2
 	tempTrans1.ID = 1
@@ -121,10 +121,10 @@ func convertQueryResultToListTxs(queryResult *repo.QueryResult) *CursoredList {
 
 	ret := make([]interface{}, 0, len(queryResult.Items))
 	i := 0
-	var preItems *repo.Transaction
+	var preItems repo.Transaction
 	for _, b := range queryResult.Items {
 		if !deepEqualWithoutId(preItems, b) || i == 0 {
-			ret = append(ret, transferTransactionToListTx(b))
+			ret = append(ret, transferTransactionToListTx(&b))
 			preItems = b
 			i += 1
 		}
@@ -204,7 +204,7 @@ type hashResult struct {
 
 func convertToHashSearchTx(tx *repo.Transaction) *searchResult {
 	var result *hashResult
-	if tx == nil {
+	if &tx == nil {
 		return &searchResult{
 			ResultType: hash,
 			Result:     nil,

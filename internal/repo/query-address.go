@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
-	"sort"
 	"strconv"
 )
 
@@ -24,7 +23,7 @@ func (s SortTxByTime) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
 // QueryAddress is to query transaction by send or recv address
 func (r *Repo) QueryAddress(request *QueryAddressRequest) (*QueryResult, error) {
-	var txs SortTxByTime
+	var txs []Transaction
 	var skip int64
 	var cursor Cursor = Cursor{"", "1"}
 	log.Info("QueryAddress", fmt.Sprintf("%s", request.CursorPaginationRequest))
@@ -39,11 +38,6 @@ func (r *Repo) QueryAddress(request *QueryAddressRequest) (*QueryResult, error) 
 		cursor.First = strconv.FormatInt(skip-1, 10)
 		cursor.Last = strconv.FormatInt(skip+1, 10)
 	}
-
-	// err := r.dbRunner.Run(func(db *gorm.DB) error {
-	// 	return db.Debug().Where("\"from\" = ?", request.Address).Or("\"to\" = ?", request.Address).Order("id desc").Offset(skip).Limit(request.CursorPaginationRequest.PageSize).Find(&txs).Error
-	// })
-
 	err := r.dbRunner.Run(func(db *gorm.DB) error {
 		return db.Debug().Preload("Block", func(db *gorm.DB) *gorm.DB {
 			return db.Select([]string{"time", "number"})
@@ -59,10 +53,26 @@ func (r *Repo) QueryAddress(request *QueryAddressRequest) (*QueryResult, error) 
 			cursor.Last = ""
 		}
 	}
-	sort.Sort(SortTxByTime(txs))
-	log.Info("cursor", fmt.Sprintf("%s", cursor))
-	log.Info("txs", fmt.Sprintf("%s", txs))
-	log.Info("txs len", fmt.Sprintf("%s", len(txs)))
+	if txs[0].Block.Time.Before(txs[len(txs)-1].Block.Time) {
+		for i := 0; i < len(txs)-1; i++ {
+			for j := i + 1; j < len(txs); j++ {
+				if txs[i].Block.Time.Before(txs[j].Block.Time) {
+					txs[i], txs[j] = txs[j], txs[i]
+				}
+			}
+		}
+	}
+	//pTransactions:= make([]*Transaction, len(txs))
+	//for _, t := range txs {
+	//	pTransactions = append(pTransactions, &t)
+	//}
+	////sort.Sort(SortTxByTime(pTransactions))
+	//for _, t := range pTransactions {
+	//	resultTransactions = append(resultTransactions, *t)
+	//}
+	/*	log.Info("cursor", fmt.Sprintf("%s", cursor))
+		log.Info("txs", fmt.Sprintf("%s", txs))
+		log.Info("txs len", fmt.Sprintf("%s", len(txs)))*/
 	return &QueryResult{
 		Cursor: cursor,
 		Items:  txs,
