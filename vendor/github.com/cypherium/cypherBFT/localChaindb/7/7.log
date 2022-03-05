@@ -1,0 +1,29 @@
+INFO [03/03/2022|16:44:42.158] FLAG                                     DisableJVM=false DisableEVM=false
+ERROR[03/03/2022|16:44:42.168] Bootstrap URL invalid                    cnode=enode://6941c498a447e0f5ddbbb4b045cff0583bff20789ed6716de016a3eeefe385db7e9a0b61eeedeb40b371f6f1daec7eb0d0024d3e3d3aeabf6186f971ae8f5156@192.168.1.3:9090 err="invalid URL scheme, want \"cnode\""
+ERROR[03/03/2022|16:44:42.180] Bootstrap URL invalid                    cnode=enode://6941c498a447e0f5ddbbb4b045cff0583bff20789ed6716de016a3eeefe385db7e9a0b61eeedeb40b371f6f1daec7eb0d0024d3e3d3aeabf6186f971ae8f5156@192.168.1.3:9090 err="invalid URL scheme, want \"cnode\""
+INFO [03/03/2022|16:44:42.219] Starting peer-to-peer node               instance=Cypher/v1.9.24-unstable-d177bd66/darwin-amd64/go1.14.2
+INFO [03/03/2022|16:44:42.232] Allocated cache and file handles         database=/Users/cypher01/go/src/github.com/cypherium/cypherBFT/localChaindb/7/cypher/chaindata cache=768 handles=1024
+INFO [03/03/2022|16:44:42.370] SetCommitteeConfig                       len=0
+panic: Writing genesis key block error!
+
+goroutine 1 [running]:
+github.com/cypherium/cypherBFT/core.SetupGenesisKeyBlock(0x4f14d40, 0xc0000b80b0, 0x0, 0x9, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0)
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/core/key_genesis.go:153 +0x86c
+github.com/cypherium/cypherBFT/eth.New(0xc0001f4100, 0xc000680800, 0x4c5a9e0, 0x4cad801, 0xc0001f4100)
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/eth/backend.go:127 +0x181
+github.com/cypherium/cypherBFT/cmd/utils.RegisterCphService.func1(0xc0001f4100, 0xc00010b4d0, 0xc0002519a8, 0xc000456360, 0x2)
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/cmd/utils/flags.go:1133 +0x34
+github.com/cypherium/cypherBFT/node.(*Node).Start(0xc0001dc280, 0x0, 0x0)
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/node/node.go:183 +0x3f9
+github.com/cypherium/cypherBFT/cmd/utils.StartNode(0xc0001dc280)
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/cmd/utils/cmd.go:67 +0x2f
+main.startNode(0xc00017b340, 0xc0001dc280)
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/cmd/cypher/main.go:273 +0x7e
+main.cypher(0xc00017b340, 0x4b5eaa0, 0xc000441570)
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/cmd/cypher/main.go:259 +0x128
+github.com/cypherium/cypherBFT/vendor/gopkg.in/urfave/cli%2ev1.HandleAction(0x4b789c0, 0x4d55c80, 0xc00017b340, 0xc00055a360, 0x0)
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/vendor/gopkg.in/urfave/cli.v1/app.go:490 +0xc8
+github.com/cypherium/cypherBFT/vendor/gopkg.in/urfave/cli%2ev1.(*App).Run(0xc0004549c0, 0xc00000c3c0, 0x1d, 0x1e, 0x0, 0x0)
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/vendor/gopkg.in/urfave/cli.v1/app.go:264 +0x5dd
+main.main()
+	/Users/cypher01/go/src/github.com/cypherium/cypherBFT/build/_workspace/src/github.com/cypherium/cypherBFT/cmd/cypher/main.go:236 +0x55

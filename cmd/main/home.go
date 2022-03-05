@@ -183,6 +183,7 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 			}
 			return div(totalTxs*int64(math.Pow(10, 9)), ns), div(int64(len(blocks))*int64(math.Pow(10, 9)), ns)
 		}()
+
 		homeMetrics = append(
 			[]HomeMetric{
 				HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Value: tps, Unit: ""}},
