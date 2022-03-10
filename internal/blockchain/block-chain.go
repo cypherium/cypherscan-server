@@ -37,11 +37,8 @@ func (blockChain *BlockChain) BlockHeadersByNumbers(numbers []int64) ([]*types.H
 
 // BlockByNumber is to get Block by number, if number is nil , and return number of transactions without retreive whole transation slice
 func (blockChain *BlockChain) BlockByNumber(number *big.Int, incTx bool) (*types.Block, int, error) {
-	// return blockChain.client.BlockByNumber(blockChain.context, number, incTx)
 	block, txn, err := blockChain.client.BlockByNumber(blockChain.context, number, incTx)
-	// if err == nil {
-	// 	setToCurrentTime(nil, block)
-	// }
+	block.TrimTimeS()
 	return block, txn, err
 }
 
@@ -58,7 +55,8 @@ func (blockChain *BlockChain) KeyBlocksByNumbers(numbers []int64) ([]*types.KeyB
 // GetLatestBlockNumber is to get the latest Block number
 func (blockChain *BlockChain) GetLatestBlockNumber() (int64, error) {
 	if blockChain.latestBlockNumber <= 0 {
-		b, _, err := blockChain.client.BlockByNumber(blockChain.context, nil, false)
+		//b, _, err := blockChain.client.BlockByNumber(blockChain.context, nil, false)
+		b, _, err := blockChain.client.BlockByNumber(blockChain.context, nil, true)
 		if err != nil {
 			return 0, err
 		}
