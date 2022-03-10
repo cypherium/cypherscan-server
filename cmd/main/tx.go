@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"strconv"
 	"time"
@@ -106,10 +107,7 @@ type listTx struct {
 }
 
 func transferTransactionToListTx(tx *repo.Transaction) *listTx {
-	//log.Info("transferTransactionToListTx address:", tx.To.String())
-	//log.Info("transferTransactionToListTx value:", tx.Value)
-	//log.Info("transferTransactionToListTx tx.Block.Time:", tx.Block.Time)
-	//log.Info("transferTransactionToListTx tx.Block.Time:", tx.Block.Number)
+	log.Infof("transferTransactionToListTx time %d", tx.Block.Time.Unix())
 	return &listTx{
 		Hash:   tx.Hash,
 		Value:  tx.Value,

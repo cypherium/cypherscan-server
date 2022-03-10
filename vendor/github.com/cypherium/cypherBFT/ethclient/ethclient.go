@@ -67,7 +67,7 @@ func (ec *Client) Close() {
 // Note that loading full blocks requires two requests. Use HeaderByHash
 // if you don't need all transactions or uncle headers.
 func (ec *Client) BlockByHash(ctx context.Context, hash common.Hash, inclTx bool) (*types.Block, int, error) {
-	return ec.getBlock(ctx, "eth_getBlockByHash", hash, inclTx, true)
+	return ec.getBlock(ctx, "eth_getBlockByHash", hash, inclTx)
 }
 
 // BlockByNumber returns a block from the current canonical chain. If number is nil, the
@@ -76,7 +76,7 @@ func (ec *Client) BlockByHash(ctx context.Context, hash common.Hash, inclTx bool
 // Note that loading full blocks requires two requests. Use HeaderByNumber
 // if you don't need all transactions .
 func (ec *Client) BlockByNumber(ctx context.Context, number *big.Int, inclTx bool) (*types.Block, int, error) {
-	return ec.getBlock(ctx, "eth_getBlockByNumber", toBlockNumArg(number), inclTx, true)
+	return ec.getBlock(ctx, "eth_getBlockByNumber", toBlockNumArg(number), inclTx)
 }
 
 type rpcBlock struct {

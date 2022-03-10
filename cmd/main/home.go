@@ -5,12 +5,10 @@ import (
 
 	"github.com/cypherium/cypherBFT/core/types"
 	"github.com/cypherium/cypherBFT/crypto"
-	"github.com/sirupsen/logrus"
-	"math"
+	"github.com/cypherium/cypherscan-server/internal/repo"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"reflect"
-
-	"github.com/cypherium/cypherscan-server/internal/repo"
 	"time"
 )
 
@@ -21,7 +19,7 @@ const (
 )
 
 func getHome(a *App, w http.ResponseWriter, r *http.Request) {
-	logrus.Info("getHome")
+	log.Info("getHome")
 	blockLatestNumber, err := a.blocksFetcher.GetLatestBlockNumber()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
@@ -68,7 +66,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		for _, t := range transactions {
-			//logrus.Info("getHome transaction ",t)
+			//log.Info("getHome transaction ",t)
 			if !reflect.DeepEqual(t, preTransaction) {
 				preTransaction = t
 				tempTransaction = append(tempTransaction, t)
@@ -81,7 +79,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
-	//logrus.Info("getHome transactions len ", len(transactions))
+	//log.Info("getHome transactions len ", len(transactions))
 	//var preKeyBlock repo.KeyBlock
 	payload := HomePayload{
 		Metrics: []HomeMetric{
@@ -121,7 +119,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		Txs: func() []HomeTx {
 			ret := make([]HomeTx, 0, len(transactions))
 			for _, t := range transactions {
-				//logrus.Info("getHome transaction ",t)
+				//log.Info("getHome transaction ",t)
 				if !reflect.DeepEqual(t, preTransaction) {
 					preTransaction = t
 					ret = append(ret, HomeTx{
@@ -152,9 +150,12 @@ type metrics struct {
 }
 
 func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) *HomePayload {
+	log.Printf("transformTxBlocksToFrontendMessage blocks len", len(blocks))
 	txBlocks := make([]HomeTxBlock, 0, len(blocks))
 	for _, b := range blocks {
-		txBlocks = append(txBlocks, *transformTxBlockToFrontend(b))
+		if b != nil {
+			txBlocks = append(txBlocks, *transformTxBlockToFrontend(b))
+		}
 	}
 	txs := make([]HomeTx, 0, TransactionCount)
 	for i := len(blocks) - 1; i >= 0; i-- {
@@ -173,17 +174,27 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 		HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: metrics.currentKeyBlock.Number().Int64()}},
 		HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{Unit: "M", Digits: 2, Value: metrics.currentKeyBlock.Difficulty().Int64() / 10000}},
 	}
+	var oldTps, oldBps int64
 	if len(blocks) > 0 {
-		firstBlock := blocks[0]
+		firstBlock := blocks[len(blocks)-1]
 		lastBlock := blocks[len(blocks)-1]
 		tps, bps := func() (int64, int64) {
-			ns := (lastBlock.Time().Int64() - firstBlock.Time().Int64())
-			if ns == 0 {
-				return 0, 0
+			blockNs := (lastBlock.Time().Int64() - firstBlock.Time().Int64())
+			if blockNs == 0 {
+				blockNs = 1
 			}
-			return div(totalTxs*int64(math.Pow(10, 9)), ns), div(int64(len(blocks))*int64(math.Pow(10, 9)), ns)
+			return totalTxs * 3, div(int64(len(blocks)), blockNs)
 		}()
-
+		if tps < 1 {
+			tps = oldTps
+		} else {
+			oldTps = tps
+		}
+		if bps < 1 {
+			bps = oldBps
+		} else {
+			oldBps = bps
+		}
 		homeMetrics = append(
 			[]HomeMetric{
 				HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Value: tps, Unit: ""}},
@@ -276,10 +287,11 @@ type HomePayload struct {
 }
 
 func transformTxBlockToFrontend(block *types.Block) *HomeTxBlock {
+	log.Info("transformTxBlockToFrontend CreatedAt", time.Unix(block.Time().Int64(), 0))
 	return &HomeTxBlock{
 		Number:    block.Number().Int64(),
 		Txn:       len(block.Transactions()),
-		CreatedAt: time.Unix(0, block.Time().Int64()),
+		CreatedAt: time.Unix(block.Time().Int64(), 0),
 	}
 }
 
@@ -291,9 +303,9 @@ func transformKeyBlockToFrontend(block *types.KeyBlockHeader) *HomeKeyBlock {
 }
 
 func transformTxToFrontend(tx *types.Transaction, block *types.Block) *HomeTx {
-	logrus.Info("transformTxToFrontend", tx)
+	log.Info("transformTxToFrontend CreatedAt", time.Unix(block.Time().Int64(), 0))
 	return &HomeTx{
-		CreatedAt: time.Unix(0, block.Time().Int64()),
+		CreatedAt: time.Unix(block.Time().Int64(), 0),
 		Value:     tx.Value().String(),
 		Hash:      repo.Hash(tx.Hash()),
 		From:      repo.Address(crypto.PubKeyToAddressCypherium(tx.SenderKey())).String(),

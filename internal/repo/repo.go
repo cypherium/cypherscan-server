@@ -59,24 +59,30 @@ func (repo *Repo) InitDb() {
 
 // SaveBlock is to save blocks into db
 func (repo *Repo) SaveBlock(block *types.Block) error {
-	header := block.Header()
-	if header.Number == nil {
-		log.Infof("Bad block.  Number is nil.")
-		return errors.New("Bad block.  Number is nil.")
-	}
-	record := transformBlockToDbRecord(block)
-	if block.Number().Int64() > 1 {
-		getBlock, _ := repo.GetBlock(record.Number)
-		if reflect.DeepEqual(getBlock, record) {
-			return errors.New("txBlock exist")
+	if block != nil {
+		header := block.Header()
+		if header.Number == nil {
+			log.Infof("Bad block.  Number is nil.")
+			return errors.New("Bad block.  Number is nil.")
 		}
-	}
-	repo.dbRunner.Run(func(db *gorm.DB) error {
-		db.Create(record)
+		record := transformBlockToDbRecord(block)
+		if block.Number().Int64() > 1 {
+			getBlock, _ := repo.GetBlock(record.Number)
+			if reflect.DeepEqual(getBlock, record) {
+				return errors.New("txBlock exist")
+			}
+		}
+		repo.dbRunner.Run(func(db *gorm.DB) error {
+			db.Create(record)
+			return nil
+		})
+		log.Infof("SaveBlock number %d", block.Number())
+		log.Infof("SaveBlock Time %s", block.Time().String())
 		return nil
-	})
-	log.Infof("SaveBlock number %d", block.Number())
-	return nil
+	} else {
+		return errors.New("txBlock is nil")
+	}
+
 }
 
 // SaveKeyBlock is to save key block into db
@@ -126,7 +132,6 @@ func (repo *Repo) GetLocalHighestBlock() (*TxBlock, error) {
 // GetBlocks is
 func (repo *Repo) GetBlocks(condition *BlockSearchContdition) ([]TxBlock, error) {
 	var txBlocks []TxBlock
-	log.Infof("GetBlocks  %d", condition)
 	pageSize := getPageSizeDefault(condition.PageSize)
 	columns := getColumnsByScenario(blockColumnsConfig, condition.Scenario)
 	whereStatment, whereArgs := getWhere(condition.StartWith, pageSize)
@@ -137,6 +142,7 @@ func (repo *Repo) GetBlocks(condition *BlockSearchContdition) ([]TxBlock, error)
 
 // GetBlock is to get single block by the number if number >=0, otherwise it will get the latest one
 func (repo *Repo) GetBlock(number int64) (*TxBlock, error) {
+	log.Printf("GetBlock number", number)
 	var txBlocks []TxBlock
 	whereStatment, whereArgs := func() (string, []interface{}) {
 		if number < 0 {
@@ -178,7 +184,7 @@ func (repo *Repo) GetBlockByHash(hash Hash) (*TxBlock, error) {
 // GetKeyBlocks is
 func (repo *Repo) GetKeyBlocks(condition *BlockSearchContdition) ([]KeyBlock, error) {
 	var keyBlocks []KeyBlock
-	log.Infof("GetKeyBlocks  %d", condition)
+	log.Printf("GetKeyBlocks condition %d", condition)
 	pageSize := getPageSizeDefault(condition.PageSize)
 	columns := getColumnsByScenario(keyBlockColumnsConfig, condition.Scenario)
 	whereStatment, whereArgs := getWhere(condition.StartWith, pageSize)
@@ -289,13 +295,12 @@ func (repo *Repo) GetTransaction(hash Hash) (*Transaction, error) {
 	if len(txs) <= 0 {
 		return nil, &util.MyError{Message: fmt.Sprintf("No Tranasction(number=%v) found in Db", hash)}
 	}
-	//log.Info("GetTransaction  BlockNumber",&txs[0].BlockNumber)
 	return &txs[0], nil
 }
 
 var blockColumnsConfig = map[Scenario][]string{
 	HomePage: []string{"number", "txn", "time"},
-	ListPage: []string{"number", "txn", "time", "gas_used", "gas_limit", "key_signature"},
+	ListPage: []string{"number", "txn", "time", "gas_used", "gas_limit", "signature"},
 }
 var keyBlockColumnsConfig = map[Scenario][]string{
 	HomePage: []string{"number", "time"},
