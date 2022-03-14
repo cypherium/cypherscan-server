@@ -10,14 +10,8 @@ import (
 type BlockFetcher interface {
 	BlockByNumber(number *big.Int, incTx bool) (*types.Block, int, error)
 	KeyBlockByNumber(number *big.Int) (*types.KeyBlock, error)
-	SetLatestNumbers(blockNumber int64, keyBlockNumber int64)
-	SetChaseNumbers(blockNumber int64, keyBlockNumber int64)
-	GetChaseBlockNumber() int64
-	GetChaseKeyBlockNumber() int64
 	GetLatestBlockNumber() (int64, error)
 	GetLatestKeyBlockNumber() (int64, error)
-	IsKeyBlockFallBehindLatest() bool
-	IsBlockFallBehindLatest() bool
 }
 
 // BlocksFetcher is the interface to fetch the Blocks

@@ -53,6 +53,12 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	keyBlockLatest, err := a.repo.GetKeyBlock(keyBlockLatestNumber)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	keyBlocks, err := a.repo.GetKeyBlocks(&repo.BlockSearchContdition{Scenario: repo.HomePage, PageSize: KeyBlocksPageSize, StartWith: keyBlockLatestNumber})
 	if err != nil {
 		respondWithError(w, 500, err.Error())
@@ -86,7 +92,7 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Unit: ""}},
 			HomeMetric{Key: "bps", Name: "BPS", Value: MetricValue{Unit: "blocks/sec"}},
 			HomeMetric{Key: "key-blocks-nodes", Name: "Validators", Value: MetricValue{Value: 21}},
-			HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{}},
+			HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{Value: int64(keyBlockLatest.Difficulty)}},
 			HomeMetric{Key: "tx-blocks-number", Name: "Tx Blocks Number", Value: MetricValue{Value: blockLatestNumber}},
 			HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: keyBlockLatestNumber}},
 		},
@@ -97,16 +103,6 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			}
 			return ret
 		}(),
-		//KeyBlocks: func() []HomeKeyBlock {
-		//	ret := make([]HomeKeyBlock, 0, len(keyBlocks))
-		//	for _, b := range keyBlocks {
-		//		if !reflect.DeepEqual(b, preKeyBlock) {
-		//			preKeyBlock = b
-		//			ret = append(ret, HomeKeyBlock{b.Number, b.Time})
-		//		}
-		//	}
-		//	return ret
-		//}(),
 		KeyBlocks: func() []HomeKeyBlock {
 			ret := make([]HomeKeyBlock, 0, len(keyBlocks))
 			for _, b := range keyBlocks {
@@ -150,7 +146,7 @@ type metrics struct {
 }
 
 func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) *HomePayload {
-	log.Printf("transformTxBlocksToFrontendMessage blocks len", len(blocks))
+	//log.Printf("transformTxBlocksToFrontendMessage blocks len", len(blocks))
 	txBlocks := make([]HomeTxBlock, 0, len(blocks))
 	for _, b := range blocks {
 		if b != nil {
@@ -174,7 +170,6 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 		HomeMetric{Key: "key-blocks-number", Name: "Key Blocks Number", Value: MetricValue{Value: metrics.currentKeyBlock.Number().Int64()}},
 		HomeMetric{Key: "key-blocks-Diff", Name: "Key Block Diff", Value: MetricValue{Unit: "M", Digits: 2, Value: metrics.currentKeyBlock.Difficulty().Int64() / 10000}},
 	}
-	var oldTps, oldBps int64
 	if len(blocks) > 0 {
 		firstBlock := blocks[len(blocks)-1]
 		lastBlock := blocks[len(blocks)-1]
@@ -186,15 +181,12 @@ func transformTxBlocksToFrontendMessage(blocks []*types.Block, metrics metrics) 
 			return totalTxs * 3, div(int64(len(blocks)), blockNs)
 		}()
 		if tps < 1 {
-			tps = oldTps
-		} else {
-			oldTps = tps
+			tps = 1
 		}
 		if bps < 1 {
-			bps = oldBps
-		} else {
-			oldBps = bps
+			bps = 1
 		}
+
 		homeMetrics = append(
 			[]HomeMetric{
 				HomeMetric{Key: "tps", Name: "TPS", Value: MetricValue{Value: tps, Unit: ""}},
@@ -287,7 +279,7 @@ type HomePayload struct {
 }
 
 func transformTxBlockToFrontend(block *types.Block) *HomeTxBlock {
-	log.Info("transformTxBlockToFrontend CreatedAt", time.Unix(block.Time().Int64(), 0))
+	//log.Info("transformTxBlockToFrontend CreatedAt", time.Unix(block.Time().Int64(), 0))
 	return &HomeTxBlock{
 		Number:    block.Number().Int64(),
 		Txn:       len(block.Transactions()),
@@ -303,7 +295,7 @@ func transformKeyBlockToFrontend(block *types.KeyBlockHeader) *HomeKeyBlock {
 }
 
 func transformTxToFrontend(tx *types.Transaction, block *types.Block) *HomeTx {
-	log.Info("transformTxToFrontend CreatedAt", time.Unix(block.Time().Int64(), 0))
+	//log.Info("transformTxToFrontend CreatedAt", time.Unix(block.Time().Int64(), 0))
 	return &HomeTx{
 		CreatedAt: time.Unix(block.Time().Int64(), 0),
 		Value:     tx.Value().String(),
