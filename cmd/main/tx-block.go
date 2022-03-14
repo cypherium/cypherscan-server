@@ -32,20 +32,22 @@ func getBlock(a *App, w http.ResponseWriter, r *http.Request) {
 
 func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 	// get request
-	log.Info("getBlocks")
 	pageNo, pageSize, err := getPaginationRequest(r)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.Info("getBlocks 1")
 	latestNumber, err := a.blocksFetcher.GetLatestBlockNumber()
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	log.Info("getBlocks 2")
+
 	var startWith = latestNumber - (pageNo-1)*int64(pageSize)
+	//log.Info("getBlocks  latestNumber %d",latestNumber)
+	//log.Info("getBlocks  startWith %d",startWith)
+	//log.Info("getBlocks  pageSize %d",pageSize)
+	//log.Info("getBlocks  pageNo %d",pageNo)
 	txBlocks, err := a.repo.GetBlocks(&repo.BlockSearchContdition{Scenario: repo.ListPage, StartWith: startWith, PageSize: pageSize})
 	if err != nil {
 		log.Info("err", err)
@@ -59,7 +61,6 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 		}
 		return ret
 	}(txBlocks)
-	log.Info("getBlocks 3")
 	numbersAlreadyGot := func() []int64 {
 		ret := make([]int64, 0, len(txBlocks))
 		for _, b := range txBlocks {
@@ -67,7 +68,6 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 		}
 		return ret
 	}()
-	log.Info("getBlocks 4")
 	missedListTxBlocks := func() []*listTxBlock {
 		if pageSize == len(numbersAlreadyGot) {
 			return []*listTxBlock{}
@@ -83,11 +83,9 @@ func getBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 
 		}(missedBlocks)
 	}()
-	log.Info("getBlocks 5")
 	retList := append(dbListTxBlocks, missedListTxBlocks...)
 	sort.Sort(numberDescSorterForListTxBlock(retList))
 	respondWithJSON(w, http.StatusOK, convertQueryResultToListTxBlocks(retList, latestNumber))
-	log.Info("getBlocks 6")
 }
 
 // responseOfGetBlocks is response of get blocks
@@ -161,6 +159,7 @@ func convertQueryResultToListTxBlocks(result []*listTxBlock, total int64) *Offse
 	for _, b := range result {
 		ret = append(ret, b)
 	}
+	log.Infof("convertQueryResultToListTxBlocks ret %v", ret)
 	return &OffsetedList{Items: ret, TotalCount: total}
 }
 

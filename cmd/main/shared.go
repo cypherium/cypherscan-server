@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/cypherium/cypherscan-server/internal/util"
-	"github.com/labstack/gommon/log"
+	log "github.com/sirupsen/logrus"
 )
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
