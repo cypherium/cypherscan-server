@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/big"
+	"reflect"
 	"time"
 
 	"github.com/cypherium/cypherBFT/core/types"
@@ -30,7 +31,8 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 	ticker := time.NewTicker(100 * time.Millisecond)
 	//newestTicker := time.NewTicker(150 * time.Millisecond)
 	blocks := make([]*types.Block, 0, 1000)
-	newestBlock := make([]*types.Block, 0, 1)
+	var newestBlock *types.Block
+	var newestKeyBlock *types.KeyBlock
 	latestKeyBlockNumber, err := listerner.BlockFetcher.GetLatestKeyBlockNumber()
 	if err != nil {
 		log.Error(err)
@@ -41,6 +43,16 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		log.Error(err)
 		return
 	}
+	newestKeyBlock, err = listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(latestKeyBlockNumber))
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	newestBlock, _, err = listerner.BlockFetcher.BlockByNumber(big.NewInt(latestBlockNumber), true)
+	if err != nil {
+		log.Error(err)
+	}
+
 	nKeyBlock = big.NewInt(latestKeyBlockNumber)
 	nTxBlock = big.NewInt(latestBlockNumber)
 	log.Infof("latestKeyBlockNumber %d", latestKeyBlockNumber)
@@ -73,9 +85,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 				return
 			}
 			if err := listerner.Repo.SaveBlock(block); err == nil {
-				newestBlock = append(newestBlock, block)
-				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(newestBlock, metrics{currentKeyBlock: latestKeyBlock}))
-				newestBlock = nil
+				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{currentKeyBlock: latestKeyBlock}))
 			}
 		case <-ticker.C:
 			if nTxBlock.Int64() > 0 {
@@ -119,13 +129,19 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 			if err != nil {
 				log.Error(err)
 			}
-			if err := listerner.Repo.SaveKeyBlock(latestKeyBlock); err == nil {
-				listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(latestKeyBlock.Header()))
+			if !reflect.DeepEqual(newestKeyBlock, latestKeyBlock) {
+				if err := listerner.Repo.SaveKeyBlock(latestKeyBlock); err == nil {
+					listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(latestKeyBlock.Header()))
+				}
+				newestKeyBlock = latestKeyBlock
 			}
-			if err := listerner.Repo.SaveBlock(latestBlock); err == nil {
-				newestBlock = append(newestBlock, latestBlock)
-				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(newestBlock, metrics{currentKeyBlock: latestKeyBlock}))
-				newestBlock = nil
+			if !reflect.DeepEqual(newestBlock, latestBlock) {
+				if err := listerner.Repo.SaveBlock(latestBlock); err == nil {
+					blocks = append(blocks, latestBlock)
+					listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{currentKeyBlock: latestKeyBlock}))
+					blocks = nil
+					newestBlock = latestBlock
+				}
 			}
 		}
 	}
