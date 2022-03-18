@@ -28,7 +28,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 	nTxBlock := big.NewInt(0)
 	nKeyBlock := big.NewInt(0)
 	ticker := time.NewTicker(100 * time.Millisecond)
-	newestTicker := time.NewTicker(150 * time.Millisecond)
+	//newestTicker := time.NewTicker(150 * time.Millisecond)
 	blocks := make([]*types.Block, 0, 1000)
 	newestBlock := make([]*types.Block, 0, 1)
 	latestKeyBlockNumber, err := listerner.BlockFetcher.GetLatestKeyBlockNumber()
@@ -99,7 +99,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 				}
 			}
 
-		case <-newestTicker.C:
+		default:
 			latestKeyBlockNumber, err := listerner.BlockFetcher.GetLatestKeyBlockNumber()
 			if err != nil {
 				log.Error(err)
@@ -127,21 +127,6 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(newestBlock, metrics{currentKeyBlock: latestKeyBlock}))
 				newestBlock = nil
 			}
-		case newKeyHead := <-keyHeadChan:
-			log.Infof("Got new kyeBlock timestamp %s\n\r", newKeyHead.Time)
-			keyBlock, err := listerner.BlockFetcher.KeyBlockByNumber(newKeyHead.Number)
-			if err != nil {
-				log.Error(err)
-				return
-			}
-			currentKeyBlock = keyBlock
-			log.Infof("Got new key block head: hash = %s, number = %d %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue)
-			if err := listerner.Repo.SaveKeyBlock(keyBlock); err == nil {
-				listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(keyBlock.Header()))
-			}
-
-		default:
-
 		}
 	}
 }
