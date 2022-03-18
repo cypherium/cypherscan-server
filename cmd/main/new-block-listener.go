@@ -138,8 +138,6 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 			if !reflect.DeepEqual(newestBlock, latestBlock) {
 				if err := listerner.Repo.SaveBlock(latestBlock); err == nil {
 					blocks = append(blocks, latestBlock)
-					listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{currentKeyBlock: latestKeyBlock}))
-					blocks = nil
 					newestBlock = latestBlock
 				}
 			}
