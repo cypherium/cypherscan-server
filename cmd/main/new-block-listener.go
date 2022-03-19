@@ -29,7 +29,7 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 	nTxBlock := big.NewInt(0)
 	nKeyBlock := big.NewInt(0)
 	ticker := time.NewTicker(100 * time.Millisecond)
-	//newestTicker := time.NewTicker(150 * time.Millisecond)
+	newestTicker := time.NewTicker(150 * time.Millisecond)
 	blocks := make([]*types.Block, 0, 1000)
 	var newestBlock *types.Block
 	var newestKeyBlock *types.KeyBlock
@@ -87,7 +87,17 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 			if err := listerner.Repo.SaveBlock(block); err == nil {
 				listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{currentKeyBlock: latestKeyBlock}))
 			}
+
 		case <-ticker.C:
+
+			if nKeyBlock.Int64() > 0 {
+				keyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(nKeyBlock)
+				currentKeyBlock = keyBlock
+				if err := listerner.Repo.SaveKeyBlock(keyBlock); err == nil {
+					listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(keyBlock.Header()))
+					nKeyBlock = nKeyBlock.Sub(nKeyBlock, big.NewInt(1))
+				}
+			}
 			if nTxBlock.Int64() > 0 {
 				block, _, _ := listerner.BlockFetcher.BlockByNumber(nTxBlock, true)
 				blocks = append(blocks, block)
@@ -100,22 +110,9 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 					nTxBlock = nTxBlock.Sub(nTxBlock, big.NewInt(1))
 				}
 			}
-			if nKeyBlock.Int64() > 0 {
-				keyBlock, _ := listerner.BlockFetcher.KeyBlockByNumber(nKeyBlock)
-				currentKeyBlock = keyBlock
-				if err := listerner.Repo.SaveKeyBlock(keyBlock); err == nil {
-					listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(keyBlock.Header()))
-					nKeyBlock = nKeyBlock.Sub(nKeyBlock, big.NewInt(1))
-				}
-			}
+		case <-newestTicker.C:
 
-		default:
 			latestKeyBlockNumber, err := listerner.BlockFetcher.GetLatestKeyBlockNumber()
-			if err != nil {
-				log.Error(err)
-				return
-			}
-			latestBlockNumber, err := listerner.BlockFetcher.GetLatestBlockNumber()
 			if err != nil {
 				log.Error(err)
 				return
@@ -125,22 +122,14 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 				log.Error(err)
 				return
 			}
-			latestBlock, _, err := listerner.BlockFetcher.BlockByNumber(big.NewInt(latestBlockNumber), true)
-			if err != nil {
-				log.Error(err)
-			}
+
 			if !reflect.DeepEqual(newestKeyBlock, latestKeyBlock) {
 				if err := listerner.Repo.SaveKeyBlock(latestKeyBlock); err == nil {
 					listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(latestKeyBlock.Header()))
 				}
 				newestKeyBlock = latestKeyBlock
 			}
-			if !reflect.DeepEqual(newestBlock, latestBlock) {
-				if err := listerner.Repo.SaveBlock(latestBlock); err == nil {
-					blocks = append(blocks, latestBlock)
-					newestBlock = latestBlock
-				}
-			}
+		default:
 		}
 	}
 }
