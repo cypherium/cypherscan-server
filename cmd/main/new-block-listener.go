@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"math/big"
-	"reflect"
 	"time"
 
 	"github.com/cypherium/cypherBFT/core/types"
@@ -29,10 +28,10 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 	nTxBlock := big.NewInt(0)
 	nKeyBlock := big.NewInt(0)
 	ticker := time.NewTicker(100 * time.Millisecond)
-	newestTicker := time.NewTicker(150 * time.Millisecond)
+	//newestTicker := time.NewTicker(150 * time.Millisecond)
 	blocks := make([]*types.Block, 0, 1000)
-	var newestBlock *types.Block
-	var newestKeyBlock *types.KeyBlock
+	//var newestBlock *types.Block
+	//var newestKeyBlock *types.KeyBlock
 	latestKeyBlockNumber, err := listerner.BlockFetcher.GetLatestKeyBlockNumber()
 	if err != nil {
 		log.Error(err)
@@ -43,15 +42,15 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 		log.Error(err)
 		return
 	}
-	newestKeyBlock, err = listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(latestKeyBlockNumber))
-	if err != nil {
-		log.Error(err)
-		return
-	}
-	newestBlock, _, err = listerner.BlockFetcher.BlockByNumber(big.NewInt(latestBlockNumber), true)
-	if err != nil {
-		log.Error(err)
-	}
+	//newestKeyBlock, err = listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(latestKeyBlockNumber))
+	//if err != nil {
+	//	log.Error(err)
+	//	return
+	//}
+	//newestBlock, _, err = listerner.BlockFetcher.BlockByNumber(big.NewInt(latestBlockNumber), true)
+	//if err != nil {
+	//	log.Error(err)
+	//}
 
 	nKeyBlock = big.NewInt(latestKeyBlockNumber)
 	nTxBlock = big.NewInt(latestBlockNumber)
@@ -95,8 +94,8 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 				currentKeyBlock = keyBlock
 				if err := listerner.Repo.SaveKeyBlock(keyBlock); err == nil {
 					listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(keyBlock.Header()))
-					nKeyBlock = nKeyBlock.Sub(nKeyBlock, big.NewInt(1))
 				}
+				nKeyBlock = nKeyBlock.Sub(nKeyBlock, big.NewInt(1))
 			}
 			if nTxBlock.Int64() > 0 {
 				block, _, _ := listerner.BlockFetcher.BlockByNumber(nTxBlock, true)
@@ -107,28 +106,22 @@ func (listerner *NewBlockListener) Listen(newHeader chan *types.Header, keyHeadC
 						listerner.Broadcastable.Broadcast(transformTxBlocksToFrontendMessage(blocks, metrics{currentKeyBlock: currentKeyBlock}))
 						blocks = nil
 					}
-					nTxBlock = nTxBlock.Sub(nTxBlock, big.NewInt(1))
 				}
+				nTxBlock = nTxBlock.Sub(nTxBlock, big.NewInt(1))
 			}
-		case <-newestTicker.C:
-
-			latestKeyBlockNumber, err := listerner.BlockFetcher.GetLatestKeyBlockNumber()
+		case newKeyHead := <-keyHeadChan:
+			log.Infof("newKeyHead time %s\n\r", newKeyHead.Time)
+			keyBlock, err := listerner.BlockFetcher.KeyBlockByNumber(newKeyHead.Number)
 			if err != nil {
 				log.Error(err)
 				return
 			}
-			latestKeyBlock, err := listerner.BlockFetcher.KeyBlockByNumber(big.NewInt(latestKeyBlockNumber))
-			if err != nil {
-				log.Error(err)
-				return
+			currentKeyBlock = keyBlock
+			log.Infof("Got new key block head: hash = %s, number = %d %v\n\r", newKeyHead.Hash().Hex(), newKeyHead.Number.Int64(), keyBlock.Body().Signatrue)
+			if err := listerner.Repo.SaveKeyBlock(keyBlock); err == nil {
+				listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(keyBlock.Header()))
 			}
 
-			if !reflect.DeepEqual(newestKeyBlock, latestKeyBlock) {
-				if err := listerner.Repo.SaveKeyBlock(latestKeyBlock); err == nil {
-					listerner.Broadcastable.Broadcast(transformKeyBlockToFrontendMessage(latestKeyBlock.Header()))
-				}
-				newestKeyBlock = latestKeyBlock
-			}
 		default:
 		}
 	}
