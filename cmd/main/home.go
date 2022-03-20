@@ -9,6 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"reflect"
+	"sort"
 	"time"
 )
 
@@ -64,6 +65,15 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 500, err.Error())
 		return
 	}
+
+	dbListKeyBlocks := func(bs []repo.KeyBlock) []*listKeyBlock {
+		ret := make([]*listKeyBlock, 0, len(bs))
+		for _, b := range bs {
+			ret = append(ret, &listKeyBlock{Number: b.Number, Time: b.Time, Difficulty: b.Difficulty})
+		}
+		return ret
+	}(keyBlocks)
+	sort.Sort(numberDescSorterForListKeyBlock(dbListKeyBlocks))
 	startTransactionNumber := blockLatestNumber
 	for {
 		transactions, err = a.repo.GetTransactions(&repo.TransactionSearchCondition{BlockNumber: startTransactionNumber, Scenario: repo.HomePage, PageSize: BlocksPageSize})
@@ -104,8 +114,8 @@ func getHome(a *App, w http.ResponseWriter, r *http.Request) {
 			return ret
 		}(),
 		KeyBlocks: func() []HomeKeyBlock {
-			ret := make([]HomeKeyBlock, 0, len(keyBlocks))
-			for _, b := range keyBlocks {
+			ret := make([]HomeKeyBlock, 0, len(dbListKeyBlocks))
+			for _, b := range dbListKeyBlocks {
 				//preKeyBlock = b
 				ret = append(ret, HomeKeyBlock{b.Number, b.Time})
 			}
@@ -216,6 +226,7 @@ func div(x, y int64) int64 {
 }
 
 func transformKeyBlockToFrontendMessage(block *types.KeyBlockHeader) *HomePayload {
+	log.Info("transformKeyBlockToFrontendMessage block number", block.Number)
 	return &HomePayload{
 		TxBlocks:  []HomeTxBlock{},
 		Txs:       []HomeTx{},

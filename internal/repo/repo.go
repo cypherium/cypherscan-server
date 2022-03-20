@@ -93,6 +93,7 @@ func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
 		if err == nil {
 			return errors.New("keyBlock exist")
 		}
+		log.Infof("SaveKeyBlock number", record.Number)
 		repo.dbRunner.Run(func(db *gorm.DB) error {
 			db.Create(record)
 			return nil

@@ -13,6 +13,7 @@ import (
 )
 
 func getKeyBlocks(a *App, w http.ResponseWriter, r *http.Request) {
+
 	// get request
 	pageNo, pageSize, err := getPaginationRequest(r)
 	if err != nil {
@@ -35,32 +36,31 @@ func getKeyBlocks(a *App, w http.ResponseWriter, r *http.Request) {
 		}
 		return ret
 	}(keyBlocks)
-	numbersAlreadyGot := func() []int64 {
-		ret := make([]int64, 0, len(keyBlocks))
-		for _, b := range keyBlocks {
-			ret = append(ret, b.Number)
-		}
-		return ret
-	}()
-	missedListKeyBlocks := func() []*listKeyBlock {
-		if pageSize == len(numbersAlreadyGot) {
-			return []*listKeyBlock{}
-		}
-		missedNumber := getMissedNumbers(latestNumber-int64(pageSize)*(pageNo-1), pageSize, numbersAlreadyGot)
-		missedBlocks, _ := a.blocksFetcher.KeyBlocksByNumbers(missedNumber)
-		return func(bs []*types.KeyBlock) []*listKeyBlock {
-			ret := make([]*listKeyBlock, 0, len(keyBlocks))
-			for _, h := range bs {
-				ret = append(ret, transferKeyBlockHeadToListKeyBlock(h))
-			}
-			return ret
-
-		}(missedBlocks)
-	}()
-	retList := append(dbListKeyBlocks, missedListKeyBlocks...)
-	sort.Sort(numberDescSorterForListKeyBlock(retList))
-
-	respondWithJSON(w, http.StatusOK, &responseOfGetKeyBlocks{Total: latestNumber + 1, Blocks: retList})
+	//numbersAlreadyGot := func() []int64 {
+	//	ret := make([]int64, 0, len(keyBlocks))
+	//	for _, b := range keyBlocks {
+	//		ret = append(ret, b.Number)
+	//	}
+	//	return ret
+	//}()
+	//missedListKeyBlocks := func() []*listKeyBlock {
+	//	if pageSize == len(numbersAlreadyGot) {
+	//		return []*listKeyBlock{}
+	//	}
+	//	missedNumber := getMissedNumbers(latestNumber-int64(pageSize)*(pageNo-1), pageSize, numbersAlreadyGot)
+	//	missedBlocks, _ := a.blocksFetcher.KeyBlocksByNumbers(missedNumber)
+	//	return func(bs []*types.KeyBlock) []*listKeyBlock {
+	//		ret := make([]*listKeyBlock, 0, len(keyBlocks))
+	//		for _, h := range bs {
+	//			ret = append(ret, transferKeyBlockHeadToListKeyBlock(h))
+	//		}
+	//		return ret
+	//
+	//	}(missedBlocks)
+	//}()
+	//retList := append(dbListKeyBlocks, missedListKeyBlocks...)
+	sort.Sort(numberDescSorterForListKeyBlock(dbListKeyBlocks))
+	respondWithJSON(w, http.StatusOK, &responseOfGetKeyBlocks{Total: latestNumber + 1, Blocks: dbListKeyBlocks})
 }
 
 func getKeyBlock(a *App, w http.ResponseWriter, r *http.Request) {
