@@ -8,6 +8,7 @@ import (
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 	"math"
+	"math/big"
 	"reflect"
 )
 
@@ -88,20 +89,18 @@ func (repo *Repo) SaveBlock(block *types.Block) error {
 
 // SaveKeyBlock is to save key block into db
 func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
-
-	record := transferKeyBlockHeaderToDbRecord(block)
-	if block.Number().Int64() > 1 {
+	if block.Number().Int64() >= 0 {
+		record := transferKeyBlockHeaderToDbRecord(block)
 		getBlock, _ := repo.GetKeyBlock(record.Number)
-		if reflect.DeepEqual(getBlock, record) {
+		if reflect.DeepEqual(big.NewInt(getBlock.Number), block.Number()) {
 			return errors.New("keyBlock exist")
 		}
+		repo.dbRunner.Run(func(db *gorm.DB) error {
+			db.Create(record)
+			return nil
+		})
 	}
-	repo.dbRunner.Run(func(db *gorm.DB) error {
-		db.Create(record)
-		return nil
-	})
-	//log.Infof("SaveKeyBlock number %d", block.Number())
-	return nil
+	return errors.New("illegal block number")
 }
 
 func (repo *Repo) GetLocalHighestKeyBlock() (*KeyBlock, error) {
