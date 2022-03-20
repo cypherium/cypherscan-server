@@ -8,7 +8,6 @@ import (
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
 	"math"
-	"math/big"
 	"reflect"
 )
 
@@ -66,21 +65,20 @@ func (repo *Repo) SaveBlock(block *types.Block) error {
 			log.Infof("Bad block.  Number is nil.")
 			return errors.New("Bad block.  Number is nil.")
 		}
-		record := transformBlockToDbRecord(block)
-		if block.Number().Int64() > 1 {
-			getBlock, _ := repo.GetBlock(record.Number)
-			if reflect.DeepEqual(getBlock, record) {
+		if block.Number().Int64() >= 0 {
+			record := transformBlockToDbRecord(block)
+			_, err := repo.GetKeyBlock(record.Number)
+			if err == nil {
 				return errors.New("txBlock exist")
 			}
+
+			log.WithFields(log.Fields{"timestamp": record.Time, "signature": record.Signature})
+			repo.dbRunner.Run(func(db *gorm.DB) error {
+				db.Create(record)
+				return nil
+			})
 		}
-		log.WithFields(log.Fields{"timestamp": record.Time, "signature": record.Signature})
-		repo.dbRunner.Run(func(db *gorm.DB) error {
-			db.Create(record)
-			return nil
-		})
-		//log.Infof("SaveBlock number %d", block.Number())
-		//log.Infof("SaveBlock Time %s", block.Time().String())
-		return nil
+		return errors.New("illegal block number")
 	} else {
 		return errors.New("txBlock is nil")
 	}
@@ -91,8 +89,8 @@ func (repo *Repo) SaveBlock(block *types.Block) error {
 func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
 	if block.Number().Int64() >= 0 {
 		record := transferKeyBlockHeaderToDbRecord(block)
-		getBlock, _ := repo.GetKeyBlock(record.Number)
-		if reflect.DeepEqual(big.NewInt(getBlock.Number), block.Number()) {
+		_, err := repo.GetKeyBlock(record.Number)
+		if err == nil {
 			return errors.New("keyBlock exist")
 		}
 		repo.dbRunner.Run(func(db *gorm.DB) error {
@@ -100,7 +98,7 @@ func (repo *Repo) SaveKeyBlock(block *types.KeyBlock) error {
 			return nil
 		})
 	}
-	return errors.New("illegal block number")
+	return errors.New("illegal key block number")
 }
 
 func (repo *Repo) GetLocalHighestKeyBlock() (*KeyBlock, error) {
